@@ -20,5 +20,5 @@ docker image prune -f
 
 echo "=========================================="
 echo "✅ Güncelleme tamamlandı!"
-echo "Uygulama aktif: http://$(hostname -I | awk '{print $1}'):3000"
+echo "Uygulama aktif: http://$(hostname -I | awk '{print $1}'):8686"
 echo "=========================================="

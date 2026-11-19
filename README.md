@@ -23,7 +23,7 @@ Bu proje CasaOS ve Raspberry Pi (ARM64 / ARMv7) ortamları için tam uyumlu Dock
    ```
 4. Tarayıcınızdan Raspberry Pi IP adresine gidin:
    ```
-   http://RASPBERRY_PI_IP:3000
+   http://RASPBERRY_PI_IP:8686
    ```
 
 ---
@@ -52,7 +52,7 @@ Uygulamanın CasaOS ana panelinde güzel bir simge ve bağlantı ile görünmesi
 2. Sağ üstteki **"+"** simgesine tıklayın -> **"Custom Install (Özel Yükleme)"** seçeneğini seçin.
 3. Sağ üstteki **"Import"** butonuna tıklayın.
 4. Projedeki `docker-compose.yml` dosyasının içeriğini yapıştırın ve **Submit** deyin.
-5. Bilgiler otomatik doldurulacaktır (Simge, Port: 3000, Dizin: `/DATA/AppData/cuzdanim/data`).
+5. Bilgiler otomatik doldurulacaktır (Simge, Port: 8686, Dizin: `/DATA/AppData/cuzdanim/data`).
 6. **Install** butonuna tıklayın. Artık CasaOS ana ekranınızda tek tıkla açılabilir!
 
 ---
@@ -61,7 +61,7 @@ Uygulamanın CasaOS ana panelinde güzel bir simge ve bağlantı ile görünmesi
 
 | Değişken | Varsayılan | Açıklama |
 |---|---|---|
-| `PORT` | `3000` | Web sunucu portu |
+| `PORT` | `8686` | Web sunucu portu |
 | `NODE_ENV` | `production` | Node.js çalışma ortamı |
 | `DATA_DIR` | `/app/data` | SQLite veritabanı klasörü |
 | `JWT_SECRET` | `cuzdanim-secret-key-2026` | Token imzalama anahtarı (kendinize özel belirleyin) |
@@ -74,4 +74,4 @@ Uygulamanın CasaOS ana panelinde güzel bir simge ve bağlantı ile görünmesi
 npm install
 npm start
 ```
-Varsayılan olarak `http://localhost:3000` üzerinde çalışır.
+Varsayılan olarak `http://localhost:8686` üzerinde çalışır.

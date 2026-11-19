@@ -20,11 +20,11 @@ COPY . .
 
 # Çevre değişkenleri
 ENV NODE_ENV=production
-ENV PORT=3000
+ENV PORT=8686
 ENV DATA_DIR=/app/data
 
 # Port
-EXPOSE 3000
+EXPOSE 8686
 
 # SQLite veritabanı için kalıcı dizin
 VOLUME ["/app/data"]
