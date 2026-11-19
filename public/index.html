@@ -5307,9 +5307,152 @@
       }
     }
 
-    async function loadSavings() {
-      const typeContainer = document.getElementById('savings-types-container');
+    let currentSavingsFilter = 'all';
+    let cachedSavingsList = [];
+    let cachedSavingsSummary = null;
+
+    function setSavingsFilter(type) {
+      currentSavingsFilter = type;
+      renderSavingsFilterTabs();
+      renderSavingsList();
+    }
+
+    function renderSavingsFilterTabs() {
+      const tabsContainer = document.getElementById('savings-filter-tabs');
+      if (!tabsContainer) return;
+
+      const counts = { all: cachedSavingsList.length };
+      cachedSavingsList.forEach(item => {
+        const t = item.type || 'diger';
+        counts[t] = (counts[t] || 0) + 1;
+      });
+
+      const typesToShow = ['all', 'altin', 'doviz', 'hisse', 'kripto', 'gumus', 'nakit'];
+
+      tabsContainer.innerHTML = typesToShow.map(typeKey => {
+        if (typeKey === 'all') {
+          const isActive = currentSavingsFilter === 'all';
+          return `
+            <button class="savings-filter-tab ${isActive ? 'active' : ''}" onclick="setSavingsFilter('all')">
+              <span>Tümü</span>
+              <span class="badge-count">${counts.all || 0}</span>
+            </button>`;
+        }
+        const cfg = SAVINGS_CONFIG[typeKey] || { label: typeKey, icon: '📦' };
+        const count = counts[typeKey] || 0;
+        const isActive = currentSavingsFilter === typeKey;
+
+        return `
+          <button class="savings-filter-tab ${isActive ? 'active' : ''}" onclick="setSavingsFilter('${typeKey}')">
+            <span>${cfg.icon}</span>
+            <span>${cfg.label}</span>
+            <span class="badge-count">${count}</span>
+          </button>`;
+      }).join('');
+
+      // Seçili kategori özeti banner'ı
+      const bannerEl = document.getElementById('savings-category-banner');
+      const bannerText = document.getElementById('savings-category-banner-text');
+      const bannerProfit = document.getElementById('savings-category-banner-profit');
+
+      if (bannerEl && currentSavingsFilter !== 'all' && cachedSavingsSummary && cachedSavingsSummary.by_type) {
+        const cfg = SAVINGS_CONFIG[currentSavingsFilter] || { label: currentSavingsFilter, icon: '📦' };
+        const typeInfo = cachedSavingsSummary.by_type.find(t => t.type === currentSavingsFilter);
+        if (typeInfo && typeInfo.count > 0) {
+          bannerEl.style.display = 'flex';
+          const pLoss = typeInfo.profit_loss || 0;
+          const cost = typeInfo.total_purchase_value || 0;
+          const pct = cost > 0 ? ((pLoss / cost) * 100).toFixed(1) : '0';
+          const isPos = pLoss >= 0;
+
+          bannerText.innerHTML = `<strong>${cfg.icon} ${cfg.label} Toplamı:</strong> ${formatMoney(typeInfo.total_current_value)}`;
+          bannerProfit.innerHTML = `<span style="color:${isPos ? '#15803d' : '#b91c1c'};font-weight:700;">${isPos ? '+' : ''}${formatMoney(pLoss)} (%${pct})</span>`;
+        } else {
+          bannerEl.style.display = 'none';
+        }
+      } else if (bannerEl) {
+        bannerEl.style.display = 'none';
+      }
+    }
+
+    function renderSavingsList() {
       const gridContainer = document.getElementById('savings-grid-container');
+      if (!gridContainer) return;
+
+      const filtered = currentSavingsFilter === 'all'
+        ? cachedSavingsList
+        : cachedSavingsList.filter(s => s.type === currentSavingsFilter);
+
+      if (!filtered || filtered.length === 0) {
+        gridContainer.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-piggy-bank"></i>
+            <h4>Bu Kategoride Kayıtlı Birikim Yok</h4>
+            <p>"+ Ekle" butonuna tıklayarak yeni varlık ekleyebilirsiniz.</p>
+          </div>`;
+        return;
+      }
+
+      gridContainer.innerHTML = filtered.map(item => {
+        const cfg = SAVINGS_CONFIG[item.type] || { label: item.type, icon: '📦' };
+        const curVal = Number(item.live_total_value !== undefined ? item.live_total_value : item.current_value) || 0;
+        const amount = Number(item.amount) || 0;
+        const buyPrice = Number(item.purchase_price) || 0;
+        const livePrice = Number(item.live_unit_price) || 0;
+        const totalCost = Number(item.total_cost !== undefined ? item.total_cost : (buyPrice * amount)) || 0;
+
+        const pLoss = Number(item.profit_loss_amount !== undefined ? item.profit_loss_amount : (curVal - totalCost)) || 0;
+        const pRate = Number(item.profit_loss_rate !== undefined ? item.profit_loss_rate : (totalCost > 0 ? ((pLoss / totalCost) * 100) : 0));
+        const isProfit = pLoss >= 0;
+
+        return `
+          <div class="debt-item-card saving-item-card" style="padding:9px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+            <!-- Sol Taraf: İkon ve Varlık Bilgileri -->
+            <div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1;">
+              <div class="debt-person-avatar" style="background:#eff6ff;color:#2563eb;font-size:16px;width:34px;height:34px;border-radius:9px;flex-shrink:0;">
+                ${cfg.icon}
+              </div>
+              <div style="min-width:0;flex:1;">
+                <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">
+                  <span style="font-size:13.5px;font-weight:700;color:var(--text-dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(item.name)}</span>
+                  ${item.is_live ? '<span class="live-pill"><i class="fas fa-bolt"></i> Canlı</span>' : ''}
+                  ${item.notes ? `<span style="font-size:10px;color:var(--text-muted);" title="${escapeHtml(item.notes)}"><i class="fas fa-info-circle"></i></span>` : ''}
+                </div>
+                <div style="font-size:11px;color:var(--text-muted);margin-top:1.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                  <strong>${item.amount} ${escapeHtml(item.unit || '')}</strong>
+                  ${livePrice > 0 ? ` · Canlı: <strong style="color:var(--text-dark);">${formatMoney(livePrice)}</strong>` : ''}
+                  ${buyPrice > 0 ? ` · Alış: ${formatMoney(buyPrice)}` : ''}
+                </div>
+              </div>
+            </div>
+
+            <!-- Sağ Taraf: Toplam Değer, Kâr/Zarar ve Butonlar -->
+            <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+              <div style="text-align:right;">
+                <div style="font-size:14.5px;font-weight:800;color:var(--primary);line-height:1.2;">
+                  ${formatMoney(curVal)}
+                </div>
+                <div style="margin-top:2px;">
+                  <span class="profit-loss-badge ${isProfit ? 'profit-badge' : 'loss-badge'}" style="font-size:10px;padding:1.5px 6px;">
+                    <i class="fas fa-arrow-${isProfit ? 'up' : 'down'}"></i>
+                    ${isProfit ? '+' : ''}${formatMoney(pLoss)} (%${Math.abs(pRate).toFixed(1)})
+                  </span>
+                </div>
+              </div>
+              <div class="card-actions-dropdown" style="display:flex;align-items:center;gap:2px;">
+                <button class="btn-action-icon" style="padding:3px 5px;font-size:11px;" title="Düzenle" onclick='openSavingModal(${JSON.stringify(item)})'>
+                  <i class="fas fa-pen"></i>
+                </button>
+                <button class="btn-action-icon delete" style="padding:3px 5px;font-size:11px;" title="Sil" onclick="deleteSaving(${item.id})">
+                  <i class="fas fa-trash-alt"></i>
+                </button>
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    async function loadSavings() {
       const tickerContainer = document.getElementById('market-ticker-items');
       const statusText = document.getElementById('market-status-text');
 
@@ -5321,6 +5464,8 @@
         ]);
 
         currentMarketRates = rates;
+        cachedSavingsList = savings || [];
+        cachedSavingsSummary = summary;
 
         // 1. Canlı Piyasa Ticker Şeridini Doldur
         if (rates && tickerContainer) {
@@ -5343,11 +5488,11 @@
 
           if (statusText) {
             const timeStr = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
-            statusText.textContent = `CANLI PİYASA · ${timeStr}`;
+            statusText.textContent = `CANLI · ${timeStr}`;
           }
         }
 
-        // 2. Genel Toplam & Kâr/Zarar Hero Kartı
+        // 2. Genel Toplam & Kâr/Zarar Hero Kartı (Kompakt)
         const grandTotal = (summary && summary.grand_total) || 0;
         const grandCost = (summary && summary.grand_cost) || 0;
         const grandProfit = (summary && summary.grand_profit_loss) !== undefined ? summary.grand_profit_loss : (grandTotal - grandCost);
@@ -5359,7 +5504,7 @@
         const grandBadgeEl = document.getElementById('savings-grand-profit-badge');
 
         if (grandTotalEl) grandTotalEl.textContent = formatMoney(grandTotal);
-        if (grandCostEl) grandCostEl.textContent = `Toplam Alış Maliyeti: ${formatMoney(grandCost)}`;
+        if (grandCostEl) grandCostEl.textContent = `Toplam Alış: ${formatMoney(grandCost)}`;
 
         if (grandProfitEl && grandBadgeEl) {
           const isPos = grandProfit >= 0;
@@ -5369,116 +5514,9 @@
           grandBadgeEl.innerHTML = `<i class="fas fa-arrow-${isPos ? 'up' : 'down'}"></i> ${isPos ? '+' : ''}%${Math.abs(grandProfitRate).toFixed(1)} ${isPos ? 'Kâr' : 'Zarar'}`;
         }
 
-        // 3. Yatay Kategori Kartları (Altın, Döviz, Hisse vb.)
-        const typeMap = {};
-        if (summary && summary.by_type) {
-          summary.by_type.forEach(item => {
-            typeMap[item.type] = item;
-          });
-        }
-
-        typeContainer.innerHTML = Object.keys(SAVINGS_CONFIG).map(typeKey => {
-          const cfg = SAVINGS_CONFIG[typeKey];
-          const item = typeMap[typeKey] || { total_current_value: 0, total_purchase_value: 0, profit_loss: 0 };
-          const val = item.total_current_value || 0;
-          const cost = item.total_purchase_value || 0;
-          const pLoss = item.profit_loss || (val - cost);
-          const isPos = pLoss >= 0;
-          const pct = cost > 0 ? ((pLoss / cost) * 100).toFixed(1) : '0';
-
-          return `
-            <div class="savings-type-card">
-              <div class="type-header">
-                <span>${cfg.icon}</span>
-                <span>${cfg.label}</span>
-              </div>
-              <div class="type-value">${formatMoney(val)}</div>
-              ${cost > 0 ? `
-                <div class="type-profit-sub" style="color:${isPos ? '#15803d' : '#b91c1c'};">
-                  ${isPos ? '+' : ''}${formatMoney(pLoss)} (%${pct})
-                </div>` : '<div class="type-profit-sub" style="color:var(--text-muted);">-</div>'}
-            </div>`;
-        }).join('');
-
-        // 4. Birikim Listesi Kartları
-        if (!savings || savings.length === 0) {
-          gridContainer.innerHTML = `
-            <div class="empty-state" style="grid-column: 1 / -1;">
-              <i class="fas fa-piggy-bank"></i>
-              <h4>Kayıtlı Birikim Bulunmuyor</h4>
-              <p>Altın, döviz, hisse veya kripto varlıklarınızı eklemek için "+ Birikim Ekle" butonuna tıklayın.</p>
-            </div>`;
-          return;
-        }
-
-        gridContainer.innerHTML = savings.map(item => {
-          const cfg = SAVINGS_CONFIG[item.type] || { label: item.type, icon: '📦' };
-          const curVal = Number(item.live_total_value !== undefined ? item.live_total_value : item.current_value) || 0;
-          const amount = Number(item.amount) || 0;
-          const buyPrice = Number(item.purchase_price) || 0;
-          const livePrice = Number(item.live_unit_price) || 0;
-          const totalCost = Number(item.total_cost !== undefined ? item.total_cost : (buyPrice * amount)) || 0;
-
-          const pLoss = Number(item.profit_loss_amount !== undefined ? item.profit_loss_amount : (curVal - totalCost)) || 0;
-          const pRate = Number(item.profit_loss_rate !== undefined ? item.profit_loss_rate : (totalCost > 0 ? ((pLoss / totalCost) * 100) : 0));
-          const isProfit = pLoss >= 0;
-
-          return `
-            <div class="saving-card">
-              <!-- Üst Satır: Kategori & Canlı Rozeti & İşlemler -->
-              <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;">
-                <div style="display:flex;align-items:center;gap:6px;">
-                  <span class="category-badge badge-teknoloji" style="font-size:10.5px;padding:2px 7px;">
-                    ${cfg.icon} ${cfg.label}
-                  </span>
-                  ${item.is_live ? '<span class="live-pill"><i class="fas fa-bolt"></i> Canlı</span>' : ''}
-                </div>
-                <div class="card-actions-dropdown">
-                  <button class="btn-action-icon" style="padding:3px 5px;" title="Düzenle" onclick='openSavingModal(${JSON.stringify(item)})'>
-                    <i class="fas fa-pen"></i>
-                  </button>
-                  <button class="btn-action-icon delete" style="padding:3px 5px;" title="Sil" onclick="deleteSaving(${item.id})">
-                    <i class="fas fa-trash-alt"></i>
-                  </button>
-                </div>
-              </div>
-
-              <!-- Varlık Başlığı -->
-              <div>
-                <h3 style="font-size:14.5px;font-weight:700;color:var(--text-dark);line-height:1.2;margin:0 0 4px 0;">
-                  ${escapeHtml(item.name)}
-                </h3>
-                <div style="font-size:11.5px;color:var(--text-muted);display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                  <span>Miktar: <strong style="color:var(--text-dark);">${item.amount} ${escapeHtml(item.unit || '')}</strong></span>
-                  ${buyPrice > 0 ? `<span>· Alış: <strong>${formatMoney(buyPrice)}</strong></span>` : ''}
-                  ${livePrice > 0 ? `<span>· Canlı: <strong style="color:var(--primary);">${formatMoney(livePrice)}</strong></span>` : ''}
-                </div>
-              </div>
-
-              <!-- Alt Bölüm: Güncel Değer & Kâr/Zarar -->
-              <div style="background:#f8fafc;border:1px solid #edf2f7;border-radius:9px;padding:8px 10px;margin-top:auto;">
-                <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px;">
-                  <span style="font-size:11px;color:var(--text-muted);">Güncel Portföy Değeri</span>
-                  <span style="font-size:16px;font-weight:800;color:var(--text-dark);">${formatMoney(curVal)}</span>
-                </div>
-
-                <div style="display:flex;align-items:center;justify-content:space-between;border-top:1px dashed #e2e8f0;padding-top:6px;">
-                  <span style="font-size:10.5px;color:var(--text-muted);">
-                    Maliyet: ${formatMoney(totalCost)}
-                  </span>
-                  <span class="profit-loss-badge ${isProfit ? 'profit-badge' : 'loss-badge'}">
-                    <i class="fas fa-arrow-${isProfit ? 'up' : 'down'}"></i>
-                    ${isProfit ? '+' : ''}${formatMoney(pLoss)} (%${Math.abs(pRate).toFixed(1)})
-                  </span>
-                </div>
-              </div>
-
-              ${item.notes ? `
-                <div style="font-size:10.5px;color:var(--text-muted);display:flex;align-items:center;gap:4px;">
-                  <i class="fas fa-info-circle text-primary"></i> <span>${escapeHtml(item.notes)}</span>
-                </div>` : ''}
-            </div>`;
-        }).join('');
+        // 3. Emtia Türü Filtre Tablarını ve Yatay Listeyi Çiz
+        renderSavingsFilterTabs();
+        renderSavingsList();
       } catch (err) {
         showToast('Birikimler yüklenemedi: ' + err.message, 'error');
       }
