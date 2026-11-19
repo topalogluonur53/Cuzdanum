@@ -1,0 +1,55 @@
+name: cuzdanim
+
+services:
+  cuzdanim:
+    container_name: cuzdanim
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: cuzdanim:latest
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DATA_DIR=/app/data
+      - JWT_SECRET=cuzdanim-gizli-anahtar-2026-degistirin
+    x-casaos:
+      envs:
+        - container: JWT_SECRET
+          description:
+            en_us: Secret key for JWT auth
+            tr_tr: JWT oturum açma gizli anahtarı
+      ports:
+        - container: "3000"
+          description:
+            en_us: Web UI port
+            tr_tr: Web Arayüz Portu
+      volumes:
+        - container: /app/data
+          description:
+            en_us: Persistent database directory
+            tr_tr: Kalıcı SQLite veritabanı klasörü
+
+x-casaos:
+  architectures:
+    - arm64
+    - arm
+    - amd64
+  main: cuzdanim
+  author: Onur Tpl
+  category: Finance
+  description:
+    en_us: Personal finance and wallet tracker with credit card, installment and asset management.
+    tr_tr: Gelir, gider, kart taksitleri ve birikimlerinizi takip eden kişisel finans uygulaması.
+  developer: Onur Tpl
+  icon: https://cdn-icons-png.flaticon.com/512/2830/2830289.png
+  index: /
+  port_map: "3000"
+  scheme: http
+  title:
+    en_us: Cüzdanım
+    tr_tr: Cüzdanım
