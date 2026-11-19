@@ -61,10 +61,18 @@ function initializeDatabase() {
       is_paid INTEGER DEFAULT 0,
       period_month INTEGER,
       period_year INTEGER,
+      iban TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     )
   `);
+
+  // Migration for existing database
+  try {
+    db.exec(`ALTER TABLE card_debts ADD COLUMN iban TEXT`);
+  } catch (e) {
+    // Column already exists
+  }
 
   // --- Receivables (Alacaklar) ---
   db.exec(`
@@ -154,6 +162,13 @@ function initializeDatabase() {
 
   // --- Seed default users ---
   seedDefaultData();
+
+  // Backfill demo cards with sample IBANs if they are null/empty
+  try {
+    db.prepare("UPDATE card_debts SET iban = 'TR64 0006 4000 0011 2345 6789 01' WHERE id = 1 AND (iban IS NULL OR iban = '')").run();
+    db.prepare("UPDATE card_debts SET iban = 'TR33 0006 2000 0001 2987 6543 21' WHERE id = 2 AND (iban IS NULL OR iban = '')").run();
+    db.prepare("UPDATE card_debts SET iban = 'TR12 0004 6000 5533 1122 3344 55' WHERE id = 3 AND (iban IS NULL OR iban = '')").run();
+  } catch (e) {}
 }
 
 function seedDefaultData() {
@@ -184,12 +199,12 @@ function seedDefaultData() {
 
   // --- Demo: Card Debts ---
   const insertCard = db.prepare(`
-    INSERT INTO card_debts (user_id, card_name, bank_name, debt_amount, minimum_payment, due_date, statement_date, is_paid, period_month, period_year)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO card_debts (user_id, card_name, bank_name, debt_amount, minimum_payment, due_date, statement_date, is_paid, period_month, period_year, iban)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
-  insertCard.run(demoUserId, 'Maximum Kart', 'İş Bankası', 8450.75, 1200, '2026-12-10', '2026-11-25', 0, 12, 2026);
-  insertCard.run(demoUserId, 'Bonus Kart', 'Garanti BBVA', 3200.50, 500, '2026-12-15', '2026-11-28', 0, 12, 2026);
-  insertCard.run(demoUserId, 'Axess Kart', 'Akbank', 12750, 2000, '2026-12-20', '2026-12-05', 0, 12, 2026);
+  insertCard.run(demoUserId, 'Maximum Kart', 'İş Bankası', 8450.75, 1200, '2026-12-10', '2026-11-25', 0, 12, 2026, 'TR64 0006 4000 0011 2345 6789 01');
+  insertCard.run(demoUserId, 'Bonus Kart', 'Garanti BBVA', 3200.50, 500, '2026-12-15', '2026-11-28', 0, 12, 2026, 'TR33 0006 2000 0001 2987 6543 21');
+  insertCard.run(demoUserId, 'Axess Kart', 'Akbank', 12750, 2000, '2026-12-20', '2026-12-05', 0, 12, 2026, 'TR12 0004 6000 5533 1122 3344 55');
 
   // --- Demo: Receivables ---
   const insertReceivable = db.prepare(`

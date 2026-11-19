@@ -8,7 +8,7 @@ const { authMiddleware, JWT_SECRET } = require('../middleware/auth');
 // POST /api/auth/login
 router.post('/login', (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { username, password, remember_me } = req.body;
 
     if (!username || !password) {
       return res.status(400).json({ error: 'Kullanıcı adı ve şifre gerekli' });
@@ -24,10 +24,11 @@ router.post('/login', (req, res) => {
       return res.status(401).json({ error: 'Geçersiz kullanıcı adı veya şifre' });
     }
 
+    const expiresIn = remember_me ? '30d' : '24h';
     const token = jwt.sign(
       { id: user.id, username: user.username, role: user.role, display_name: user.display_name },
       JWT_SECRET,
-      { expiresIn: '24h' }
+      { expiresIn }
     );
 
     res.json({

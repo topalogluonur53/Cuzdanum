@@ -18,18 +18,19 @@ router.get('/', (req, res) => {
 // POST /api/cards
 router.post('/', (req, res) => {
   try {
-    const { card_name, bank_name, debt_amount, minimum_payment, due_date, statement_date, is_paid, period_month, period_year } = req.body;
+    const { card_name, bank_name, debt_amount, minimum_payment, due_date, statement_date, is_paid, period_month, period_year, iban } = req.body;
 
     if (!card_name || debt_amount === undefined) {
       return res.status(400).json({ error: 'Kart adı ve borç tutarı gerekli' });
     }
 
     const result = db.prepare(`
-      INSERT INTO card_debts (user_id, card_name, bank_name, debt_amount, minimum_payment, due_date, statement_date, is_paid, period_month, period_year)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO card_debts (user_id, card_name, bank_name, debt_amount, minimum_payment, due_date, statement_date, is_paid, period_month, period_year, iban)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       req.user.id, card_name, bank_name || null, debt_amount, minimum_payment || null,
-      due_date || null, statement_date || null, is_paid || 0, period_month || null, period_year || null
+      due_date || null, statement_date || null, is_paid || 0, period_month || null, period_year || null,
+      iban || null
     );
 
     const card = db.prepare('SELECT * FROM card_debts WHERE id = ?').get(result.lastInsertRowid);
@@ -48,17 +49,18 @@ router.put('/:id', (req, res) => {
       return res.status(404).json({ error: 'Kart borcu bulunamadı' });
     }
 
-    const { card_name, bank_name, debt_amount, minimum_payment, due_date, statement_date, is_paid, period_month, period_year } = req.body;
+    const { card_name, bank_name, debt_amount, minimum_payment, due_date, statement_date, is_paid, period_month, period_year, iban } = req.body;
 
     db.prepare(`
       UPDATE card_debts SET card_name = ?, bank_name = ?, debt_amount = ?, minimum_payment = ?,
-      due_date = ?, statement_date = ?, is_paid = ?, period_month = ?, period_year = ?
+      due_date = ?, statement_date = ?, is_paid = ?, period_month = ?, period_year = ?, iban = ?
       WHERE id = ? AND user_id = ?
     `).run(
       card_name || card.card_name, bank_name !== undefined ? bank_name : card.bank_name,
       debt_amount !== undefined ? debt_amount : card.debt_amount, minimum_payment !== undefined ? minimum_payment : card.minimum_payment,
       due_date || card.due_date, statement_date || card.statement_date,
       is_paid !== undefined ? is_paid : card.is_paid, period_month || card.period_month, period_year || card.period_year,
+      iban !== undefined ? iban : card.iban,
       id, req.user.id
     );
 

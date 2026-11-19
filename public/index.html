@@ -2,7 +2,11 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="format-detection" content="telephone=no">
   <title>Cüzdanım — Kişisel Finans Yönetimi</title>
   <!-- Google Fonts: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -47,10 +51,22 @@
       --topbar-height: 60px;
     }
 
-    * {
+    html {
+      box-sizing: border-box;
+      width: 100%;
+      max-width: 100vw;
+      overflow-x: hidden;
+      -webkit-text-size-adjust: 100%;
+      -moz-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+      touch-action: manipulation;
+    }
+
+    *, *:before, *:after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+      -webkit-tap-highlight-color: transparent;
     }
 
     body {
@@ -58,8 +74,16 @@
       background-color: var(--bg);
       color: var(--text-dark);
       min-height: 100vh;
+      width: 100%;
+      max-width: 100vw;
+      overflow-x: hidden;
+      position: relative;
       line-height: 1.5;
       -webkit-font-smoothing: antialiased;
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
     }
 
     /* Scrollbars */
@@ -248,6 +272,64 @@
     .btn-demo:hover {
       background: rgba(15, 52, 96, 0.06);
       transform: scale(1.01);
+    }
+
+    /* Beni Hatırla (Remember Me) */
+    .login-remember-row {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      margin: -6px 0 16px 2px;
+    }
+    .remember-checkbox-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #64748b;
+      cursor: pointer;
+      user-select: none;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .remember-checkbox-label input[type="checkbox"] {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+      pointer-events: none;
+    }
+    .custom-checkbox-box {
+      width: 18px;
+      height: 18px;
+      border: 2px solid #cbd5e1;
+      border-radius: 5px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      background: #ffffff;
+      flex-shrink: 0;
+    }
+    .custom-checkbox-box i {
+      font-size: 10px;
+      color: white;
+      opacity: 0;
+      transform: scale(0.5);
+      transition: all 0.2s ease;
+    }
+    .remember-checkbox-label input[type="checkbox"]:checked + .custom-checkbox-box {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+    .remember-checkbox-label input[type="checkbox"]:checked + .custom-checkbox-box i {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .remember-checkbox-label:hover .custom-checkbox-box {
+      border-color: var(--primary);
+    }
+    .remember-checkbox-label:hover .remember-checkbox-text {
+      color: var(--text-dark);
     }
 
     /* ==========================================================================
@@ -1214,6 +1296,14 @@
       color: var(--red);
       background: var(--red-light);
     }
+    .btn-action-icon.share:hover {
+      color: var(--blue);
+      background: #eff6ff;
+    }
+    .btn-action-icon.copy:hover {
+      color: var(--green);
+      background: #ecfdf5;
+    }
 
     .expense-card-title {
       font-size: 13px;
@@ -1512,6 +1602,105 @@
 
     .toggle-switch input:checked + .toggle-slider:before {
       transform: translateX(18px);
+    }
+
+    /* Credit Card IBAN Pill on Card */
+    .card-iban-pill {
+      margin: 9px 0 7px;
+      padding: 6px 10px;
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+    .card-iban-pill:hover {
+      background: rgba(255, 255, 255, 0.24);
+      border-color: rgba(255, 255, 255, 0.4);
+      transform: translateY(-1px);
+    }
+    .card-iban-pill:active {
+      transform: scale(0.99);
+    }
+    .card-iban-pill.is-empty {
+      border-style: dashed;
+      background: rgba(255, 255, 255, 0.08);
+      opacity: 0.85;
+      font-size: 11px;
+    }
+    .card-iban-pill-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 1;
+      min-width: 0;
+    }
+    .card-iban-pill-left i {
+      font-size: 11px;
+      opacity: 0.85;
+      flex-shrink: 0;
+    }
+    .card-iban-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      opacity: 0.8;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+    .card-iban-val {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      font-family: 'JetBrains Mono', 'Courier New', monospace;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .btn-card-iban-copy {
+      background: rgba(255, 255, 255, 0.18);
+      border: none;
+      color: white;
+      width: 22px;
+      height: 22px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 10.5px;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+      margin-left: 6px;
+    }
+    .btn-card-iban-copy:hover {
+      background: rgba(255, 255, 255, 0.38);
+    }
+    .btn-paste-iban {
+      background: rgba(15, 52, 96, 0.08);
+      border: none;
+      color: var(--primary);
+      font-size: 10.5px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+    .btn-paste-iban:hover {
+      background: rgba(15, 52, 96, 0.16);
     }
 
     /* ==========================================================================
@@ -1909,33 +2098,29 @@
     .grand-profit-badge.pos { background: rgba(16, 185, 129, 0.25); color: #34d399; }
     .grand-profit-badge.neg { background: rgba(239, 68, 68, 0.25); color: #f87171; }
 
-    /* Emtia Türü Filtre Tabları */
+    /* Emtia Türü Filtre Tabları (Ekrana Sığdırılmış, Görünür Yapı) */
     .savings-filter-tabs {
       display: flex;
-      gap: 5px;
-      overflow-x: auto;
-      scrollbar-width: none;
-      -ms-overflow-style: none;
-      padding-bottom: 4px;
-      margin-bottom: 10px;
+      flex-wrap: wrap;
+      gap: 4px 5px;
+      margin-bottom: 8px;
     }
-    .savings-filter-tabs::-webkit-scrollbar { display: none; }
 
     .savings-filter-tab {
       background: white;
       border: 1px solid #e2e8f0;
       color: var(--text-dark);
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 11px;
+      padding: 3.5px 8px;
+      border-radius: 16px;
+      font-size: 10.5px;
       font-weight: 600;
       cursor: pointer;
       white-space: nowrap;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      transition: all 0.2s ease;
-      flex-shrink: 0;
+      gap: 3.5px;
+      transition: all 0.15s ease;
+      flex: 0 0 auto;
     }
     .savings-filter-tab:hover {
       background: #f8fafc;
@@ -2483,7 +2668,7 @@
     }
 
     /* ==========================================================================
-       RESPONSIVE BREAKPOINTS
+       RESPONSIVE BREAKPOINTS (100% MOBILE COMPLIANT & ANTI-ZOOM)
        ========================================================================== */
     @media (max-width: 1024px) {
       .dashboard-summary-grid {
@@ -2495,6 +2680,19 @@
     }
 
     @media (max-width: 768px) {
+      /* Prevent iOS Safari and Android Chrome auto-zoom on input tap */
+      input,
+      select,
+      textarea,
+      .form-control,
+      .modern-field-input,
+      .field-input,
+      .filter-select,
+      .hero-amount-input {
+        font-size: 16px !important;
+        touch-action: manipulation;
+      }
+
       #sidebar {
         transform: translateX(-100%);
       }
@@ -2506,17 +2704,90 @@
       }
       #topbar {
         left: 0;
+        padding-top: env(safe-area-inset-top, 0px);
+        padding-left: max(10px, env(safe-area-inset-left, 0px));
+        padding-right: max(10px, env(safe-area-inset-right, 0px));
+        padding-bottom: 0;
+        height: calc(52px + env(safe-area-inset-top, 0px));
+        width: 100%;
+        max-width: 100vw;
+        box-sizing: border-box;
+      }
+      .topbar-left {
+        gap: 8px;
+        min-width: 0;
+        flex: 1;
+      }
+      #page-title {
+        font-size: 15px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 160px;
+        line-height: 1.2;
+      }
+      .topbar-right {
+        gap: 6px;
+        flex-shrink: 0;
+      }
+      #topbar-user-name,
+      .btn-logout-text {
+        display: none !important;
+      }
+      .user-profile-badge {
+        padding: 2px !important;
+        background: transparent !important;
+        border: none !important;
+      }
+      .btn-logout {
+        padding: 6px 10px !important;
+        font-size: 12px !important;
+        border-radius: 8px !important;
       }
       #content {
         margin-left: 0;
-        padding: 12px;
+        margin-top: calc(52px + env(safe-area-inset-top, 0px));
+        padding-top: 10px;
+        padding-left: max(10px, env(safe-area-inset-left, 0px));
+        padding-right: max(10px, env(safe-area-inset-right, 0px));
+        padding-bottom: max(28px, env(safe-area-inset-bottom, 24px));
+        min-height: calc(100vh - 52px);
+        width: 100%;
+        max-width: 100vw;
+        box-sizing: border-box;
+        overflow-x: hidden;
+      }
+      .page-section {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        overflow-x: hidden;
       }
       .btn-hamburger {
         display: block;
       }
+      .page-header-row {
+        margin-bottom: 12px;
+        gap: 8px;
+      }
+      .page-main-title {
+        font-size: 16px;
+        gap: 6px;
+      }
+      .btn-add-primary {
+        padding: 6px 12px;
+        font-size: 12px;
+        border-radius: 8px;
+        white-space: nowrap;
+      }
+      .card {
+        padding: 14px 14px;
+        margin-bottom: 12px;
+        border-radius: 12px;
+      }
       .dashboard-summary-grid {
         grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
+        gap: 8px;
       }
       .debts-summary-grid {
         grid-template-columns: 1fr 1fr;
@@ -2533,14 +2804,14 @@
       .grand-savings-card {
         flex-direction: column;
         align-items: stretch;
-        gap: 12px;
+        gap: 8px;
       }
       .grand-savings-right {
         display: flex;
         align-items: center;
         justify-content: space-between;
         border-top: 1px solid rgba(255, 255, 255, 0.12);
-        padding-top: 10px;
+        padding-top: 8px;
         text-align: left;
       }
       .savings-grid {
@@ -2553,84 +2824,419 @@
       }
     }
 
+    @media (max-width: 600px) {
+      .modal-overlay {
+        align-items: flex-end;
+        padding: 0;
+      }
+
+      /* Veri giriş pencereleri telefonda uygulama sayfası gibi davranır.
+         Form gövdesi kayar; başlık ve işlem düğmeleri her zaman erişilebilir kalır. */
+      .modal-overlay:not(#modal-confirm) .modal {
+        width: 100% !important;
+        max-width: 100vw !important;
+        height: 100dvh;
+        max-height: 100dvh !important;
+        border-radius: 0 !important;
+        box-sizing: border-box !important;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        animation: slideUp 0.28s cubic-bezier(0.32,0.72,0,1);
+        padding-bottom: 0 !important;
+        overscroll-behavior: contain;
+      }
+      .modal-overlay:not(#modal-confirm) .modal::before {
+        flex: 0 0 auto;
+        margin: 7px auto 2px;
+      }
+      .modal-header {
+        padding: 12px 14px 10px !important;
+        flex: 0 0 auto;
+        top: 0;
+      }
+      .modal-title {
+        font-size: 15px !important;
+      }
+      .modal-form {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+        padding: 10px 14px max(16px, env(safe-area-inset-bottom)) !important;
+      }
+      .modal-actions,
+      .modal-actions-modern {
+        padding: 10px 14px max(14px, env(safe-area-inset-bottom)) !important;
+        margin-top: auto;
+        box-shadow: 0 -8px 18px rgba(15, 23, 42, 0.07);
+      }
+      .modal-form [style*="grid-template-columns:1fr 1fr"] {
+        grid-template-columns: 1fr !important;
+      }
+      .modal-form [style*="border-right"] {
+        border-right: none !important;
+        border-bottom: 1px solid #f1f5f9;
+      }
+      .modal-form .installment-chips-row,
+      .modal-form .day-chips-row {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+      .modal-form .inst-chip,
+      .modal-form .day-chip {
+        min-height: 36px;
+      }
+      #saving-live-hero-box {
+        align-items: stretch !important;
+        flex-wrap: wrap;
+      }
+      #saving-live-hero-box .btn-sync-market {
+        width: 100%;
+        min-height: 36px;
+      }
+
+      /* Hesap / profil veri girişi */
+      .settings-container {
+        gap: 12px;
+        max-width: none;
+      }
+      .profile-info-grid > div {
+        padding: 10px 12px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        min-width: 0;
+      }
+      .profile-info-grid strong,
+      .profile-info-grid span:not(.role-badge) {
+        overflow-wrap: anywhere;
+      }
+      #form-change-password .input-group {
+        margin-bottom: 12px;
+      }
+      #form-change-password .btn-submit {
+        width: 100%;
+        min-height: 46px;
+        margin-top: 2px !important;
+      }
+    }
+
     @media (max-width: 480px) {
+      /* Dashboard */
       .dashboard-summary-grid {
         grid-template-columns: repeat(2, 1fr);
-        gap: 8px;
-      }
-      .debts-summary-grid {
-        grid-template-columns: 1fr 1fr;
         gap: 6px;
+        margin-bottom: 12px;
       }
-      .debt-stat-card {
-        padding: 7px 9px;
+      .summary-card {
+        padding: 8px 9px;
+        border-radius: 10px;
       }
-      .debt-stat-card .summary-value {
+      .summary-label {
+        font-size: 9.5px;
+        margin-bottom: 2px;
+      }
+      .summary-value {
         font-size: 13.5px;
       }
-      .debt-stat-card .summary-icon-box {
+      .summary-icon-box {
         width: 26px;
         height: 26px;
         font-size: 11px;
       }
-      .summary-card {
-        padding: 10px 10px;
+      .forecast-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        padding: 12px 12px;
+        border-radius: 12px;
       }
+      .forecast-amount {
+        font-size: 17px;
+        align-self: flex-end;
+      }
+      .dash-box {
+        padding: 12px 12px;
+        border-radius: 12px;
+        margin-bottom: 12px;
+      }
+      .dash-box-title {
+        font-size: 13px;
+      }
+      .upcoming-item-row {
+        padding: 8px 10px;
+      }
+      .upcoming-name {
+        font-size: 12px;
+      }
+      .upcoming-amount {
+        font-size: 12.5px;
+      }
+      .installment-item-row {
+        padding: 8px 10px;
+      }
+
+      /* Sabit Giderler & Alacak / Verecek Üst Kartları */
+      .debts-summary-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+        margin-bottom: 10px;
+      }
+      .debt-stat-card {
+        padding: 7px 9px;
+        border-radius: 10px;
+      }
+      .debt-stat-card .summary-label {
+        font-size: 9px;
+        margin-bottom: 1px;
+      }
+      .debt-stat-card .summary-value {
+        font-size: 13px;
+      }
+      .debt-stat-card .summary-icon-box {
+        width: 24px;
+        height: 24px;
+        font-size: 10.5px;
+      }
+
+      /* Kredi Kartı Borçları */
+      .filter-bar {
+        padding: 8px 10px;
+        gap: 8px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+      }
+      .filter-group {
+        flex: 1;
+        min-width: 120px;
+        font-size: 12px;
+      }
+      .filter-select {
+        padding: 5px 8px;
+        font-size: 12px;
+        width: 100%;
+      }
+      .cards-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 7px;
+      }
+      .credit-card-visual {
+        padding: 8px 9px;
+        min-height: 120px;
+        border-radius: 10px;
+      }
+      .card-bank-name {
+        font-size: 10.5px;
+      }
+      .card-title-sub {
+        font-size: 9px;
+      }
+      .chip-icon {
+        width: 18px;
+        height: 13px;
+      }
+      .card-debt-center {
+        margin: 3px 0;
+      }
+      .card-debt-label {
+        font-size: 8px;
+      }
+      .card-debt-value {
+        font-size: 13.5px;
+      }
+      .card-footer-info {
+        font-size: 8.5px;
+      }
+      .card-bottom-actions {
+        padding: 4px 7px;
+        border-radius: 0 0 10px 10px;
+      }
+      .paid-toggle-box {
+        font-size: 10px;
+        gap: 3px;
+      }
+      .toggle-switch {
+        width: 26px;
+        height: 15px;
+      }
+      .toggle-slider:before {
+        height: 10px;
+        width: 10px;
+        left: 2px;
+        bottom: 2px;
+      }
+      .toggle-switch input:checked + .toggle-slider:before {
+        transform: translateX(11px);
+      }
+
+      /* Gelirler */
+      .income-summary-banner {
+        padding: 12px 14px;
+        margin-bottom: 12px;
+        border-radius: 12px;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .income-banner-left h3 {
+        font-size: 10.5px;
+        margin-bottom: 2px;
+      }
+      .income-banner-left .banner-amount {
+        font-size: 20px;
+      }
+      .income-summary-banner i.fa-coins {
+        font-size: 26px;
+      }
+      .income-item-row {
+        padding: 8px 10px;
+        gap: 8px;
+      }
+      .income-source-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 13px;
+        border-radius: 8px;
+      }
+      .income-source-name {
+        font-size: 12.5px;
+      }
+      .income-meta-tags {
+        font-size: 10px;
+      }
+      .income-amount-right {
+        font-size: 13.5px;
+      }
+
+      /* Alacak / Verecek */
+      .debt-tabs-nav {
+        gap: 2px;
+      }
+      .tab-btn {
+        padding: 5px 9px;
+        font-size: 11.5px;
+      }
+      .debt-item-card {
+        padding: 8px 10px;
+        border-radius: 10px;
+      }
+
+      /* Birikimler */
+      .grand-savings-card {
+        padding: 8px 10px;
+        margin-bottom: 8px;
+        border-radius: 10px;
+      }
+      .grand-savings-left .label {
+        font-size: 9px;
+      }
+      .grand-savings-left .value {
+        font-size: 17px;
+      }
+      .grand-savings-sub {
+        font-size: 9.5px;
+      }
+      .grand-savings-right .label {
+        font-size: 9px;
+      }
+      .grand-savings-right .value {
+        font-size: 14px;
+      }
+      .live-market-ticker-bar {
+        padding: 3px 6px;
+        gap: 6px;
+        margin-bottom: 8px;
+        border-radius: 8px;
+      }
+      .ticker-scroll-items {
+        font-size: 10px;
+        gap: 8px;
+      }
+      .ticker-status-pill {
+        font-size: 9px;
+        padding: 1px 5px;
+      }
+      .savings-filter-tabs {
+        gap: 3.5px;
+        margin-bottom: 8px;
+      }
+      .savings-filter-tab {
+        padding: 3px 6.5px;
+        font-size: 10px;
+      }
+      .saving-item-card {
+        padding: 8px 10px;
+        border-radius: 10px;
+      }
+
+      /* Notlar */
       .savings-grid {
         grid-template-columns: 1fr;
       }
       .notes-grid {
         grid-template-columns: 1fr;
-      }
-      .cards-grid {
-        grid-template-columns: repeat(2, 1fr);
         gap: 8px;
       }
-      .credit-card-visual {
-        padding: 9px 10px;
-        min-height: 125px;
+      .note-card {
+        padding: 10px 12px;
       }
-      .card-bank-name {
-        font-size: 11px;
+
+      /* Ayarlar & Yönetim */
+      .profile-info-grid {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
       }
-      .card-title-sub {
-        font-size: 9.5px;
+      .table-container {
+        border-radius: 10px;
+        margin-bottom: 12px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
       }
-      .chip-icon {
-        width: 20px;
-        height: 14px;
+      .admin-table th,
+      .admin-table td {
+        padding: 8px 10px;
+        font-size: 12px;
+        white-space: nowrap;
       }
-      .card-debt-center {
-        margin: 4px 0;
+
+      /* Giriş Sayfası */
+      #login-page {
+        padding: 12px;
       }
-      .card-debt-label {
-        font-size: 8.5px;
+      .login-card {
+        padding: 24px 16px;
+        border-radius: 14px;
+        max-width: 340px;
       }
-      .card-debt-value {
+      .login-logo {
+        font-size: 32px;
+        margin-bottom: 4px;
+      }
+      .login-title {
+        font-size: 22px;
+      }
+      .login-subtitle {
+        font-size: 12px;
+        margin-bottom: 16px;
+      }
+      .input-wrapper input {
+        padding: 10px 12px 10px 38px;
+      }
+      .btn-login {
+        padding: 11px;
         font-size: 14px;
       }
-      .card-footer-info {
-        font-size: 9px;
+    }
+
+    @media (max-width: 350px) {
+      .cards-grid {
+        grid-template-columns: 1fr;
       }
-      .card-bottom-actions {
-        padding: 5px 8px;
-      }
-      .paid-toggle-box {
-        font-size: 10.5px;
-        gap: 4px;
-      }
-      .toggle-switch {
-        width: 28px;
-        height: 16px;
-      }
-      .toggle-slider:before {
-        height: 11px;
-        width: 11px;
-        left: 2px;
-        bottom: 2px;
-      }
-      .toggle-switch input:checked + .toggle-slider:before {
-        transform: translateX(12px);
+      #page-title {
+        max-width: 130px;
       }
     }
   </style>
@@ -2672,6 +3278,14 @@
             <input type="password" id="login-password" placeholder="••••••••" required autocomplete="current-password">
             <i class="fas fa-eye password-toggle" id="login-pwd-toggle" title="Şifreyi Göster"></i>
           </div>
+        </div>
+
+        <div class="login-remember-row">
+          <label class="remember-checkbox-label" for="login-remember">
+            <input type="checkbox" id="login-remember">
+            <span class="custom-checkbox-box"><i class="fas fa-check"></i></span>
+            <span class="remember-checkbox-text">Beni Hatırla</span>
+          </label>
         </div>
 
         <button type="submit" class="btn-login" id="btn-login-submit">
@@ -3147,7 +3761,7 @@
             <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 16px; color: var(--sidebar-bg); display: flex; align-items: center; gap: 8px;">
               <i class="fas fa-id-badge text-primary"></i> Profil Bilgileri
             </h3>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; font-size: 14px;">
+            <div class="profile-info-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; font-size: 14px;">
               <div>
                 <span class="text-muted" style="display: block; font-size: 12px;">Kullanıcı Adı</span>
                 <strong id="settings-username">-</strong>
@@ -3386,348 +4000,670 @@
     </div>
   </div>
 
-  <!-- Kart Borcu Modal -->
+  <!-- Kart Borcu Modal (Modern Mobile-First Bottom Sheet) -->
   <div class="modal-overlay hidden" id="modal-card">
-    <div class="modal">
+    <div class="modal" style="max-width: 460px;">
       <div class="modal-header">
-        <h3 class="modal-title" id="modal-card-title">Kart Borcu Ekle</h3>
-        <button class="modal-close-btn" onclick="closeModal('modal-card')"><i class="fas fa-times"></i></button>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="width:32px;height:32px;border-radius:8px;background:rgba(52,152,219,0.12);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:14px;">
+            <i class="fas fa-credit-card"></i>
+          </div>
+          <div>
+            <h3 class="modal-title" id="modal-card-title" style="margin:0;font-size:15px;line-height:1.2;">Kart Borcu Ekle</h3>
+            <span style="font-size:11px;color:var(--text-muted);">Kredi kartı ekstre ve borç bilgisi</span>
+          </div>
+        </div>
+        <button class="modal-close-btn" type="button" onclick="closeModal('modal-card')"><i class="fas fa-times"></i></button>
       </div>
-      <form id="form-card" class="modal-form" onsubmit="handleSaveCard(event)">
+
+      <form id="form-card" class="modal-form" style="padding:14px 16px 0;" onsubmit="handleSaveCard(event)">
         <input type="hidden" id="card-id">
 
-        <div class="form-row-2">
-          <div>
-            <label class="form-label">Kart Adı *</label>
-            <input type="text" id="card-name" class="form-control" placeholder="Örn: Maximum Kart" required>
+        <!-- 1. HERO AMOUNT BOX -->
+        <div class="modal-hero-amount" style="background:linear-gradient(135deg,#eff6ff 0%,#e0f2fe 100%);border-color:#bae6fd;">
+          <div class="hero-amount-label" style="color:#0369a1;">Toplam Borç Tutarı</div>
+          <div class="hero-amount-input-wrap">
+            <span class="currency" style="color:#0284c7;">₺</span>
+            <input type="number" step="0.01" id="card-debt" class="hero-amount-input" style="color:#0c4a6e;" placeholder="0,00" required oninput="onCardDebtInput()">
           </div>
-          <div>
-            <label class="form-label">Banka Adı</label>
-            <input type="text" id="card-bank" class="form-control" placeholder="Örn: İş Bankası">
-          </div>
-        </div>
-
-        <div class="form-row-2">
-          <div>
-            <label class="form-label">Toplam Borç Tutarı (₺) *</label>
-            <input type="number" step="0.01" id="card-debt" class="form-control" placeholder="8450.75" required>
-          </div>
-          <div>
-            <label class="form-label">Asgari Ödeme (₺)</label>
-            <input type="number" step="0.01" id="card-min-payment" class="form-control" placeholder="1200.00">
+          <div class="live-monthly-pill" id="card-min-pill" style="border-color:#bae6fd;color:#0284c7;">
+            <i class="fas fa-percent"></i> Asgari: <strong id="card-min-badge" style="margin-left:3px;font-weight:700;">₺0,00</strong> (%20)
           </div>
         </div>
 
-        <div class="form-row-2">
-          <div>
-            <label class="form-label">Son Ödeme Tarihi</label>
-            <input type="date" id="card-due-date" class="form-control">
+        <!-- 2. HIZLI BANKA SEÇİMİ (Dokunmatik Çipler) -->
+        <div style="margin-bottom:10px;">
+          <div class="chips-label-row" style="display:flex;justify-content:space-between;margin-bottom:4px;">
+            <label class="modern-field-label">HIZLI BANKA SEÇİMİ</label>
+            <span id="card-bank-selected-text" style="font-size:11px;font-weight:700;color:var(--primary);">İş Bankası</span>
           </div>
-          <div>
-            <label class="form-label">Hesap Kesim / Ekstre Tarihi</label>
-            <input type="date" id="card-statement-date" class="form-control">
-          </div>
-        </div>
-
-        <div class="form-row-2">
-          <div>
-            <label class="form-label">Dönem Ayı (1-12)</label>
-            <select id="card-period-month" class="form-control">
-              <option value="1">1 - Ocak</option>
-              <option value="2">2 - Şubat</option>
-              <option value="3">3 - Mart</option>
-              <option value="4">4 - Nisan</option>
-              <option value="5">5 - Mayıs</option>
-              <option value="6">6 - Haziran</option>
-              <option value="7">7 - Temmuz</option>
-              <option value="8">8 - Ağustos</option>
-              <option value="9">9 - Eylül</option>
-              <option value="10">10 - Ekim</option>
-              <option value="11">11 - Kasım</option>
-              <option value="12">12 - Aralık</option>
-            </select>
-          </div>
-          <div>
-            <label class="form-label">Dönem Yılı</label>
-            <input type="number" id="card-period-year" class="form-control" value="2026">
+          <div class="category-chips-scroll" id="card-bank-chips" style="margin-bottom:6px;">
+            <button type="button" class="category-chip active" data-bank="İş Bankası" onclick="selectCardBank('İş Bankası', 'Maximum Kart')">🏦 İş Bankası</button>
+            <button type="button" class="category-chip" data-bank="Garanti BBVA" onclick="selectCardBank('Garanti BBVA', 'Bonus Kart')">🏦 Garanti</button>
+            <button type="button" class="category-chip" data-bank="Yapı Kredi" onclick="selectCardBank('Yapı Kredi', 'World Kart')">🏦 Yapı Kredi</button>
+            <button type="button" class="category-chip" data-bank="Akbank" onclick="selectCardBank('Akbank', 'Axess Kart')">🏦 Akbank</button>
+            <button type="button" class="category-chip" data-bank="Ziraat Bankası" onclick="selectCardBank('Ziraat Bankası', 'Bankkart')">🏦 Ziraat</button>
+            <button type="button" class="category-chip" data-bank="QNB" onclick="selectCardBank('QNB', 'CardFinans')">🏦 QNB</button>
+            <button type="button" class="category-chip" data-bank="Enpara" onclick="selectCardBank('Enpara', 'Enpara Kredi Kartı')">🏦 Enpara</button>
           </div>
         </div>
 
-        <div class="modal-actions">
-          <button type="button" class="btn-secondary" onclick="closeModal('modal-card')">İptal</button>
-          <button type="submit" class="btn-submit">Kaydet</button>
+        <!-- 3. KART VE BANKA ADI -->
+        <div class="modern-form-group">
+          <div class="modern-field-row">
+            <div class="modern-field-icon"><i class="fas fa-tag"></i></div>
+            <div class="modern-field-content">
+              <label class="modern-field-label">KART ADI *</label>
+              <input type="text" id="card-name" class="modern-field-input" placeholder="Örn: Maximum Kart, Bonus" required>
+            </div>
+          </div>
+          <div class="modern-field-divider"></div>
+          <div class="modern-field-row">
+            <div class="modern-field-icon"><i class="fas fa-university"></i></div>
+            <div class="modern-field-content">
+              <label class="modern-field-label">BANKA ADI</label>
+              <input type="text" id="card-bank" class="modern-field-input" placeholder="Örn: İş Bankası">
+            </div>
+          </div>
+          <div class="modern-field-divider"></div>
+          <div class="modern-field-row">
+            <div class="modern-field-icon"><i class="fas fa-money-check-alt"></i></div>
+            <div class="modern-field-content">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <label class="modern-field-label">KART / HESAP IBAN</label>
+                <button type="button" class="btn-paste-iban" onclick="pasteIbanFromClipboard()" title="Panodan Yapıştır">
+                  <i class="far fa-clipboard"></i> Yapıştır
+                </button>
+              </div>
+              <input type="text" id="card-iban" class="modern-field-input" placeholder="TR00 0000 0000 0000 0000 0000 00" maxlength="32" oninput="formatIbanInput(this)">
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. ASGARİ ÖDEME VE TARİHLER -->
+        <div class="modern-form-group">
+          <div class="modern-field-row">
+            <div class="modern-field-icon"><i class="fas fa-coins"></i></div>
+            <div class="modern-field-content">
+              <label class="modern-field-label">ASGARİ ÖDEME (₺)</label>
+              <input type="number" step="0.01" id="card-min-payment" class="modern-field-input" placeholder="Otomatik veya özel tutar">
+            </div>
+          </div>
+          <div class="modern-field-divider"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;background:white;">
+            <div class="modern-field-row" style="border-right:1px solid #f1f5f9;">
+              <div class="modern-field-icon"><i class="far fa-calendar-alt"></i></div>
+              <div class="modern-field-content">
+                <label class="modern-field-label">SON ÖDEME</label>
+                <input type="date" id="card-due-date" class="modern-field-input" style="font-size:12px;">
+              </div>
+            </div>
+            <div class="modern-field-row">
+              <div class="modern-field-icon"><i class="far fa-calendar-check"></i></div>
+              <div class="modern-field-content">
+                <label class="modern-field-label">EKSTRE TARİHİ</label>
+                <input type="date" id="card-statement-date" class="modern-field-input" style="font-size:12px;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. DÖNEM AYI VE YILI -->
+        <div class="modern-form-group" style="margin-bottom:12px;">
+          <div style="display:grid;grid-template-columns:1.2fr 0.8fr;background:white;">
+            <div class="modern-field-row" style="border-right:1px solid #f1f5f9;">
+              <div class="modern-field-icon"><i class="far fa-clock"></i></div>
+              <div class="modern-field-content">
+                <label class="modern-field-label">DÖNEM AYI</label>
+                <select id="card-period-month" class="modern-field-input" style="background:transparent;cursor:pointer;">
+                  <option value="1">1 - Ocak</option>
+                  <option value="2">2 - Şubat</option>
+                  <option value="3">3 - Mart</option>
+                  <option value="4">4 - Nisan</option>
+                  <option value="5">5 - Mayıs</option>
+                  <option value="6">6 - Haziran</option>
+                  <option value="7">7 - Temmuz</option>
+                  <option value="8">8 - Ağustos</option>
+                  <option value="9">9 - Eylül</option>
+                  <option value="10">10 - Ekim</option>
+                  <option value="11">11 - Kasım</option>
+                  <option value="12">12 - Aralık</option>
+                </select>
+              </div>
+            </div>
+            <div class="modern-field-row">
+              <div class="modern-field-content">
+                <label class="modern-field-label">DÖNEM YILI</label>
+                <input type="number" id="card-period-year" class="modern-field-input" value="2026">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. ACTIONS (Sticky Bottom) -->
+        <div class="modal-actions-modern">
+          <button type="button" class="btn-modern-cancel" onclick="closeModal('modal-card')">İptal</button>
+          <button type="submit" class="btn-modern-save">
+            <i class="fas fa-check-circle"></i> Kart Borcunu Kaydet
+          </button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Gelir Modal -->
+  <!-- Gelir Modal (Modern Mobile-First Bottom Sheet) -->
   <div class="modal-overlay hidden" id="modal-income">
-    <div class="modal">
+    <div class="modal" style="max-width: 440px;">
       <div class="modal-header">
-        <h3 class="modal-title" id="modal-income-title">Gelir Ekle</h3>
-        <button class="modal-close-btn" onclick="closeModal('modal-income')"><i class="fas fa-times"></i></button>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="width:32px;height:32px;border-radius:8px;background:rgba(39,174,96,0.12);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:14px;">
+            <i class="fas fa-wallet"></i>
+          </div>
+          <div>
+            <h3 class="modal-title" id="modal-income-title" style="margin:0;font-size:15px;line-height:1.2;">Gelir Ekle</h3>
+            <span style="font-size:11px;color:var(--text-muted);">Maaş, ek gelir, kira veya kazançlar</span>
+          </div>
+        </div>
+        <button class="modal-close-btn" type="button" onclick="closeModal('modal-income')"><i class="fas fa-times"></i></button>
       </div>
-      <form id="form-income" class="modal-form" onsubmit="handleSaveIncome(event)">
+
+      <form id="form-income" class="modal-form" style="padding:14px 16px 0;" onsubmit="handleSaveIncome(event)">
         <input type="hidden" id="income-id">
 
-        <div>
-          <label class="form-label">Gelir Kaynağı *</label>
-          <input type="text" id="income-source" class="form-control" placeholder="Örn: Maaş, Freelance, Kira Geliri" required>
+        <!-- 1. HERO AMOUNT BOX -->
+        <div class="modal-hero-amount" style="background:linear-gradient(135deg,#f0fdf4 0%,#dcfce7 100%);border-color:#86efac;">
+          <div class="hero-amount-label" style="color:#15803d;">Gelir Tutarı</div>
+          <div class="hero-amount-input-wrap">
+            <span class="currency" style="color:#16a34a;">₺</span>
+            <input type="number" step="0.01" id="income-amount" class="hero-amount-input" style="color:#14532d;" placeholder="0,00" required>
+          </div>
         </div>
 
-        <div>
-          <label class="form-label">Tutar (₺) *</label>
-          <input type="number" step="0.01" id="income-amount" class="form-control" placeholder="42000.00" required>
+        <!-- 2. HIZLI GELİR KAYNAĞI ÇİPLERİ -->
+        <div style="margin-bottom:10px;">
+          <div class="chips-label-row" style="display:flex;justify-content:space-between;margin-bottom:4px;">
+            <label class="modern-field-label">GELİR TÜRÜ</label>
+            <span id="income-source-selected-text" style="font-size:11px;font-weight:700;color:var(--green);">Maaş</span>
+          </div>
+          <div class="category-chips-scroll" id="income-preset-chips" style="margin-bottom:6px;">
+            <button type="button" class="category-chip active" data-source="Maaş" onclick="selectIncomePreset('Maaş')">💼 Maaş</button>
+            <button type="button" class="category-chip" data-source="Freelance" onclick="selectIncomePreset('Freelance')">💻 Freelance</button>
+            <button type="button" class="category-chip" data-source="Kira Geliri" onclick="selectIncomePreset('Kira Geliri')">🏠 Kira Geliri</button>
+            <button type="button" class="category-chip" data-source="Yatırım / Temettü" onclick="selectIncomePreset('Yatırım / Temettü')">📈 Yatırım</button>
+            <button type="button" class="category-chip" data-source="Prim / İkramiye" onclick="selectIncomePreset('Prim / İkramiye')">🎁 Prim</button>
+            <button type="button" class="category-chip" data-source="Diğer" onclick="selectIncomePreset('Diğer')">📌 Diğer</button>
+          </div>
         </div>
 
-        <div class="form-row-2" style="align-items: center;">
-          <div>
-            <label class="form-label" style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin-top: 10px;">
-              <input type="checkbox" id="income-is-recurring" style="width: 18px; height: 18px;" onchange="toggleRecurringIncomeDay()">
-              <span>Düzenli / Aylık Gelir</span>
+        <!-- 3. KAYNAK ADI VE AÇIKLAMA -->
+        <div class="modern-form-group">
+          <div class="modern-field-row">
+            <div class="modern-field-icon" style="color:var(--green);background:#f0fdf4;"><i class="fas fa-tag"></i></div>
+            <div class="modern-field-content">
+              <label class="modern-field-label">GELİR KAYNAĞI *</label>
+              <input type="text" id="income-source" class="modern-field-input" placeholder="Örn: Şirket Maaşı, Freelance Proje" required>
+            </div>
+          </div>
+          <div class="modern-field-divider"></div>
+          <div class="modern-field-row">
+            <div class="modern-field-icon"><i class="fas fa-align-left"></i></div>
+            <div class="modern-field-content">
+              <label class="modern-field-label">AÇIKLAMA (OPSİYONEL)</label>
+              <input type="text" id="income-desc" class="modern-field-input" placeholder="Ekstra detaylar...">
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. DÜZENLİ GELİR & ÖDEME GÜNÜ -->
+        <div class="modern-form-group" style="padding:10px 12px;background:white;margin-bottom:12px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <label for="income-is-recurring" style="display:flex;align-items:center;gap:8px;cursor:pointer;margin:0;">
+              <span class="toggle-switch">
+                <input type="checkbox" id="income-is-recurring" onchange="toggleRecurringIncomeDay()">
+                <span class="toggle-slider"></span>
+              </span>
+              <div>
+                <span style="font-size:13px;font-weight:700;color:var(--text-dark);display:block;">Düzenli / Aylık Gelir</span>
+                <span style="font-size:10.5px;color:var(--text-muted);">Her ay tekrarlanan gelir</span>
+              </div>
             </label>
           </div>
-          <div id="income-day-wrapper">
-            <label class="form-label">Her Ayın Günü (1-31)</label>
-            <select id="income-recurring-day" class="form-control">
+
+          <div id="income-day-wrapper" style="margin-top:10px;padding-top:8px;border-top:1px solid #f1f5f9;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+              <label class="modern-field-label" style="margin:0;">HER AYIN GÜNÜ</label>
+              <span id="income-day-label" style="font-size:11px;font-weight:700;color:var(--green);">1. Günü</span>
+            </div>
+            <div class="day-chips-row">
+              <button type="button" class="day-chip active" data-day="1" onclick="selectIncomeDay(1)">1'i</button>
+              <button type="button" class="day-chip" data-day="5" onclick="selectIncomeDay(5)">5'i</button>
+              <button type="button" class="day-chip" data-day="10" onclick="selectIncomeDay(10)">10'u</button>
+              <button type="button" class="day-chip" data-day="15" onclick="selectIncomeDay(15)">15'i</button>
+              <button type="button" class="day-chip" data-day="20" onclick="selectIncomeDay(20)">20'si</button>
+              <button type="button" class="day-chip" data-day="25" onclick="selectIncomeDay(25)">25'i</button>
+            </div>
+            <select id="income-recurring-day" style="width:100%;margin-top:6px;padding:6px 8px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;color:var(--text-dark);background:white;outline:none;" onchange="onIncomeDaySelectChange(this.value)">
               <!-- Injected 1-31 -->
             </select>
           </div>
         </div>
 
-        <div>
-          <label class="form-label">Açıklama</label>
-          <input type="text" id="income-desc" class="form-control" placeholder="Ekstra detaylar...">
-        </div>
-
-        <div class="modal-actions">
-          <button type="button" class="btn-secondary" onclick="closeModal('modal-income')">İptal</button>
-          <button type="submit" class="btn-submit">Kaydet</button>
+        <!-- 5. ACTIONS (Sticky Bottom) -->
+        <div class="modal-actions-modern">
+          <button type="button" class="btn-modern-cancel" onclick="closeModal('modal-income')">İptal</button>
+          <button type="submit" class="btn-modern-save" style="background:linear-gradient(135deg,#059669,#10b981);">
+            <i class="fas fa-check-circle"></i> Geliri Kaydet
+          </button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Alacak / Verecek Modal -->
+  <!-- Alacak / Verecek Modal (Modern Mobile-First Bottom Sheet) -->
   <div class="modal-overlay hidden" id="modal-debt">
-    <div class="modal">
+    <div class="modal" style="max-width: 440px;">
       <div class="modal-header">
-        <h3 class="modal-title" id="modal-debt-title">Kayıt Ekle</h3>
-        <button class="modal-close-btn" onclick="closeModal('modal-debt')"><i class="fas fa-times"></i></button>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div id="modal-debt-icon-box" style="width:32px;height:32px;border-radius:8px;background:rgba(39,174,96,0.12);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:14px;">
+            <i class="fas fa-hand-holding-usd" id="modal-debt-icon"></i>
+          </div>
+          <div>
+            <h3 class="modal-title" id="modal-debt-title" style="margin:0;font-size:15px;line-height:1.2;">Alacak Ekle</h3>
+            <span id="modal-debt-subtitle" style="font-size:11px;color:var(--text-muted);">Borç veya alacak takibi</span>
+          </div>
+        </div>
+        <button class="modal-close-btn" type="button" onclick="closeModal('modal-debt')"><i class="fas fa-times"></i></button>
       </div>
-      <form id="form-debt" class="modal-form" onsubmit="handleSaveDebt(event)">
+
+      <form id="form-debt" class="modal-form" style="padding:14px 16px 0;" onsubmit="handleSaveDebt(event)">
         <input type="hidden" id="debt-id">
         <input type="hidden" id="debt-kind" value="receivable">
 
-        <div>
-          <label class="form-label">Kişi Adı *</label>
-          <input type="text" id="debt-person-name" class="form-control" placeholder="Örn: Ahmet Yılmaz" required>
+        <!-- 1. HERO AMOUNT BOX -->
+        <div class="modal-hero-amount" id="debt-hero-box" style="background:linear-gradient(135deg,#f0fdf4 0%,#ecfdf5 100%);border-color:#a7f3d0;">
+          <div class="hero-amount-label" id="debt-hero-label" style="color:#065f46;">Tutar</div>
+          <div class="hero-amount-input-wrap">
+            <span class="currency" id="debt-currency-symbol" style="color:#059669;">₺</span>
+            <!-- Normal tutar input -->
+            <input type="number" step="0.01" id="debt-amount" class="hero-amount-input" placeholder="0,00" style="color:#064e3b;">
+            <!-- Taksitli tutar input (gizli başlar) -->
+            <input type="number" step="0.01" id="debt-total-amount" class="hero-amount-input" placeholder="0,00" style="display:none;color:#064e3b;" oninput="recalcDebtInstallment()">
+          </div>
+          <div class="live-monthly-pill" id="debt-live-monthly-pill" style="display:none;border-color:#a7f3d0;color:#047857;">
+            <i class="fas fa-calculator"></i> Aylık: <strong id="debt-live-monthly-badge" style="margin-left:3px;font-weight:700;">₺0,00</strong> / ay
+          </div>
         </div>
 
-        <!-- Taksitli mi? -->
-        <div style="background:#f8fafc;border-radius:8px;padding:12px;">
-          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;font-weight:600;">
-            <input type="checkbox" id="debt-is-installment" style="width:18px;height:18px;" onchange="toggleDebtInstallment()">
-            <span>💳 Taksitli (Karttan alınan işlem)</span>
-          </label>
-          <p style="font-size:11px;color:var(--text-muted);margin-top:4px;margin-left:28px;">Başkası adına kartınızdan çekilen veya birinin kartıyla yapılan işlem</p>
-        </div>
-
-        <!-- Normal tutar (taksitsiz) -->
-        <div id="debt-normal-amount-row">
-          <label class="form-label">Tutar (₺) *</label>
-          <input type="number" step="0.01" id="debt-amount" class="form-control" placeholder="2500.00">
-        </div>
-
-        <!-- Taksitli alanlar -->
-        <div id="debt-installment-fields" style="display:none;">
-          <div class="form-row-2">
-            <div>
-              <label class="form-label">Toplam Tutar (₺) *</label>
-              <input type="number" step="0.01" id="debt-total-amount" class="form-control" placeholder="24000.00" oninput="recalcDebtInstallment()">
-            </div>
-            <div>
-              <label class="form-label">Taksit Sayısı *</label>
-              <input type="number" min="1" id="debt-total-installments" class="form-control" value="12" oninput="recalcDebtInstallment()">
+        <!-- 2. KİŞİ ADI VE AÇIKLAMA -->
+        <div class="modern-form-group">
+          <div class="modern-field-row">
+            <div class="modern-field-icon"><i class="fas fa-user"></i></div>
+            <div class="modern-field-content">
+              <label class="modern-field-label">KİŞİ ADI *</label>
+              <input type="text" id="debt-person-name" class="modern-field-input" placeholder="Örn: Ahmet Yılmaz, Mehmet" required>
             </div>
           </div>
-          <div class="form-row-2">
-            <div>
-              <label class="form-label">Aylık Taksit (₺)</label>
-              <input type="number" step="0.01" id="debt-installment-amount" class="form-control" placeholder="Otomatik hesaplanır">
-            </div>
-            <div>
-              <label class="form-label">Ödenmiş Taksit</label>
-              <input type="number" min="0" id="debt-paid-installments" class="form-control" value="0">
+          <div class="modern-field-divider"></div>
+          <div class="modern-field-row">
+            <div class="modern-field-icon"><i class="fas fa-align-left"></i></div>
+            <div class="modern-field-content">
+              <label class="modern-field-label">AÇIKLAMA (OPSİYONEL)</label>
+              <input type="text" id="debt-desc" class="modern-field-input" placeholder="Örn: Telefon taksiti, elden borç">
             </div>
           </div>
         </div>
 
-        <div>
-          <label class="form-label">Vade / Beklenen Tarih</label>
-          <input type="date" id="debt-due-date" class="form-control">
+        <!-- 3. TAKSİTLİ Mİ? (Modern Switch Box) -->
+        <div class="modern-form-group" style="padding:10px 12px;background:white;">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <label for="debt-is-installment" style="display:flex;align-items:center;gap:8px;cursor:pointer;margin:0;">
+              <span class="toggle-switch">
+                <input type="checkbox" id="debt-is-installment" onchange="toggleDebtInstallment()">
+                <span class="toggle-slider"></span>
+              </span>
+              <div>
+                <span style="font-size:13px;font-weight:700;color:var(--text-dark);display:block;">💳 Taksitli İşlem</span>
+                <span style="font-size:10.5px;color:var(--text-muted);">Karttan çekilen veya taksitle ödenecek</span>
+              </div>
+            </label>
+          </div>
+
+          <!-- Taksit Alanları (Açılır Kapanır) -->
+          <div id="debt-installment-fields" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid #f1f5f9;">
+            <div class="chips-label-row" style="display:flex;justify-content:space-between;margin-bottom:4px;">
+              <label class="modern-field-label">TAKSİT SAYISI</label>
+              <span id="debt-inst-count-badge" style="font-size:11px;font-weight:700;color:var(--primary);">12 Taksit</span>
+            </div>
+            <div class="installment-chips-row" id="debt-inst-chips">
+              <button type="button" class="inst-chip" data-val="3" onclick="selectDebtInstallment(3)">3 Ay</button>
+              <button type="button" class="inst-chip" data-val="6" onclick="selectDebtInstallment(6)">6 Ay</button>
+              <button type="button" class="inst-chip" data-val="9" onclick="selectDebtInstallment(9)">9 Ay</button>
+              <button type="button" class="inst-chip active" data-val="12" onclick="selectDebtInstallment(12)">12 Ay</button>
+              <button type="button" class="inst-chip" data-val="24" onclick="selectDebtInstallment(24)">24 Ay</button>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;">
+              <div class="modern-form-group" style="margin-bottom:0;">
+                <div class="modern-field-row" style="padding:6px 10px;">
+                  <div class="modern-field-content">
+                    <label class="modern-field-label">TOPLAM TAKSİT</label>
+                    <input type="number" min="1" id="debt-total-installments" class="modern-field-input" value="12" oninput="recalcDebtInstallment()">
+                  </div>
+                </div>
+              </div>
+              <div class="modern-form-group" style="margin-bottom:0;">
+                <div class="modern-field-row" style="padding:6px 10px;">
+                  <div class="modern-field-content">
+                    <label class="modern-field-label">ÖDENMİŞ TAKSİT</label>
+                    <input type="number" min="0" id="debt-paid-installments" class="modern-field-input" value="0">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="modern-form-group" style="margin-top:8px;margin-bottom:0;">
+              <div class="modern-field-row" style="padding:6px 10px;">
+                <div class="modern-field-icon"><i class="fas fa-coins"></i></div>
+                <div class="modern-field-content">
+                  <label class="modern-field-label">AYLIK TAKSİT TUTARI (₺)</label>
+                  <input type="number" step="0.01" id="debt-installment-amount" class="modern-field-input" placeholder="Otomatik hesaplanır">
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div>
-          <label class="form-label">Açıklama</label>
-          <input type="text" id="debt-desc" class="form-control" placeholder="Örn: Telefon taksiti, kardan çekildi">
+        <!-- 4. VADE / BEKLENEN TARİH -->
+        <div class="modern-form-group" style="margin-bottom:12px;">
+          <div class="modern-field-row">
+            <div class="modern-field-icon"><i class="far fa-calendar-alt"></i></div>
+            <div class="modern-field-content">
+              <label class="modern-field-label">VADE / BEKLENEN TARİH</label>
+              <input type="date" id="debt-due-date" class="modern-field-input" style="font-size:13px;">
+            </div>
+          </div>
         </div>
 
-        <div class="modal-actions">
-          <button type="button" class="btn-secondary" onclick="closeModal('modal-debt')">İptal</button>
-          <button type="submit" class="btn-submit">Kaydet</button>
+        <!-- 5. ACTIONS (Sticky Bottom) -->
+        <div class="modal-actions-modern">
+          <button type="button" class="btn-modern-cancel" onclick="closeModal('modal-debt')">İptal</button>
+          <button type="submit" class="btn-modern-save" id="btn-save-debt">
+            <i class="fas fa-check-circle"></i> Kaydet
+          </button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Birikim Modal -->
+  <!-- Birikim Modal (Mobile-App Style) -->
   <div class="modal-overlay hidden" id="modal-saving">
-    <div class="modal">
-      <div class="modal-header">
-        <h3 class="modal-title" id="modal-saving-title">Birikim Ekle</h3>
-        <button class="modal-close-btn" onclick="closeModal('modal-saving')"><i class="fas fa-times"></i></button>
+    <div class="modal" style="max-width: 440px; border-radius: 16px;">
+      <div class="modal-header" style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="width:32px;height:32px;border-radius:8px;background:rgba(37,99,235,0.1);color:#2563eb;display:flex;align-items:center;justify-content:center;font-size:14px;">
+            <i class="fas fa-coins"></i>
+          </div>
+          <div>
+            <h3 class="modal-title" id="modal-saving-title" style="margin:0;font-size:15px;line-height:1.2;">Birikim Varlığı Ekle</h3>
+            <span style="font-size:11px;color:var(--text-muted);">Altın, döviz, hisse, kripto veya nakit</span>
+          </div>
+        </div>
+        <button class="modal-close-btn" type="button" onclick="closeModal('modal-saving')"><i class="fas fa-times"></i></button>
       </div>
-      <form id="form-saving" class="modal-form" onsubmit="handleSaveSaving(event)">
+
+      <form id="form-saving" class="modal-form" style="padding: 12px 16px 0;" onsubmit="handleSaveSaving(event)">
         <input type="hidden" id="saving-id">
+        <input type="hidden" id="saving-type" value="altin">
 
-        <div class="form-row-2">
-          <div>
-            <label class="form-label">Tür *</label>
-            <select id="saving-type" class="form-control" onchange="onSavingTypeChange()" required>
-              <option value="altin">🥇 Altın</option>
-              <option value="gumus">🥈 Gümüş</option>
-              <option value="hisse">📈 Hisse</option>
-              <option value="doviz">💵 Döviz</option>
-              <option value="nakit">💰 Nakit</option>
-              <option value="kripto">₿ Kripto</option>
-              <option value="diger">📦 Diğer</option>
-            </select>
+        <!-- 1. EMTİA TÜRÜ ÇİPLERİ (Dokunmatik Çipler) -->
+        <div style="margin-bottom: 10px;">
+          <div class="chips-label-row" style="display:flex;justify-content:space-between;margin-bottom:4px;">
+            <label class="modern-field-label">VARLIK TÜRÜ</label>
+            <span id="saving-type-selected-text" style="font-size:11px;font-weight:700;color:var(--primary);">Altın</span>
           </div>
-          <div>
-            <label class="form-label">Varlık Adı *</label>
-            <input type="text" id="saving-name" class="form-control" placeholder="Örn: Gram Altın, THYAO, USD" oninput="onSavingNameOrAmountInput()" required>
+          <div class="category-chips-scroll" id="saving-type-chips" style="margin-bottom:6px;">
+            <button type="button" class="category-chip active" data-type="altin" onclick="selectSavingTypeModal('altin')">🥇 Altın</button>
+            <button type="button" class="category-chip" data-type="doviz" onclick="selectSavingTypeModal('doviz')">💵 Döviz</button>
+            <button type="button" class="category-chip" data-type="hisse" onclick="selectSavingTypeModal('hisse')">📈 Hisse</button>
+            <button type="button" class="category-chip" data-type="kripto" onclick="selectSavingTypeModal('kripto')">₿ Kripto</button>
+            <button type="button" class="category-chip" data-type="gumus" onclick="selectSavingTypeModal('gumus')">🥈 Gümüş</button>
+            <button type="button" class="category-chip" data-type="nakit" onclick="selectSavingTypeModal('nakit')">💰 Nakit</button>
           </div>
         </div>
 
-        <div id="saving-live-price-hint" style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:8px 10px;font-size:11.5px;color:#166534;margin-bottom:10px;display:none;align-items:center;justify-content:space-between;">
-          <span id="saving-live-hint-text"></span>
-          <button type="button" class="btn-action-icon" style="color:#166534;font-size:11px;" onclick="applyLivePriceToModal()">Uygula</button>
-        </div>
-
-        <div class="form-row-2">
-          <div>
-            <label class="form-label">Miktar *</label>
-            <input type="number" step="any" id="saving-amount" class="form-control" placeholder="10" oninput="onSavingNameOrAmountInput()" required>
-          </div>
-          <div>
-            <label class="form-label">Birim</label>
-            <input type="text" id="saving-unit" class="form-control" placeholder="gram, adet, USD">
+        <!-- 2. HIZLI SEÇİM ÇİPLERİ (Preset Chips) -->
+        <div style="margin-bottom: 10px;" id="saving-preset-chips-wrap">
+          <label class="modern-field-label" style="margin-bottom:4px;">HIZLI SEÇİM</label>
+          <div class="category-chips-scroll" id="saving-preset-chips" style="margin-bottom:6px;">
+            <!-- Injected dynamically based on type -->
           </div>
         </div>
 
-        <div class="form-row-2">
+        <!-- 3. CANLI PİYASA BİLGİ & DOLDURMA KUTUSU -->
+        <div id="saving-live-hero-box" style="background:linear-gradient(135deg,#f0fdf4 0%,#ecfdf5 100%);border:1.5px dashed #a7f3d0;border-radius:12px;padding:8px 12px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
           <div>
-            <label class="form-label">Birim Alış Fiyatı (₺)</label>
-            <input type="number" step="any" id="saving-purchase-price" class="form-control" placeholder="2800" oninput="onSavingNameOrAmountInput()">
+            <div style="font-size:9.5px;font-weight:700;color:#065f46;text-transform:uppercase;">CANLI PİYASA FİYATI</div>
+            <div id="saving-modal-live-rate" style="font-size:15px;font-weight:800;color:#047857;">₺0,00</div>
           </div>
-          <div>
-            <label class="form-label">Güncel Toplam Değer (₺) *</label>
-            <input type="number" step="any" id="saving-current-value" class="form-control" placeholder="59600" required>
+          <button type="button" class="btn-sync-market" style="background:#059669;color:white;border:none;font-size:10.5px;padding:4px 8px;border-radius:6px;cursor:pointer;" onclick="applyLivePriceToModal()">
+            <i class="fas fa-calculator"></i> Güncel Değeri Hesapla
+          </button>
+        </div>
+
+        <!-- 4. MODERN INPUT GRUBU: Varlık Adı & Miktar & Birim & Fiyatlar -->
+        <div class="modern-form-group">
+          <!-- Varlık Adı -->
+          <div class="modern-field-row">
+            <div class="modern-field-icon"><i class="fas fa-tag"></i></div>
+            <div class="modern-field-content">
+              <label class="modern-field-label">VARLIK ADI *</label>
+              <input type="text" id="saving-name" class="modern-field-input" placeholder="Örn: Gram Altın, THYAO, USD" required oninput="onSavingNameOrAmountInput()">
+            </div>
+          </div>
+          <div class="modern-field-divider"></div>
+
+          <!-- Miktar ve Birim -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;background:white;">
+            <div class="modern-field-row" style="border-right:1px solid #f1f5f9;">
+              <div class="modern-field-icon"><i class="fas fa-cubes"></i></div>
+              <div class="modern-field-content">
+                <label class="modern-field-label">MİKTAR *</label>
+                <input type="number" step="any" id="saving-amount" class="modern-field-input" placeholder="10" required oninput="onSavingNameOrAmountInput()">
+              </div>
+            </div>
+            <div class="modern-field-row">
+              <div class="modern-field-icon"><i class="fas fa-balance-scale"></i></div>
+              <div class="modern-field-content">
+                <label class="modern-field-label">BİRİM</label>
+                <input type="text" id="saving-unit" class="modern-field-input" placeholder="gram, adet, USD">
+              </div>
+            </div>
+          </div>
+          <div class="modern-field-divider"></div>
+
+          <!-- Alış Fiyatı ve Güncel Değer -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;background:white;">
+            <div class="modern-field-row" style="border-right:1px solid #f1f5f9;">
+              <div class="modern-field-icon"><i class="fas fa-shopping-cart"></i></div>
+              <div class="modern-field-content">
+                <label class="modern-field-label">BİRİM ALIŞ (₺)</label>
+                <input type="number" step="any" id="saving-purchase-price" class="modern-field-input" placeholder="2800" oninput="onSavingNameOrAmountInput()">
+              </div>
+            </div>
+            <div class="modern-field-row">
+              <div class="modern-field-icon" style="background:#eff6ff;color:#2563eb;"><i class="fas fa-coins"></i></div>
+              <div class="modern-field-content">
+                <label class="modern-field-label" style="color:#2563eb;">GÜNCEL TOPLAM (₺) *</label>
+                <input type="number" step="any" id="saving-current-value" class="modern-field-input" placeholder="59600" required style="color:#2563eb;font-weight:700;">
+              </div>
+            </div>
           </div>
         </div>
 
-        <div>
-          <label class="form-label">Notlar</label>
-          <input type="text" id="saving-notes" class="form-control" placeholder="Uzun vadeli hedef...">
+        <!-- 5. KÂR / ZARAR CANLI ÖNİZLEME ROZETİ -->
+        <div id="saving-modal-profit-preview" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:6px 10px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;font-size:11px;">
+          <span style="color:var(--text-muted);font-weight:600;">Tahmini Kâr / Zarar:</span>
+          <span id="saving-modal-profit-badge" style="font-weight:700;color:var(--text-dark);">--</span>
         </div>
 
-        <div class="modal-actions">
-          <button type="button" class="btn-secondary" onclick="closeModal('modal-saving')">İptal</button>
-          <button type="submit" class="btn-submit">Kaydet</button>
+        <!-- 6. NOTLAR -->
+        <div class="modern-form-group" style="margin-bottom:12px;">
+          <div class="modern-field-row">
+            <div class="modern-field-icon"><i class="fas fa-sticky-note"></i></div>
+            <div class="modern-field-content">
+              <label class="modern-field-label">NOTLAR (OPSİYONEL)</label>
+              <input type="text" id="saving-notes" class="modern-field-input" placeholder="Örn: Uzun vadeli, Ziraat kasasında">
+            </div>
+          </div>
+        </div>
+
+        <!-- MODAL AKSİYONLARI (Touch-Friendly) -->
+        <div class="modal-actions" style="margin-top:0;padding-bottom:14px;">
+          <button type="button" class="btn-secondary" style="border-radius:10px;padding:9px 16px;font-size:13px;" onclick="closeModal('modal-saving')">Vazgeç</button>
+          <button type="submit" class="btn-submit" style="border-radius:10px;padding:9px 20px;font-size:13px;font-weight:700;"><i class="fas fa-check"></i> Kaydet</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Not Modal -->
+  <!-- Not Modal (Modern Mobile-First Bottom Sheet) -->
   <div class="modal-overlay hidden" id="modal-note">
-    <div class="modal">
+    <div class="modal" style="max-width: 440px;">
       <div class="modal-header">
-        <h3 class="modal-title" id="modal-note-title">Not Ekle</h3>
-        <button class="modal-close-btn" onclick="closeModal('modal-note')"><i class="fas fa-times"></i></button>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="width:32px;height:32px;border-radius:8px;background:rgba(245,158,11,0.12);color:#d97706;display:flex;align-items:center;justify-content:center;font-size:14px;">
+            <i class="fas fa-sticky-note"></i>
+          </div>
+          <div>
+            <h3 class="modal-title" id="modal-note-title" style="margin:0;font-size:15px;line-height:1.2;">Not Ekle</h3>
+            <span style="font-size:11px;color:var(--text-muted);">Finansal hatırlatıcı veya önemli not</span>
+          </div>
+        </div>
+        <button class="modal-close-btn" type="button" onclick="closeModal('modal-note')"><i class="fas fa-times"></i></button>
       </div>
-      <form id="form-note" class="modal-form" onsubmit="handleSaveNote(event)">
+
+      <form id="form-note" class="modal-form" style="padding:14px 16px 0;" onsubmit="handleSaveNote(event)">
         <input type="hidden" id="note-id">
 
-        <div>
-          <label class="form-label">Başlık *</label>
-          <input type="text" id="note-title" class="form-control" placeholder="Örn: Fatura Hatırlatma" required>
-        </div>
-
-        <div>
-          <label class="form-label">İçerik</label>
-          <textarea id="note-content" class="form-control" placeholder="Notunuzu buraya yazın..."></textarea>
-        </div>
-
-        <div>
-          <label class="form-label">Kart Rengi Seçimi</label>
-          <div class="color-picker-row" id="note-color-picker">
-            <div class="color-dot active" data-color="#fff9c4" style="background: #fff9c4;" title="Sarı"></div>
-            <div class="color-dot" data-color="#c8e6c9" style="background: #c8e6c9;" title="Yeşil"></div>
-            <div class="color-dot" data-color="#bbdefb" style="background: #bbdefb;" title="Mavi"></div>
-            <div class="color-dot" data-color="#f8bbd0" style="background: #f8bbd0;" title="Pembe"></div>
-            <div class="color-dot" data-color="#e1bee7" style="background: #e1bee7;" title="Mor"></div>
+        <!-- 1. HIZLI ŞABLON ÇİPLERİ -->
+        <div style="margin-bottom:10px;">
+          <div class="chips-label-row" style="display:flex;justify-content:space-between;margin-bottom:4px;">
+            <label class="modern-field-label">HIZLI ŞABLON</label>
+          </div>
+          <div class="category-chips-scroll" id="note-template-chips" style="margin-bottom:6px;">
+            <button type="button" class="category-chip" data-template="Fatura Hatırlatma" onclick="selectNoteTemplate('Fatura Hatırlatma')">📅 Fatura Günü</button>
+            <button type="button" class="category-chip" data-template="Birikim Hedefi" onclick="selectNoteTemplate('Birikim Hedefi')">🎯 Birikim Hedefi</button>
+            <button type="button" class="category-chip" data-template="Ödeme Uyarısı" onclick="selectNoteTemplate('Ödeme Uyarısı')">⚠️ Ödeme Uyarısı</button>
+            <button type="button" class="category-chip" data-template="Kart Borcu Takibi" onclick="selectNoteTemplate('Kart Borcu Takibi')">💳 Kart Takibi</button>
+            <button type="button" class="category-chip" data-template="Alışveriş Listesi" onclick="selectNoteTemplate('Alışveriş Listesi')">📝 Liste</button>
           </div>
         </div>
 
-        <div class="modal-actions">
-          <button type="button" class="btn-secondary" onclick="closeModal('modal-note')">İptal</button>
-          <button type="submit" class="btn-submit">Kaydet</button>
+        <!-- 2. BAŞLIK VE İÇERİK -->
+        <div class="modern-form-group">
+          <div class="modern-field-row">
+            <div class="modern-field-icon" style="color:#d97706;background:#fef3c7;"><i class="fas fa-heading"></i></div>
+            <div class="modern-field-content">
+              <label class="modern-field-label">NOT BAŞLIĞI *</label>
+              <input type="text" id="note-title" class="modern-field-input" placeholder="Örn: Ay Sonu Fatura Ödemeleri" required>
+            </div>
+          </div>
+          <div class="modern-field-divider"></div>
+          <div class="modern-field-row" style="align-items:flex-start;padding-top:10px;">
+            <div class="modern-field-icon"><i class="fas fa-paragraph"></i></div>
+            <div class="modern-field-content">
+              <label class="modern-field-label">İÇERİK</label>
+              <textarea id="note-content" class="modern-field-input" style="min-height:90px;resize:vertical;" placeholder="Notunuzu buraya detaylıca yazabilirsiniz..."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. KART RENK SEÇİMİ -->
+        <div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:10px 12px;margin-bottom:12px;">
+          <label class="modern-field-label" style="margin-bottom:8px;">KART RENK TEMASI</label>
+          <div class="color-picker-row" id="note-color-picker" style="display:flex;gap:12px;align-items:center;">
+            <div class="color-dot active" data-color="#fff9c4" style="background:#fff9c4;" title="Sarı"></div>
+            <div class="color-dot" data-color="#c8e6c9" style="background:#c8e6c9;" title="Yeşil"></div>
+            <div class="color-dot" data-color="#bbdefb" style="background:#bbdefb;" title="Mavi"></div>
+            <div class="color-dot" data-color="#f8bbd0" style="background:#f8bbd0;" title="Pembe"></div>
+            <div class="color-dot" data-color="#e1bee7" style="background:#e1bee7;" title="Mor"></div>
+          </div>
+        </div>
+
+        <!-- 4. ACTIONS (Sticky Bottom) -->
+        <div class="modal-actions-modern">
+          <button type="button" class="btn-modern-cancel" onclick="closeModal('modal-note')">İptal</button>
+          <button type="submit" class="btn-modern-save" style="background:linear-gradient(135deg,#d97706,#f59e0b);">
+            <i class="fas fa-check-circle"></i> Notu Kaydet
+          </button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Yönetim Kullanıcı Modal -->
+  <!-- Yönetim Kullanıcı Modal (Modern Mobile-First Bottom Sheet) -->
   <div class="modal-overlay hidden" id="modal-admin-user">
-    <div class="modal">
+    <div class="modal" style="max-width: 440px;">
       <div class="modal-header">
-        <h3 class="modal-title" id="modal-admin-user-title">Kullanıcı Ekle</h3>
-        <button class="modal-close-btn" onclick="closeModal('modal-admin-user')"><i class="fas fa-times"></i></button>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="width:32px;height:32px;border-radius:8px;background:rgba(142,68,173,0.12);color:var(--purple);display:flex;align-items:center;justify-content:center;font-size:14px;">
+            <i class="fas fa-user-plus"></i>
+          </div>
+          <div>
+            <h3 class="modal-title" id="modal-admin-user-title" style="margin:0;font-size:15px;line-height:1.2;">Kullanıcı Ekle</h3>
+            <span style="font-size:11px;color:var(--text-muted);">Sistem kullanıcısı hesabı</span>
+          </div>
+        </div>
+        <button class="modal-close-btn" type="button" onclick="closeModal('modal-admin-user')"><i class="fas fa-times"></i></button>
       </div>
-      <form id="form-admin-user" class="modal-form" onsubmit="handleSaveAdminUser(event)">
+
+      <form id="form-admin-user" class="modal-form" style="padding:14px 16px 0;" onsubmit="handleSaveAdminUser(event)">
         <input type="hidden" id="admin-user-id">
 
-        <div class="form-row-2">
-          <div>
-            <label class="form-label">Kullanıcı Adı *</label>
-            <input type="text" id="admin-username" class="form-control" required autocomplete="off">
+        <div class="modern-form-group">
+          <div class="modern-field-row">
+            <div class="modern-field-icon"><i class="fas fa-user"></i></div>
+            <div class="modern-field-content">
+              <label class="modern-field-label">KULLANICI ADI *</label>
+              <input type="text" id="admin-username" class="modern-field-input" placeholder="Örn: ahmet123" required autocomplete="off">
+            </div>
           </div>
-          <div>
-            <label class="form-label">Görünen Ad *</label>
-            <input type="text" id="admin-display-name" class="form-control" required>
-          </div>
-        </div>
-
-        <div class="form-row-2">
-          <div>
-            <label class="form-label">Şifre <span id="admin-user-pwd-hint" style="font-weight: 400; color: #888;"></span></label>
-            <input type="password" id="admin-password" class="form-control" autocomplete="new-password">
-          </div>
-          <div>
-            <label class="form-label">Rol</label>
-            <select id="admin-role" class="form-control">
-              <option value="user">Kullanıcı (user)</option>
-              <option value="admin">Yönetici (admin)</option>
-            </select>
+          <div class="modern-field-divider"></div>
+          <div class="modern-field-row">
+            <div class="modern-field-icon"><i class="fas fa-id-card"></i></div>
+            <div class="modern-field-content">
+              <label class="modern-field-label">GÖRÜNEN AD *</label>
+              <input type="text" id="admin-display-name" class="modern-field-input" placeholder="Örn: Ahmet Yılmaz" required>
+            </div>
           </div>
         </div>
 
-        <div class="modal-actions">
-          <button type="button" class="btn-secondary" onclick="closeModal('modal-admin-user')">İptal</button>
-          <button type="submit" class="btn-submit">Kaydet</button>
+        <div class="modern-form-group" style="margin-bottom:12px;">
+          <div class="modern-field-row">
+            <div class="modern-field-icon"><i class="fas fa-key"></i></div>
+            <div class="modern-field-content">
+              <label class="modern-field-label">ŞİFRE <span id="admin-user-pwd-hint" style="font-weight:400;color:#888;"></span></label>
+              <input type="password" id="admin-password" class="modern-field-input" placeholder="••••••••" autocomplete="new-password">
+            </div>
+          </div>
+          <div class="modern-field-divider"></div>
+          <div class="modern-field-row">
+            <div class="modern-field-icon"><i class="fas fa-shield-alt"></i></div>
+            <div class="modern-field-content">
+              <label class="modern-field-label">SİSTEM ROLÜ</label>
+              <select id="admin-role" class="modern-field-input" style="background:transparent;cursor:pointer;">
+                <option value="user">Kullanıcı (Standart)</option>
+                <option value="admin">Yönetici (Admin)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-actions-modern">
+          <button type="button" class="btn-modern-cancel" onclick="closeModal('modal-admin-user')">İptal</button>
+          <button type="submit" class="btn-modern-save" style="background:linear-gradient(135deg,var(--purple),var(--accent));">
+            <i class="fas fa-check-circle"></i> Kullanıcıyı Kaydet
+          </button>
         </div>
       </form>
     </div>
@@ -3755,7 +4691,7 @@
     /* ==========================================================================
        GLOBAL STATE & CONFIG
        ========================================================================== */
-    let token = localStorage.getItem('token');
+    let token = localStorage.getItem('token') || sessionStorage.getItem('token');
     let currentUser = null;
     let currentPage = 'dashboard';
     let currentDebtTab = 'receivables'; // 'receivables' or 'payables'
@@ -3833,6 +4769,136 @@
 
     function hideSpinner() {
       document.getElementById('loading-spinner').classList.add('hidden');
+    }
+
+    /* ==========================================================================
+       CLIPBOARD & IBAN UTILITIES
+       ========================================================================== */
+    async function copyToClipboard(text) {
+      if (!text) return false;
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+          return true;
+        }
+      } catch (e) {
+        // Fall back below
+      }
+
+      try {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-9999px';
+        textArea.style.top = '0';
+        textArea.setAttribute('readonly', '');
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        const success = document.execCommand('copy');
+        document.body.removeChild(textArea);
+        return success;
+      } catch (err) {
+        return false;
+      }
+    }
+
+    function formatIban(iban) {
+      if (!iban) return '';
+      const clean = iban.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+      return clean.match(/.{1,4}/g)?.join(' ') || clean;
+    }
+
+    function formatIbanInput(input) {
+      let val = input.value.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+      if (val.length > 26) val = val.slice(0, 26);
+      input.value = val.match(/.{1,4}/g)?.join(' ') || val;
+    }
+
+    async function pasteIbanFromClipboard() {
+      try {
+        if (navigator.clipboard && navigator.clipboard.readText) {
+          const text = await navigator.clipboard.readText();
+          if (text) {
+            const input = document.getElementById('card-iban');
+            input.value = text.trim();
+            formatIbanInput(input);
+            showToast('IBAN panodan yapıştırıldı.');
+          }
+        } else {
+          showToast('Lütfen IBAN alanına doğrudan yapıştırın.', 'info');
+        }
+      } catch (e) {
+        showToast('Panodan okuma izni verilemedi, lütfen elle yapıştırın.', 'info');
+      }
+    }
+
+    async function copyCardIban(iban, event) {
+      if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+      }
+      if (!iban) {
+        showToast('Bu karta tanımlı IBAN bulunmuyor.', 'info');
+        return;
+      }
+      const cleanIban = iban.replace(/\s+/g, '').toUpperCase();
+      const copied = await copyToClipboard(cleanIban);
+      if (copied) {
+        showToast('IBAN panoya kopyalandı: ' + formatIban(cleanIban));
+      } else {
+        showToast('IBAN kopyalanamadı.', 'error');
+      }
+    }
+
+    async function shareCardInfo(card) {
+      if (!card) return;
+      const formattedDebt = formatMoney(card.debt_amount);
+      const formattedMin = card.minimum_payment ? formatMoney(card.minimum_payment) : null;
+      const formattedDue = card.due_date ? formatDate(card.due_date) : null;
+      const ibanVal = card.iban ? formatIban(card.iban) : null;
+
+      let shareText = `💳 ${card.bank_name ? card.bank_name + ' - ' : ''}${card.card_name}\n`;
+      shareText += `💰 Toplam Borç: ${formattedDebt}\n`;
+      if (formattedMin) shareText += `📉 Asgari Ödeme: ${formattedMin}\n`;
+      if (formattedDue) shareText += `📅 Son Ödeme: ${formattedDue}\n`;
+      if (ibanVal) shareText += `🏦 IBAN: ${ibanVal}\n`;
+
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: `${card.card_name} Borç ve IBAN Bilgisi`,
+            text: shareText.trim()
+          });
+          return;
+        } catch (err) {
+          if (err.name === 'AbortError') return;
+        }
+      }
+
+      const copied = await copyToClipboard(shareText.trim());
+      if (copied) {
+        showToast('Kart ve IBAN bilgileri panoya kopyalandı! 📋');
+      } else {
+        showToast('Paylaşım bilgisi kopyalanamadı.', 'error');
+      }
+    }
+
+    function restoreRememberedLogin() {
+      const isRemembered = localStorage.getItem('cuzdanim_remember_me') === 'true';
+      const rememberedUser = localStorage.getItem('cuzdanim_remembered_username') || '';
+      const rememberCheckbox = document.getElementById('login-remember');
+      const usernameInput = document.getElementById('login-username');
+
+      if (rememberCheckbox) {
+        rememberCheckbox.checked = isRemembered;
+      }
+      if (isRemembered && rememberedUser && usernameInput) {
+        usernameInput.value = rememberedUser;
+        if (pwdInput) {
+          pwdInput.focus();
+        }
+      }
     }
 
     /* ==========================================================================
@@ -4029,15 +5095,28 @@
 
       const username = document.getElementById('login-username').value.trim();
       const password = pwdInput.value;
+      const rememberCheckbox = document.getElementById('login-remember');
+      const rememberMe = rememberCheckbox ? rememberCheckbox.checked : false;
 
       try {
         const res = await api('/api/auth/login', {
           method: 'POST',
-          body: JSON.stringify({ username, password })
+          body: JSON.stringify({ username, password, remember_me: rememberMe })
         });
 
         token = res.token;
-        localStorage.setItem('token', token);
+        if (rememberMe) {
+          localStorage.setItem('token', token);
+          sessionStorage.removeItem('token');
+          localStorage.setItem('cuzdanim_remember_me', 'true');
+          localStorage.setItem('cuzdanim_remembered_username', username);
+        } else {
+          sessionStorage.setItem('token', token);
+          localStorage.removeItem('token');
+          localStorage.removeItem('cuzdanim_remember_me');
+          localStorage.removeItem('cuzdanim_remembered_username');
+        }
+
         setCurrentUser(res.user);
         showApp();
         showToast('Hoş geldiniz, ' + res.user.display_name + '!');
@@ -4054,6 +5133,7 @@
         const res = await api('/api/auth/demo', { method: 'POST' });
         token = res.token;
         localStorage.setItem('token', token);
+        sessionStorage.removeItem('token');
         setCurrentUser(res.user);
         showApp();
         showToast('Demo moduna hoş geldiniz!');
@@ -4068,12 +5148,28 @@
 
     function logout() {
       localStorage.removeItem('token');
+      sessionStorage.removeItem('token');
       token = null;
       currentUser = null;
       loginPage.classList.remove('hidden');
       appContainer.classList.add('hidden');
-      document.getElementById('login-username').value = '';
-      pwdInput.value = '';
+
+      const isRemembered = localStorage.getItem('cuzdanim_remember_me') === 'true';
+      const rememberedUser = localStorage.getItem('cuzdanim_remembered_username') || '';
+      const rememberCheckbox = document.getElementById('login-remember');
+      const usernameInput = document.getElementById('login-username');
+
+      if (isRemembered && rememberedUser) {
+        if (usernameInput) usernameInput.value = rememberedUser;
+        if (rememberCheckbox) rememberCheckbox.checked = true;
+        pwdInput.value = '';
+        pwdInput.focus();
+      } else {
+        if (usernameInput) usernameInput.value = '';
+        if (rememberCheckbox) rememberCheckbox.checked = false;
+        pwdInput.value = '';
+      }
+
       loginError.style.display = 'none';
       showToast('Oturum kapatıldı.', 'info');
     }
@@ -4109,6 +5205,7 @@
       if (!token) {
         loginPage.classList.remove('hidden');
         appContainer.classList.add('hidden');
+        restoreRememberedLogin();
         return;
       }
 
@@ -4118,9 +5215,11 @@
         showApp();
       } catch (err) {
         localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
         token = null;
         loginPage.classList.remove('hidden');
         appContainer.classList.add('hidden');
+        restoreRememberedLogin();
       }
     }
 
@@ -4558,6 +5657,37 @@
       return '';
     }
 
+    function selectCardBank(bank, defaultCardName) {
+      document.getElementById('card-bank').value = bank;
+      const bankLabel = document.getElementById('card-bank-selected-text');
+      if (bankLabel) bankLabel.textContent = bank;
+
+      const nameInput = document.getElementById('card-name');
+      if (!nameInput.value || nameInput.dataset.autoFilled === '1') {
+        nameInput.value = defaultCardName || (bank + ' Kartı');
+        nameInput.dataset.autoFilled = '1';
+      }
+      document.querySelectorAll('#card-bank-chips .category-chip').forEach(c => {
+        c.classList.toggle('active', c.dataset.bank === bank);
+      });
+    }
+
+    function onCardDebtInput() {
+      const debt = parseFloat(document.getElementById('card-debt').value) || 0;
+      const minInput = document.getElementById('card-min-payment');
+      const badgeEl = document.getElementById('card-min-badge');
+      if (debt > 0) {
+        const minVal = (debt * 0.20).toFixed(2);
+        if (badgeEl) badgeEl.textContent = formatMoney(minVal);
+        if (minInput && (!minInput.value || minInput.dataset.autoCalc === '1')) {
+          minInput.value = minVal;
+          minInput.dataset.autoCalc = '1';
+        }
+      } else {
+        if (badgeEl) badgeEl.textContent = '₺0,00';
+      }
+    }
+
     function openCardModal(card = null) {
       document.getElementById('form-card').reset();
       const titleEl = document.getElementById('modal-card-title');
@@ -4574,13 +5704,28 @@
         document.getElementById('card-statement-date').value = card.statement_date || '';
         document.getElementById('card-period-month').value = card.period_month || (now.getMonth() + 1);
         document.getElementById('card-period-year').value = card.period_year || now.getFullYear();
+
+        const bankLabel = document.getElementById('card-bank-selected-text');
+        if (bankLabel) bankLabel.textContent = card.bank_name || 'Özel';
+        document.querySelectorAll('#card-bank-chips .category-chip').forEach(c => {
+          c.classList.toggle('active', c.dataset.bank === card.bank_name);
+        });
       } else {
         titleEl.textContent = 'Kart Borcu Ekle';
         document.getElementById('card-id').value = '';
         document.getElementById('card-period-month').value = now.getMonth() + 1;
         document.getElementById('card-period-year').value = now.getFullYear();
+        document.getElementById('card-bank').value = 'İş Bankası';
+        document.getElementById('card-name').value = 'Maximum Kart';
+        document.getElementById('card-name').dataset.autoFilled = '1';
+        const bankLabel = document.getElementById('card-bank-selected-text');
+        if (bankLabel) bankLabel.textContent = 'İş Bankası';
+        document.querySelectorAll('#card-bank-chips .category-chip').forEach(c => {
+          c.classList.toggle('active', c.dataset.bank === 'İş Bankası');
+        });
       }
 
+      onCardDebtInput();
       openModal('modal-card');
     }
 
@@ -4753,9 +5898,41 @@
       dayWrapper.style.pointerEvents = isRecurring ? 'auto' : 'none';
     }
 
+    function selectIncomePreset(source) {
+      document.getElementById('income-source').value = source;
+      const textEl = document.getElementById('income-source-selected-text');
+      if (textEl) textEl.textContent = source;
+      document.querySelectorAll('#income-preset-chips .category-chip').forEach(c => {
+        c.classList.toggle('active', c.dataset.source === source);
+      });
+    }
+
+    function selectIncomeDay(day) {
+      document.getElementById('income-recurring-day').value = day;
+      const lbl = document.getElementById('income-day-label');
+      if (lbl) lbl.textContent = day + '. Günü';
+      document.querySelectorAll('#modal-income .day-chips-row .day-chip').forEach(c => {
+        c.classList.toggle('active', parseInt(c.dataset.day) === day);
+      });
+    }
+
+    function onIncomeDaySelectChange(day) {
+      const lbl = document.getElementById('income-day-label');
+      if (lbl) lbl.textContent = day + '. Günü';
+      document.querySelectorAll('#modal-income .day-chips-row .day-chip').forEach(c => {
+        c.classList.toggle('active', parseInt(c.dataset.day) === parseInt(day));
+      });
+    }
+
     function openIncomeModal(income = null) {
       document.getElementById('form-income').reset();
       const titleEl = document.getElementById('modal-income-title');
+
+      // Populate 1-31 options if not present
+      const daySelect = document.getElementById('income-recurring-day');
+      if (daySelect && daySelect.options.length <= 1) {
+        daySelect.innerHTML = Array.from({length: 31}, (_, i) => `<option value="${i + 1}">Her ayın ${i + 1}. günü</option>`).join('');
+      }
 
       if (income) {
         titleEl.textContent = 'Geliri Düzenle';
@@ -4765,11 +5942,25 @@
         document.getElementById('income-is-recurring').checked = !!income.is_recurring;
         document.getElementById('income-recurring-day').value = income.recurring_day || 1;
         document.getElementById('income-desc').value = income.description || '';
+
+        const textEl = document.getElementById('income-source-selected-text');
+        if (textEl) textEl.textContent = income.source || 'Özel';
+        document.querySelectorAll('#income-preset-chips .category-chip').forEach(c => {
+          c.classList.toggle('active', c.dataset.source === income.source);
+        });
+        selectIncomeDay(income.recurring_day || 1);
       } else {
         titleEl.textContent = 'Yeni Gelir Ekle';
         document.getElementById('income-id').value = '';
+        document.getElementById('income-source').value = 'Maaş';
         document.getElementById('income-is-recurring').checked = true;
         document.getElementById('income-recurring-day').value = 1;
+        const textEl = document.getElementById('income-source-selected-text');
+        if (textEl) textEl.textContent = 'Maaş';
+        document.querySelectorAll('#income-preset-chips .category-chip').forEach(c => {
+          c.classList.toggle('active', c.dataset.source === 'Maaş');
+        });
+        selectIncomeDay(1);
       }
 
       toggleRecurringIncomeDay();
@@ -4886,20 +6077,52 @@
       loadDebts();
     }
 
+    function selectDebtInstallment(count) {
+      document.getElementById('debt-total-installments').value = count;
+      const badge = document.getElementById('debt-inst-count-badge');
+      if (badge) badge.textContent = count + ' Taksit';
+      document.querySelectorAll('#debt-inst-chips .inst-chip').forEach(c => {
+        c.classList.toggle('active', parseInt(c.dataset.val) === count);
+      });
+      recalcDebtInstallment();
+    }
+
     function toggleDebtInstallment() {
       const isInst = document.getElementById('debt-is-installment').checked;
-      document.getElementById('debt-installment-fields').style.display = isInst ? 'flex' : 'none';
-      document.getElementById('debt-installment-fields').style.flexDirection = 'column';
-      document.getElementById('debt-installment-fields').style.gap = '12px';
-      document.getElementById('debt-normal-amount-row').style.display = isInst ? 'none' : 'block';
-      const amountInput = document.getElementById('debt-amount');
-      amountInput.required = !isInst;
+      const instFields = document.getElementById('debt-installment-fields');
+      const normalInput = document.getElementById('debt-amount');
+      const totalInput = document.getElementById('debt-total-amount');
+      const monthlyPill = document.getElementById('debt-live-monthly-pill');
+      const heroLabel = document.getElementById('debt-hero-label');
+
+      if (instFields) instFields.style.display = isInst ? 'block' : 'none';
+      if (normalInput) {
+        normalInput.style.display = isInst ? 'none' : 'block';
+        normalInput.required = !isInst;
+      }
+      if (totalInput) {
+        totalInput.style.display = isInst ? 'block' : 'none';
+        totalInput.required = isInst;
+        if (isInst && normalInput && normalInput.value) {
+          totalInput.value = normalInput.value;
+        }
+      }
+      if (monthlyPill) monthlyPill.style.display = isInst ? 'inline-flex' : 'none';
+      if (heroLabel) heroLabel.textContent = isInst ? 'Toplam Taksitli Tutar' : 'Tutar';
+
+      if (isInst) {
+        recalcDebtInstallment();
+      }
     }
 
     function recalcDebtInstallment() {
       const total = parseFloat(document.getElementById('debt-total-amount').value) || 0;
       const count = parseInt(document.getElementById('debt-total-installments').value) || 1;
-      document.getElementById('debt-installment-amount').value = count > 0 ? (total / count).toFixed(2) : '0.00';
+      const monthly = count > 0 ? (total / count).toFixed(2) : '0.00';
+      const instInput = document.getElementById('debt-installment-amount');
+      if (instInput) instInput.value = monthly;
+      const badge = document.getElementById('debt-live-monthly-badge');
+      if (badge) badge.textContent = formatMoney(monthly);
     }
 
     function openDebtModal(debt = null) {
@@ -4907,10 +6130,46 @@
       const titleEl = document.getElementById('modal-debt-title');
       const isReceivable = currentDebtTab === 'receivables';
       document.getElementById('debt-kind').value = currentDebtTab;
+
+      // Update Header & Icons based on receivable vs payable
+      const iconBox = document.getElementById('modal-debt-icon-box');
+      const iconEl = document.getElementById('modal-debt-icon');
+      const subtitleEl = document.getElementById('modal-debt-subtitle');
+      const saveBtn = document.getElementById('btn-save-debt');
+      const heroBox = document.getElementById('debt-hero-box');
+      const currSymbol = document.getElementById('debt-currency-symbol');
+
+      if (isReceivable) {
+        if (iconBox) {
+          iconBox.style.background = 'rgba(39,174,96,0.12)';
+          iconBox.style.color = 'var(--green)';
+        }
+        if (iconEl) iconEl.className = 'fas fa-hand-holding-usd';
+        if (subtitleEl) subtitleEl.textContent = 'Tahsil edilecek borç veya alacak kaydı';
+        if (saveBtn) saveBtn.style.background = 'linear-gradient(135deg,#059669,#10b981)';
+        if (heroBox) {
+          heroBox.style.background = 'linear-gradient(135deg,#f0fdf4 0%,#ecfdf5 100%)';
+          heroBox.style.borderColor = '#a7f3d0';
+        }
+        if (currSymbol) currSymbol.style.color = '#059669';
+      } else {
+        if (iconBox) {
+          iconBox.style.background = 'rgba(231,76,60,0.12)';
+          iconBox.style.color = 'var(--red)';
+        }
+        if (iconEl) iconEl.className = 'fas fa-money-bill-wave';
+        if (subtitleEl) subtitleEl.textContent = 'Ödenecek borç veya taksitli kart borcu';
+        if (saveBtn) saveBtn.style.background = 'linear-gradient(135deg,#e11d48,#f43f5e)';
+        if (heroBox) {
+          heroBox.style.background = 'linear-gradient(135deg,#fff1f2 0%,#ffe4e6 100%)';
+          heroBox.style.borderColor = '#fecdd3';
+        }
+        if (currSymbol) currSymbol.style.color = '#e11d48';
+      }
+
       // Reset installment UI
-      document.getElementById('debt-installment-fields').style.display = 'none';
-      document.getElementById('debt-normal-amount-row').style.display = 'block';
-      document.getElementById('debt-amount').required = true;
+      document.getElementById('debt-is-installment').checked = false;
+      toggleDebtInstallment();
 
       if (debt) {
         titleEl.textContent = isReceivable ? 'Alacağı Düzenle' : 'Vereceği Düzenle';
@@ -4920,16 +6179,13 @@
         document.getElementById('debt-desc').value = debt.description || '';
         const isInst = !!debt.is_installment;
         document.getElementById('debt-is-installment').checked = isInst;
+        toggleDebtInstallment();
         if (isInst) {
-          document.getElementById('debt-installment-fields').style.display = 'flex';
-          document.getElementById('debt-installment-fields').style.flexDirection = 'column';
-          document.getElementById('debt-installment-fields').style.gap = '12px';
-          document.getElementById('debt-normal-amount-row').style.display = 'none';
-          document.getElementById('debt-amount').required = false;
           document.getElementById('debt-total-amount').value = debt.amount;
           document.getElementById('debt-total-installments').value = debt.total_installments || 1;
           document.getElementById('debt-installment-amount').value = debt.installment_amount || '';
           document.getElementById('debt-paid-installments').value = debt.paid_installments || 0;
+          selectDebtInstallment(debt.total_installments || 12);
         } else {
           document.getElementById('debt-amount').value = debt.amount;
         }
@@ -4938,6 +6194,7 @@
         document.getElementById('debt-id').value = '';
         document.getElementById('debt-total-installments').value = 12;
         document.getElementById('debt-paid-installments').value = 0;
+        selectDebtInstallment(12);
       }
 
       openModal('modal-debt');
@@ -5161,59 +6418,110 @@
        ========================================================================== */
     let currentMarketRates = null;
 
+    const SAVING_PRESETS = {
+      altin: [
+        { name: 'Gram Altın', unit: 'gram' },
+        { name: 'Çeyrek Altın', unit: 'adet' },
+        { name: 'Yarım Altın', unit: 'adet' },
+        { name: 'Tam Altın', unit: 'adet' },
+        { name: 'Ata Altın', unit: 'adet' }
+      ],
+      doviz: [
+        { name: 'Amerikan Doları', unit: 'USD' },
+        { name: 'Euro', unit: 'EUR' },
+        { name: 'İngiliz Sterlini', unit: 'GBP' },
+        { name: 'İsviçre Frangı', unit: 'CHF' }
+      ],
+      hisse: [
+        { name: 'THYAO', unit: 'adet' },
+        { name: 'GARAN', unit: 'adet' },
+        { name: 'ASELS', unit: 'adet' },
+        { name: 'EREGL', unit: 'adet' },
+        { name: 'BIMAS', unit: 'adet' }
+      ],
+      kripto: [
+        { name: 'Bitcoin', unit: 'adet' },
+        { name: 'Ethereum', unit: 'adet' },
+        { name: 'Solana', unit: 'adet' },
+        { name: 'Tether (USDT)', unit: 'USDT' }
+      ],
+      gumus: [
+        { name: 'Gram Gümüş', unit: 'gram' }
+      ],
+      nakit: [
+        { name: 'Nakit Türk Lirası', unit: 'TL' }
+      ]
+    };
+
+    function selectSavingTypeModal(type) {
+      document.getElementById('saving-type').value = type;
+      const typeCfg = SAVINGS_CONFIG[type] || { label: type };
+      const selectedText = document.getElementById('saving-type-selected-text');
+      if (selectedText) selectedText.textContent = typeCfg.label;
+
+      document.querySelectorAll('#saving-type-chips .category-chip').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.type === type);
+      });
+
+      // Hızlı seçim çiplerini yükle
+      const presetsWrap = document.getElementById('saving-preset-chips-wrap');
+      const presetsContainer = document.getElementById('saving-preset-chips');
+      const presets = SAVING_PRESETS[type] || [];
+
+      if (presets.length > 0) {
+        presetsWrap.style.display = 'block';
+        presetsContainer.innerHTML = presets.map((p, idx) => `
+          <button type="button" class="category-chip ${idx === 0 ? 'active' : ''}" onclick="selectSavingPreset('${escapeHtml(p.name)}', '${escapeHtml(p.unit)}')">
+            ${escapeHtml(p.name)}
+          </button>
+        `).join('');
+
+        const nameInput = document.getElementById('saving-name');
+        const unitInput = document.getElementById('saving-unit');
+        if (nameInput && (!nameInput.value || nameInput.value === 'Gram Altın' || Object.values(SAVING_PRESETS).flat().some(pr => pr.name === nameInput.value))) {
+          nameInput.value = presets[0].name;
+          unitInput.value = presets[0].unit;
+        }
+      } else {
+        presetsWrap.style.display = 'none';
+      }
+
+      onSavingNameOrAmountInput();
+    }
+
+    function selectSavingPreset(name, unit) {
+      document.getElementById('saving-name').value = name;
+      document.getElementById('saving-unit').value = unit;
+
+      document.querySelectorAll('#saving-preset-chips .category-chip').forEach(btn => {
+        btn.classList.toggle('active', btn.textContent.trim() === name);
+      });
+
+      onSavingNameOrAmountInput();
+    }
+
     function openSavingModal(saving = null) {
       document.getElementById('form-saving').reset();
       const titleEl = document.getElementById('modal-saving-title');
-      const hintEl = document.getElementById('saving-live-price-hint');
-      if (hintEl) hintEl.style.display = 'none';
 
       if (saving) {
         titleEl.textContent = 'Birikimi Düzenle';
         document.getElementById('saving-id').value = saving.id;
-        document.getElementById('saving-type').value = saving.type || 'altin';
         document.getElementById('saving-name').value = saving.name;
         document.getElementById('saving-amount').value = saving.amount;
         document.getElementById('saving-unit').value = saving.unit || '';
         document.getElementById('saving-purchase-price').value = saving.purchase_price || '';
         document.getElementById('saving-current-value').value = saving.live_total_value || saving.current_value || '';
         document.getElementById('saving-notes').value = saving.notes || '';
+        selectSavingTypeModal(saving.type || 'altin');
       } else {
         titleEl.textContent = 'Yeni Birikim Ekle';
         document.getElementById('saving-id').value = '';
-        document.getElementById('saving-type').value = 'altin';
-        document.getElementById('saving-unit').value = 'gram';
-        document.getElementById('saving-name').value = 'Gram Altın';
+        selectSavingTypeModal('altin');
       }
 
       onSavingNameOrAmountInput();
       openModal('modal-saving');
-    }
-
-    function onSavingTypeChange() {
-      const type = document.getElementById('saving-type').value;
-      const unitEl = document.getElementById('saving-unit');
-      const nameEl = document.getElementById('saving-name');
-
-      if (type === 'altin') {
-        unitEl.value = 'gram';
-        if (!nameEl.value || ['USD', 'EUR', 'BTC', 'THYAO'].includes(nameEl.value)) nameEl.value = 'Gram Altın';
-      } else if (type === 'gumus') {
-        unitEl.value = 'gram';
-        nameEl.value = 'Gram Gümüş';
-      } else if (type === 'doviz') {
-        unitEl.value = 'USD';
-        nameEl.value = 'Amerikan Doları';
-      } else if (type === 'kripto') {
-        unitEl.value = 'adet';
-        nameEl.value = 'Bitcoin';
-      } else if (type === 'hisse') {
-        unitEl.value = 'adet';
-        nameEl.value = 'THYAO';
-      } else if (type === 'nakit') {
-        unitEl.value = 'TL';
-        nameEl.value = 'Nakit Türk Lirası';
-      }
-      onSavingNameOrAmountInput();
     }
 
     function onSavingNameOrAmountInput() {
@@ -5222,8 +6530,8 @@
       const name = (document.getElementById('saving-name').value || '').toLowerCase();
       const amount = parseFloat(document.getElementById('saving-amount').value) || 0;
       const buyPrice = parseFloat(document.getElementById('saving-purchase-price').value) || 0;
-      const hintEl = document.getElementById('saving-live-price-hint');
-      const hintText = document.getElementById('saving-live-hint-text');
+      const liveRateEl = document.getElementById('saving-modal-live-rate');
+      const profitBadge = document.getElementById('saving-modal-profit-badge');
 
       let livePrice = 0;
       if (type === 'altin') {
@@ -5246,13 +6554,34 @@
         livePrice = 1.0;
       }
 
-      if (livePrice > 0) {
-        window._modalEstimatedLivePrice = livePrice;
-        hintEl.style.display = 'flex';
-        const estTotal = amount > 0 ? (amount * livePrice) : livePrice;
-        hintText.innerHTML = `<strong>🟢 Canlı Fiyat:</strong> ${formatMoney(livePrice)} ${amount > 0 ? `· <strong>Tahmini Değer:</strong> ${formatMoney(estTotal)}` : ''}`;
-      } else {
-        hintEl.style.display = 'none';
+      window._modalEstimatedLivePrice = livePrice || 0;
+
+      if (liveRateEl) {
+        liveRateEl.textContent = livePrice > 0 ? formatMoney(livePrice) : 'Piyasa fiyatı aranıyor...';
+      }
+
+      const curValInput = document.getElementById('saving-current-value');
+      if (livePrice > 0 && amount > 0) {
+        const estTotal = amount * livePrice;
+        if (!curValInput.value || curValInput.dataset.autoFilled === '1') {
+          curValInput.value = Math.round(estTotal * 100) / 100;
+          curValInput.dataset.autoFilled = '1';
+        }
+      }
+
+      // Kâr/Zarar Tahmini Önizleme
+      if (profitBadge) {
+        const curVal = parseFloat(curValInput.value) || (amount * livePrice);
+        const totalCost = amount * buyPrice;
+        if (buyPrice > 0 && curVal > 0) {
+          const diff = curVal - totalCost;
+          const rate = totalCost > 0 ? ((diff / totalCost) * 100) : 0;
+          const isPos = diff >= 0;
+          profitBadge.innerHTML = `<span style="color:${isPos ? '#15803d' : '#b91c1c'};font-weight:700;"><i class="fas fa-arrow-${isPos ? 'up' : 'down'}"></i> ${isPos ? '+' : ''}${formatMoney(diff)} (%${rate.toFixed(1)})</span>`;
+        } else {
+          profitBadge.textContent = 'Miktar ve alış fiyatı girildiğinde hesaplanır';
+          profitBadge.style.color = 'var(--text-muted)';
+        }
       }
     }
 
@@ -5260,8 +6589,11 @@
       if (window._modalEstimatedLivePrice) {
         const amount = parseFloat(document.getElementById('saving-amount').value) || 1;
         const total = amount * window._modalEstimatedLivePrice;
-        document.getElementById('saving-current-value').value = Math.round(total * 100) / 100;
-        showToast('Canlı piyasa değeri uygulandı.');
+        const curValInput = document.getElementById('saving-current-value');
+        curValInput.value = Math.round(total * 100) / 100;
+        curValInput.dataset.autoFilled = '1';
+        onSavingNameOrAmountInput();
+        showToast('Canlı piyasa toplam değeri uygulandı.');
       }
     }
 
@@ -5546,6 +6878,21 @@
       });
     });
 
+    function selectNoteTemplate(title) {
+      document.getElementById('note-title').value = title;
+      const contentEl = document.getElementById('note-content');
+      if (!contentEl.value) {
+        if (title.includes('Fatura')) contentEl.value = '• Elektrik:\n• Su:\n• Doğalgaz:\n• İnternet:';
+        else if (title.includes('Birikim')) contentEl.value = '• Hedef Varlık: Altın / Döviz\n• Hedef Tutar: ₺\n• Tarih:';
+        else if (title.includes('Ödeme')) contentEl.value = '• Ödenecek Kişi:\n• Tutar: ₺\n• Son Tarih:';
+        else if (title.includes('Kart')) contentEl.value = '• Kart: \n• Asgari: ₺\n• Son Ödeme:';
+        else if (title.includes('Liste')) contentEl.value = '1. \n2. \n3. ';
+      }
+      document.querySelectorAll('#note-template-chips .category-chip').forEach(c => {
+        c.classList.toggle('active', c.dataset.template === title);
+      });
+    }
+
     function openNoteModal(note = null) {
       document.getElementById('form-note').reset();
       const titleEl = document.getElementById('modal-note-title');
@@ -5556,10 +6903,14 @@
         document.getElementById('note-title').value = note.title;
         document.getElementById('note-content').value = note.content || '';
         selectedNoteColor = note.color || '#fff9c4';
+        document.querySelectorAll('#note-template-chips .category-chip').forEach(c => {
+          c.classList.toggle('active', c.dataset.template === note.title);
+        });
       } else {
         titleEl.textContent = 'Yeni Not Ekle';
         document.getElementById('note-id').value = '';
         selectedNoteColor = '#fff9c4';
+        document.querySelectorAll('#note-template-chips .category-chip').forEach(c => c.classList.remove('active'));
       }
 
       document.querySelectorAll('#note-color-picker .color-dot').forEach(dot => {

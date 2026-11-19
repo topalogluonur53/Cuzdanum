@@ -78,7 +78,7 @@ router.get('/', (req, res) => {
     const todayStr = now.toISOString().split('T')[0];
 
     const upcomingCardPayments = db.prepare(`
-      SELECT card_name as title, debt_amount as amount, due_date, 'card' as type
+      SELECT card_name as title, debt_amount as amount, due_date, 'card' as type, iban, bank_name
       FROM card_debts
       WHERE user_id = ? AND is_paid = 0 AND due_date BETWEEN ? AND ?
       ORDER BY due_date ASC
