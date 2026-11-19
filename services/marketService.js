@@ -18,7 +18,7 @@ async function getMarketRates(forceRefresh = false) {
   }
 
   const rates = {
-    currencies: { USD: 50.46, EUR: 55.54, GBP: 66.30, CHF: 59.50 },
+    currencies: { USD: 50.46, EUR: 55.54, GBP: 66.30, CHF: 59.50, CAD: 36.80, AUD: 33.40, JPY: 0.32, AED: 13.74, SAR: 13.45, NOK: 4.85, SEK: 5.02, DKK: 7.45 },
     precious_metals: {
       GRA: 5964.41,
       CEYREKALTIN: 10018,
@@ -32,7 +32,13 @@ async function getMarketRates(forceRefresh = false) {
       BTC: 3154000,
       ETH: 89400,
       SOL: 3710,
-      USDT: 50.40
+      USDT: 50.40,
+      BNB: 30800,
+      XRP: 35,
+      ADA: 17,
+      DOGE: 7,
+      AVAX: 970,
+      DOT: 185
     },
     indices: {
       XU100: 11400.0
@@ -53,6 +59,9 @@ async function getMarketRates(forceRefresh = false) {
       if (data.EUR && data.EUR.Selling) rates.currencies.EUR = parseFloat(data.EUR.Selling);
       if (data.GBP && data.GBP.Selling) rates.currencies.GBP = parseFloat(data.GBP.Selling);
       if (data.CHF && data.CHF.Selling) rates.currencies.CHF = parseFloat(data.CHF.Selling);
+      ['CAD', 'AUD', 'JPY', 'AED', 'SAR', 'NOK', 'SEK', 'DKK'].forEach(code => {
+        if (data[code] && data[code].Selling) rates.currencies[code] = parseFloat(data[code].Selling);
+      });
 
       if (data.GRA && data.GRA.Selling) rates.precious_metals.GRA = parseFloat(data.GRA.Selling);
       if (data.CEYREKALTIN && data.CEYREKALTIN.Selling) rates.precious_metals.CEYREKALTIN = parseFloat(data.CEYREKALTIN.Selling);
@@ -81,7 +90,13 @@ async function getMarketRates(forceRefresh = false) {
       { pair: 'BTCTRY', key: 'BTC' },
       { pair: 'ETHTRY', key: 'ETH' },
       { pair: 'SOLTRY', key: 'SOL' },
-      { pair: 'USDTTRY', key: 'USDT' }
+      { pair: 'USDTTRY', key: 'USDT' },
+      { pair: 'BNBTRY', key: 'BNB' },
+      { pair: 'XRPTRY', key: 'XRP' },
+      { pair: 'ADATRY', key: 'ADA' },
+      { pair: 'DOGETRY', key: 'DOGE' },
+      { pair: 'AVAXTRY', key: 'AVAX' },
+      { pair: 'DOTTRY', key: 'DOT' }
     ];
     await Promise.allSettled(cryptoPairs.map(async ({ pair, key }) => {
       const controller = new AbortController();
@@ -175,31 +190,18 @@ async function resolveSavingValues(item, marketRates) {
     liveUnitPrice = marketRates.precious_metals.GUMUS;
     isLive = true;
   } else if (type === 'doviz') {
-    if (name.includes('dolar') || unit === 'USD' || name.includes('usd')) {
-      liveUnitPrice = marketRates.currencies.USD;
-      isLive = true;
-    } else if (name.includes('euro') || unit === 'EUR' || name.includes('eur')) {
-      liveUnitPrice = marketRates.currencies.EUR;
-      isLive = true;
-    } else if (name.includes('sterlin') || unit === 'GBP' || name.includes('gbp')) {
-      liveUnitPrice = marketRates.currencies.GBP;
-      isLive = true;
-    } else if (name.includes('frank') || unit === 'CHF' || name.includes('chf')) {
-      liveUnitPrice = marketRates.currencies.CHF;
+    const currencyAliases = { USD: ['dolar', 'usd'], EUR: ['euro', 'eur'], GBP: ['sterlin', 'gbp'], CHF: ['frank', 'chf'], CAD: ['kanada', 'cad'], AUD: ['avustralya', 'aud'], JPY: ['japon', 'yen', 'jpy'], AED: ['bae', 'dirhem', 'aed'], SAR: ['riyal', 'sar'], NOK: ['norveç', 'norvec', 'nok'], SEK: ['isveç', 'isvec', 'sek'], DKK: ['danimarka', 'dkk'] };
+    const currency = Object.keys(currencyAliases).find(code => unit === code)
+      || Object.keys(currencyAliases).find(code => currencyAliases[code].some(alias => name.includes(alias)));
+    if (currency && marketRates.currencies[currency]) {
+      liveUnitPrice = marketRates.currencies[currency];
       isLive = true;
     }
   } else if (type === 'kripto') {
-    if (name.includes('bitcoin') || unit === 'BTC' || name.includes('btc')) {
-      liveUnitPrice = marketRates.crypto.BTC;
-      isLive = true;
-    } else if (name.includes('ethereum') || unit === 'ETH' || name.includes('eth')) {
-      liveUnitPrice = marketRates.crypto.ETH;
-      isLive = true;
-    } else if (name.includes('solana') || unit === 'SOL' || name.includes('sol')) {
-      liveUnitPrice = marketRates.crypto.SOL;
-      isLive = true;
-    } else if (name.includes('tether') || unit === 'USDT' || name.includes('usdt')) {
-      liveUnitPrice = marketRates.crypto.USDT;
+    const cryptoAliases = { BTC: ['bitcoin', 'btc'], ETH: ['ethereum', 'eth'], SOL: ['solana', 'sol'], USDT: ['tether', 'usdt'], BNB: ['bnb', 'binance'], XRP: ['xrp', 'ripple'], ADA: ['ada', 'cardano'], DOGE: ['doge', 'dogecoin'], AVAX: ['avax', 'avalanche'], DOT: ['dot', 'polkadot'] };
+    const crypto = Object.keys(cryptoAliases).find(code => unit === code || cryptoAliases[code].some(alias => name.includes(alias)));
+    if (crypto && marketRates.crypto[crypto]) {
+      liveUnitPrice = marketRates.crypto[crypto];
       isLive = true;
     }
   } else if (type === 'hisse') {

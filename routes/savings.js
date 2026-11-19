@@ -17,6 +17,35 @@ router.get('/rates', async (req, res) => {
   }
 });
 
+// GET /api/savings/quote — Birikim ekleme penceresi için seçilen varlığın anlık fiyatı
+router.get('/quote', async (req, res) => {
+  try {
+    const { type, name, unit, refresh } = req.query;
+    if (!type || !name) {
+      return res.status(400).json({ error: 'Varlık türü ve adı gerekli' });
+    }
+
+    const rates = await marketService.getMarketRates(refresh === '1');
+    const quote = await marketService.resolveSavingValues({
+      type,
+      name,
+      unit: unit || '',
+      amount: 1,
+      purchase_price: 0
+    }, rates);
+
+    res.json({
+      name,
+      unit: unit || '',
+      live_unit_price: quote.live_unit_price,
+      is_live: quote.is_live,
+      updated_at: rates.updated_at
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Fiyat alınamadı: ' + err.message });
+  }
+});
+
 // GET /api/savings — Kullanıcı birikimleri (Canlı piyasa verileri ve kâr/zarar ile zenginleştirilmiş)
 router.get('/', async (req, res) => {
   try {

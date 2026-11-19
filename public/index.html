@@ -4439,14 +4439,25 @@
           </div>
         </div>
 
-        <!-- 3. CANLI PİYASA BİLGİ & DOLDURMA KUTUSU -->
+        <!-- 3. VARLIK ARAMA VE SEÇİMİ -->
+        <div class="saving-asset-search" style="margin-bottom:10px;">
+          <label class="modern-field-label" for="saving-asset-search" style="margin-bottom:4px;">VARLIK ARA VE SEÇ</label>
+          <div style="display:flex;align-items:center;gap:8px;border:1px solid #dbe4ef;border-radius:10px;background:#fff;padding:0 10px;">
+            <i class="fas fa-search" style="color:#64748b;font-size:12px;"></i>
+            <input type="search" id="saving-asset-search" class="modern-field-input" style="padding:10px 0;" placeholder="Örn: gram altın, THYAO, dolar, Bitcoin" autocomplete="off" oninput="filterSavingAssets(this.value)" onfocus="filterSavingAssets(this.value)">
+            <button type="button" aria-label="Aramayı temizle" onclick="clearSavingAssetSearch()" style="border:0;background:transparent;color:#94a3b8;padding:6px;cursor:pointer;"><i class="fas fa-times"></i></button>
+          </div>
+          <div id="saving-asset-results" style="display:none;margin-top:6px;max-height:180px;overflow-y:auto;border:1px solid #e2e8f0;border-radius:10px;background:#fff;"></div>
+        </div>
+
+        <!-- 4. CANLI PİYASA BİLGİ & DOLDURMA KUTUSU -->
         <div id="saving-live-hero-box" style="background:linear-gradient(135deg,#f0fdf4 0%,#ecfdf5 100%);border:1.5px dashed #a7f3d0;border-radius:12px;padding:8px 12px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
           <div>
             <div style="font-size:9.5px;font-weight:700;color:#065f46;text-transform:uppercase;">CANLI PİYASA FİYATI</div>
             <div id="saving-modal-live-rate" style="font-size:15px;font-weight:800;color:#047857;">₺0,00</div>
           </div>
-          <button type="button" class="btn-sync-market" style="background:#059669;color:white;border:none;font-size:10.5px;padding:4px 8px;border-radius:6px;cursor:pointer;" onclick="applyLivePriceToModal()">
-            <i class="fas fa-calculator"></i> Güncel Değeri Hesapla
+          <button type="button" class="btn-sync-market" style="background:#059669;color:white;border:none;font-size:10.5px;padding:4px 8px;border-radius:6px;cursor:pointer;" onclick="refreshSavingQuote(true)">
+            <i class="fas fa-sync-alt"></i> Fiyatı Yenile
           </button>
         </div>
 
@@ -4457,7 +4468,8 @@
             <div class="modern-field-icon"><i class="fas fa-tag"></i></div>
             <div class="modern-field-content">
               <label class="modern-field-label">VARLIK ADI *</label>
-              <input type="text" id="saving-name" class="modern-field-input" placeholder="Örn: Gram Altın, THYAO, USD" required oninput="onSavingNameOrAmountInput()">
+              <input type="text" id="saving-name" class="modern-field-input" list="saving-assets-datalist" placeholder="Varlık adını yazın veya listeden seçin" required oninput="onSavingNameOrAmountInput()" onchange="selectSavingAssetByName(this.value)">
+              <datalist id="saving-assets-datalist"></datalist>
             </div>
           </div>
           <div class="modern-field-divider"></div>
@@ -6418,40 +6430,23 @@
        ========================================================================== */
     let currentMarketRates = null;
 
-    const SAVING_PRESETS = {
-      altin: [
-        { name: 'Gram Altın', unit: 'gram' },
-        { name: 'Çeyrek Altın', unit: 'adet' },
-        { name: 'Yarım Altın', unit: 'adet' },
-        { name: 'Tam Altın', unit: 'adet' },
-        { name: 'Ata Altın', unit: 'adet' }
-      ],
-      doviz: [
-        { name: 'Amerikan Doları', unit: 'USD' },
-        { name: 'Euro', unit: 'EUR' },
-        { name: 'İngiliz Sterlini', unit: 'GBP' },
-        { name: 'İsviçre Frangı', unit: 'CHF' }
-      ],
-      hisse: [
-        { name: 'THYAO', unit: 'adet' },
-        { name: 'GARAN', unit: 'adet' },
-        { name: 'ASELS', unit: 'adet' },
-        { name: 'EREGL', unit: 'adet' },
-        { name: 'BIMAS', unit: 'adet' }
-      ],
-      kripto: [
-        { name: 'Bitcoin', unit: 'adet' },
-        { name: 'Ethereum', unit: 'adet' },
-        { name: 'Solana', unit: 'adet' },
-        { name: 'Tether (USDT)', unit: 'USDT' }
-      ],
-      gumus: [
-        { name: 'Gram Gümüş', unit: 'gram' }
-      ],
-      nakit: [
-        { name: 'Nakit Türk Lirası', unit: 'TL' }
-      ]
-    };
+    // Arama kutusunda gösterilen varlık kataloğu. Hisse seçildiğinde sembol üzerinden
+    // fiyat ayrıca sunucudan sorgulanır; diğer gruplar piyasa kurlarıyla eşleşir.
+    const SAVING_ASSETS = [
+      ['altin', 'Gram Altın', 'gram'], ['altin', 'Çeyrek Altın', 'adet'], ['altin', 'Yarım Altın', 'adet'], ['altin', 'Tam Altın', 'adet'], ['altin', 'Ata Altın', 'adet'], ['altin', 'Cumhuriyet Altını', 'adet'],
+      ['gumus', 'Gram Gümüş', 'gram'],
+      ['doviz', 'Amerikan Doları', 'USD'], ['doviz', 'Euro', 'EUR'], ['doviz', 'İngiliz Sterlini', 'GBP'], ['doviz', 'İsviçre Frangı', 'CHF'], ['doviz', 'Kanada Doları', 'CAD'], ['doviz', 'Avustralya Doları', 'AUD'], ['doviz', 'Japon Yeni', 'JPY'], ['doviz', 'BAE Dirhemi', 'AED'], ['doviz', 'Suudi Arabistan Riyali', 'SAR'], ['doviz', 'Norveç Kronu', 'NOK'], ['doviz', 'İsveç Kronu', 'SEK'], ['doviz', 'Danimarka Kronu', 'DKK'],
+      ['kripto', 'Bitcoin', 'BTC'], ['kripto', 'Ethereum', 'ETH'], ['kripto', 'Solana', 'SOL'], ['kripto', 'Tether', 'USDT'], ['kripto', 'BNB', 'BNB'], ['kripto', 'XRP', 'XRP'], ['kripto', 'Cardano', 'ADA'], ['kripto', 'Dogecoin', 'DOGE'], ['kripto', 'Avalanche', 'AVAX'], ['kripto', 'Polkadot', 'DOT'],
+      ['hisse', 'THYAO', 'adet'], ['hisse', 'ASELS', 'adet'], ['hisse', 'TUPRS', 'adet'], ['hisse', 'KCHOL', 'adet'], ['hisse', 'AKBNK', 'adet'], ['hisse', 'GARAN', 'adet'], ['hisse', 'EREGL', 'adet'], ['hisse', 'BIMAS', 'adet'], ['hisse', 'FROTO', 'adet'], ['hisse', 'SISE', 'adet'], ['hisse', 'SAHOL', 'adet'], ['hisse', 'YKBNK', 'adet'], ['hisse', 'ENKAI', 'adet'], ['hisse', 'TCELL', 'adet'], ['hisse', 'TTKOM', 'adet'], ['hisse', 'MGROS', 'adet'], ['hisse', 'PETKM', 'adet'], ['hisse', 'KOZAL', 'adet'], ['hisse', 'AEFES', 'adet'], ['hisse', 'ALARK', 'adet'], ['hisse', 'ARCLK', 'adet'], ['hisse', 'ASTOR', 'adet'], ['hisse', 'BRSAN', 'adet'], ['hisse', 'CANTE', 'adet'], ['hisse', 'CCOLA', 'adet'], ['hisse', 'CIMSA', 'adet'], ['hisse', 'DOAS', 'adet'], ['hisse', 'EKGYO', 'adet'], ['hisse', 'EUPWR', 'adet'], ['hisse', 'GUBRF', 'adet'], ['hisse', 'HEKTS', 'adet'], ['hisse', 'ISCTR', 'adet'], ['hisse', 'KONTR', 'adet'], ['hisse', 'KRDMD', 'adet'], ['hisse', 'ODAS', 'adet'], ['hisse', 'OYAKC', 'adet'], ['hisse', 'PGSUS', 'adet'], ['hisse', 'SASA', 'adet'], ['hisse', 'SOKM', 'adet'], ['hisse', 'TAVHL', 'adet'], ['hisse', 'TOASO', 'adet'], ['hisse', 'TSKB', 'adet'], ['hisse', 'ULKER', 'adet'], ['hisse', 'VAKBN', 'adet'], ['hisse', 'VESTL', 'adet'],
+      ['nakit', 'Nakit Türk Lirası', 'TL']
+    ].map(([type, name, unit]) => ({ type, name, unit }));
+
+    const SAVING_PRESETS = SAVING_ASSETS.reduce((groups, asset) => {
+      (groups[asset.type] ||= []).push(asset);
+      return groups;
+    }, {});
+    let savingQuoteTimer = null;
+    let isApplyingSavingQuote = false;
 
     function selectSavingTypeModal(type) {
       document.getElementById('saving-type').value = type;
@@ -6470,7 +6465,7 @@
 
       if (presets.length > 0) {
         presetsWrap.style.display = 'block';
-        presetsContainer.innerHTML = presets.map((p, idx) => `
+        presetsContainer.innerHTML = presets.slice(0, 8).map((p, idx) => `
           <button type="button" class="category-chip ${idx === 0 ? 'active' : ''}" onclick="selectSavingPreset('${escapeHtml(p.name)}', '${escapeHtml(p.unit)}')">
             ${escapeHtml(p.name)}
           </button>
@@ -6486,6 +6481,7 @@
         presetsWrap.style.display = 'none';
       }
 
+      filterSavingAssets(document.getElementById('saving-asset-search')?.value || '');
       onSavingNameOrAmountInput();
     }
 
@@ -6500,8 +6496,66 @@
       onSavingNameOrAmountInput();
     }
 
+    function filterSavingAssets(query = '') {
+      const results = document.getElementById('saving-asset-results');
+      if (!results) return;
+      const normalized = query.trim().toLocaleLowerCase('tr-TR');
+      const activeType = document.getElementById('saving-type')?.value;
+      const matches = SAVING_ASSETS.filter(asset => {
+        const haystack = `${asset.name} ${asset.unit} ${asset.type}`.toLocaleLowerCase('tr-TR');
+        return normalized ? haystack.includes(normalized) : asset.type === activeType;
+      }).slice(0, 18);
+
+      results.style.display = matches.length ? 'block' : 'none';
+      results.innerHTML = matches.map(asset => {
+        const index = SAVING_ASSETS.indexOf(asset);
+        const cfg = SAVINGS_CONFIG[asset.type] || {};
+        return `<button type="button" onclick="selectSavingAsset(${index})" style="display:flex;width:100%;align-items:center;justify-content:space-between;gap:10px;border:0;border-bottom:1px solid #f1f5f9;background:#fff;padding:10px 12px;text-align:left;cursor:pointer;font-family:inherit;">
+          <span style="font-size:13px;font-weight:700;color:var(--text-dark);">${cfg.icon || '📦'} ${escapeHtml(asset.name)}</span>
+          <span style="font-size:11px;color:var(--text-muted);">${escapeHtml(asset.unit)}</span>
+        </button>`;
+      }).join('');
+    }
+
+    function clearSavingAssetSearch() {
+      const search = document.getElementById('saving-asset-search');
+      if (search) search.value = '';
+      filterSavingAssets('');
+      search?.focus();
+    }
+
+    function renderSavingAssetDatalist() {
+      const datalist = document.getElementById('saving-assets-datalist');
+      if (!datalist || datalist.dataset.ready === '1') return;
+      datalist.innerHTML = SAVING_ASSETS.map(asset => {
+        const label = SAVINGS_CONFIG[asset.type]?.label || asset.type;
+        return `<option value="${escapeHtml(asset.name)}" label="${escapeHtml(label)} · ${escapeHtml(asset.unit)}"></option>`;
+      }).join('');
+      datalist.dataset.ready = '1';
+    }
+
+    function selectSavingAssetByName(name) {
+      const normalized = (name || '').trim().toLocaleLowerCase('tr-TR');
+      const index = SAVING_ASSETS.findIndex(asset => asset.name.toLocaleLowerCase('tr-TR') === normalized);
+      if (index >= 0) selectSavingAsset(index);
+    }
+
+    function selectSavingAsset(index) {
+      const asset = SAVING_ASSETS[index];
+      if (!asset) return;
+      document.getElementById('saving-type').value = asset.type;
+      document.getElementById('saving-name').value = asset.name;
+      document.getElementById('saving-unit').value = asset.unit;
+      const search = document.getElementById('saving-asset-search');
+      if (search) search.value = asset.name;
+      document.getElementById('saving-asset-results').style.display = 'none';
+      selectSavingTypeModal(asset.type);
+      refreshSavingQuote(false);
+    }
+
     function openSavingModal(saving = null) {
       document.getElementById('form-saving').reset();
+      renderSavingAssetDatalist();
       const titleEl = document.getElementById('modal-saving-title');
 
       if (saving) {
@@ -6525,9 +6579,13 @@
     }
 
     function onSavingNameOrAmountInput() {
-      if (!currentMarketRates) return;
+      if (!currentMarketRates) {
+        scheduleSavingQuote();
+        return;
+      }
       const type = document.getElementById('saving-type').value;
       const name = (document.getElementById('saving-name').value || '').toLowerCase();
+      const unit = (document.getElementById('saving-unit').value || '').toUpperCase();
       const amount = parseFloat(document.getElementById('saving-amount').value) || 0;
       const buyPrice = parseFloat(document.getElementById('saving-purchase-price').value) || 0;
       const liveRateEl = document.getElementById('saving-modal-live-rate');
@@ -6552,6 +6610,11 @@
         else livePrice = currentMarketRates.crypto?.BTC;
       } else if (type === 'nakit') {
         livePrice = 1.0;
+      }
+
+      const quoteKey = `${type}|${name}|${unit}`;
+      if (!livePrice && window._modalQuoteKey === quoteKey) {
+        livePrice = window._modalQuotePrice || 0;
       }
 
       window._modalEstimatedLivePrice = livePrice || 0;
@@ -6582,6 +6645,49 @@
           profitBadge.textContent = 'Miktar ve alış fiyatı girildiğinde hesaplanır';
           profitBadge.style.color = 'var(--text-muted)';
         }
+      }
+      if (!isApplyingSavingQuote) scheduleSavingQuote();
+    }
+
+    function scheduleSavingQuote() {
+      clearTimeout(savingQuoteTimer);
+      savingQuoteTimer = setTimeout(() => refreshSavingQuote(false), 450);
+    }
+
+    async function refreshSavingQuote(force = false) {
+      const type = document.getElementById('saving-type')?.value;
+      const nameInput = document.getElementById('saving-name');
+      const unitInput = document.getElementById('saving-unit');
+      const name = nameInput?.value.trim();
+      const unit = unitInput?.value.trim() || '';
+      if (!type || !name || !token) return;
+
+      const requestKey = `${type}|${name.toLowerCase()}|${unit.toUpperCase()}`;
+      const rateEl = document.getElementById('saving-modal-live-rate');
+      const button = document.querySelector('#saving-live-hero-box .btn-sync-market');
+      if (rateEl) rateEl.textContent = 'Canlı fiyat alınıyor...';
+      if (button) button.classList.add('spinning');
+
+      try {
+        const query = new URLSearchParams({ type, name, unit });
+        if (force) query.set('refresh', '1');
+        const quote = await api('/api/savings/quote?' + query.toString());
+        // Kullanıcı sorgu sürerken başka bir varlığa geçtiyse eski yanıtı uygulama.
+        const currentKey = `${document.getElementById('saving-type').value}|${document.getElementById('saving-name').value.trim().toLowerCase()}|${document.getElementById('saving-unit').value.trim().toUpperCase()}`;
+        if (currentKey !== requestKey) return;
+        window._modalQuoteKey = requestKey;
+        window._modalQuotePrice = Number(quote.live_unit_price) || 0;
+        if (quote.live_unit_price > 0) {
+          isApplyingSavingQuote = true;
+          onSavingNameOrAmountInput();
+          isApplyingSavingQuote = false;
+        } else if (rateEl) {
+          rateEl.textContent = 'Bu varlık için canlı fiyat bulunamadı';
+        }
+      } catch (err) {
+        if (rateEl) rateEl.textContent = 'Fiyat şu an alınamadı';
+      } finally {
+        if (button) button.classList.remove('spinning');
       }
     }
 
