@@ -1012,6 +1012,33 @@
       letter-spacing: 0.5px;
       margin-bottom: 3px;
     }
+    .hero-amount-toggle-wrap {
+      display: inline-flex;
+      align-items: center;
+      background: rgba(6, 95, 70, 0.08);
+      border: 1px solid rgba(6, 95, 70, 0.18);
+      padding: 2px;
+      border-radius: 20px;
+      gap: 2px;
+      margin-bottom: 4px;
+    }
+    .amount-mode-btn {
+      background: transparent;
+      border: none;
+      font-size: 10.5px;
+      font-weight: 700;
+      color: #065f46;
+      padding: 3px 10px;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      line-height: 1.2;
+    }
+    .amount-mode-btn.active {
+      background: #047857;
+      color: #ffffff;
+      box-shadow: 0 1px 4px rgba(4, 120, 87, 0.25);
+    }
     .hero-amount-input-wrap {
       display: flex;
       align-items: center;
@@ -3087,8 +3114,10 @@
         text-align: left;
         padding: 7px 10px;
       }
-      #modal-expense .hero-amount-label {
+      #modal-expense .hero-amount-label,
+      #modal-expense .hero-amount-toggle-wrap {
         grid-column: 1;
+        margin-bottom: 2px;
       }
       #modal-expense .hero-amount-input-wrap {
         grid-column: 1;
@@ -4684,13 +4713,20 @@
 
         <!-- 1. HERO AMOUNT BOX -->
         <div class="modal-hero-amount">
-          <div class="hero-amount-label">Toplam Tutar</div>
+          <div class="hero-amount-toggle-wrap">
+            <button type="button" class="amount-mode-btn active" id="btn-expense-mode-total" onclick="setExpenseAmountMode('total')">
+              Toplam Tutar
+            </button>
+            <button type="button" class="amount-mode-btn" id="btn-expense-mode-monthly" onclick="setExpenseAmountMode('monthly')">
+              Aylık Taksit
+            </button>
+          </div>
           <div class="hero-amount-input-wrap">
             <span class="currency">₺</span>
             <input type="text" inputmode="decimal" id="expense-total-amount" class="hero-amount-input money-input" placeholder="0,00" required oninput="formatMoneyInput(this); recalcExpenseMonthly()" onblur="normalizeMoneyInput(this)">
           </div>
           <div class="live-monthly-pill" id="expense-live-monthly">
-            <i class="fas fa-calculator"></i> Aylık Taksit: <strong id="expense-monthly-badge" style="margin-left:3px;font-weight:700;">₺0,00</strong> / ay
+            <i class="fas fa-calculator"></i> <span id="expense-live-monthly-text">Aylık Taksit:</span> <strong id="expense-monthly-badge" style="margin-left:3px;font-weight:700;">₺0,00</strong>
           </div>
           <input type="hidden" id="expense-monthly-amount" value="0">
         </div>
@@ -6354,14 +6390,52 @@
       });
     }
 
-    function recalcExpenseMonthly() {
-      const total = parseMoneyInput(document.getElementById('expense-total-amount').value);
+    let currentExpenseAmountMode = 'total'; // 'total' | 'monthly'
+
+    function setExpenseAmountMode(mode) {
+      if (currentExpenseAmountMode === mode) return;
       const count = parseInt(document.getElementById('expense-total-installments').value) || 1;
-      const monthly = count > 0 ? (total / count) : 0;
-      document.getElementById('expense-monthly-amount').value = monthly.toFixed(2);
+      const inputEl = document.getElementById('expense-total-amount');
+      const val = parseMoneyInput(inputEl.value);
+
+      currentExpenseAmountMode = mode;
+
+      const btnTotal = document.getElementById('btn-expense-mode-total');
+      const btnMonthly = document.getElementById('btn-expense-mode-monthly');
+      if (btnTotal) btnTotal.classList.toggle('active', mode === 'total');
+      if (btnMonthly) btnMonthly.classList.toggle('active', mode === 'monthly');
+
+      if (val > 0) {
+        if (mode === 'monthly') {
+          const monthly = count > 0 ? (val / count) : val;
+          setMoneyInputValue('expense-total-amount', monthly);
+        } else {
+          const total = val * count;
+          setMoneyInputValue('expense-total-amount', total);
+        }
+      }
+
+      recalcExpenseMonthly();
+      inputEl.focus();
+    }
+
+    function recalcExpenseMonthly() {
+      const inputVal = parseMoneyInput(document.getElementById('expense-total-amount').value);
+      const count = parseInt(document.getElementById('expense-total-installments').value) || 1;
       const badge = document.getElementById('expense-monthly-badge');
-      if (badge) {
-        badge.textContent = formatMoney(monthly);
+      const labelText = document.getElementById('expense-live-monthly-text');
+      const hiddenMonthly = document.getElementById('expense-monthly-amount');
+
+      if (currentExpenseAmountMode === 'total') {
+        const monthly = count > 0 ? (inputVal / count) : inputVal;
+        if (hiddenMonthly) hiddenMonthly.value = monthly.toFixed(2);
+        if (labelText) labelText.textContent = 'Aylık Taksit:';
+        if (badge) badge.textContent = formatMoney(monthly) + (count > 1 ? ' / ay' : '');
+      } else {
+        const total = inputVal * count;
+        if (hiddenMonthly) hiddenMonthly.value = inputVal.toFixed(2);
+        if (labelText) labelText.textContent = 'Toplam Tutar:';
+        if (badge) badge.textContent = formatMoney(total);
       }
     }
 
@@ -6369,6 +6443,12 @@
       document.getElementById('form-expense').reset();
       const titleEl = document.getElementById('modal-expense-title');
       const deleteBtn = document.getElementById('expense-delete-btn');
+
+      currentExpenseAmountMode = 'total';
+      const btnTotal = document.getElementById('btn-expense-mode-total');
+      const btnMonthly = document.getElementById('btn-expense-mode-monthly');
+      if (btnTotal) btnTotal.classList.add('active');
+      if (btnMonthly) btnMonthly.classList.remove('active');
 
       if (expense) {
         titleEl.textContent = 'Gideri Düzenle';
@@ -6415,12 +6495,24 @@
     async function handleSaveExpense(e) {
       e.preventDefault();
       const id = document.getElementById('expense-id').value;
+      const count = parseInt(document.getElementById('expense-total-installments').value) || 1;
+      const inputVal = parseMoneyInput(document.getElementById('expense-total-amount').value);
+
+      let totalAmount, installmentAmount;
+      if (currentExpenseAmountMode === 'monthly') {
+        installmentAmount = inputVal;
+        totalAmount = Math.round((inputVal * count) * 100) / 100;
+      } else {
+        totalAmount = inputVal;
+        installmentAmount = count > 0 ? Math.round((inputVal / count) * 100) / 100 : inputVal;
+      }
+
       const body = {
         title: document.getElementById('expense-title').value.trim(),
         description: document.getElementById('expense-desc').value.trim(),
-        total_amount: parseMoneyInput(document.getElementById('expense-total-amount').value),
-        total_installments: parseInt(document.getElementById('expense-total-installments').value) || 1,
-        installment_amount: parseMoneyInput(document.getElementById('expense-monthly-amount').value),
+        total_amount: totalAmount,
+        total_installments: count,
+        installment_amount: installmentAmount,
         paid_installments: parseInt(document.getElementById('expense-paid-installments').value) || 0,
         start_date: document.getElementById('expense-start-date').value || null,
         due_day: parseInt(document.getElementById('expense-due-day').value) || 1,
