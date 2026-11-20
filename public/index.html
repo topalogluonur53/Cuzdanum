@@ -2830,48 +2830,53 @@
         padding: 0;
       }
 
-      /* Veri giriş pencereleri telefonda uygulama sayfası gibi davranır.
-         Form gövdesi kayar; başlık ve işlem düğmeleri her zaman erişilebilir kalır. */
+      /* Veri giriş pencereleri: doğal yükseklikte alt sayfa. Böylece formun
+         altı kesilmez; uzun içerik pencerenin tamamından kaydırılabilir. */
       .modal-overlay:not(#modal-confirm) .modal {
         width: 100% !important;
         max-width: 100vw !important;
-        height: 100dvh;
-        max-height: 100dvh !important;
-        border-radius: 0 !important;
+        height: auto;
+        max-height: calc(100dvh - 12px) !important;
+        border-radius: 20px 20px 0 0 !important;
         box-sizing: border-box !important;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
+        display: block;
+        overflow-x: hidden;
+        overflow-y: auto;
         animation: slideUp 0.28s cubic-bezier(0.32,0.72,0,1);
-        padding-bottom: 0 !important;
+        padding-bottom: max(8px, env(safe-area-inset-bottom)) !important;
         overscroll-behavior: contain;
+        scroll-padding-bottom: 78px;
       }
       .modal-overlay:not(#modal-confirm) .modal::before {
-        flex: 0 0 auto;
         margin: 7px auto 2px;
       }
       .modal-header {
         padding: 12px 14px 10px !important;
-        flex: 0 0 auto;
         top: 0;
       }
       .modal-title {
         font-size: 15px !important;
       }
       .modal-form {
-        flex: 1 1 auto;
-        min-height: 0;
-        overflow-y: auto;
-        overflow-x: hidden;
-        -webkit-overflow-scrolling: touch;
-        overscroll-behavior: contain;
+        display: block;
+        overflow: visible;
         padding: 10px 14px max(16px, env(safe-area-inset-bottom)) !important;
       }
       .modal-actions,
       .modal-actions-modern {
         padding: 10px 14px max(14px, env(safe-area-inset-bottom)) !important;
-        margin-top: auto;
+        margin-top: 12px;
+        position: sticky;
+        bottom: 0;
+        z-index: 5;
         box-shadow: 0 -8px 18px rgba(15, 23, 42, 0.07);
+      }
+      .btn-modern-cancel,
+      .btn-modern-save {
+        min-height: 44px;
+      }
+      .btn-modern-cancel {
+        min-width: 70px;
       }
       .modal-form [style*="grid-template-columns:1fr 1fr"] {
         grid-template-columns: 1fr !important;
@@ -2882,12 +2887,205 @@
       }
       .modal-form .installment-chips-row,
       .modal-form .day-chips-row {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        display: flex;
+        overflow-x: auto;
+        padding-bottom: 2px;
+        -webkit-overflow-scrolling: touch;
       }
       .modal-form .inst-chip,
       .modal-form .day-chip {
         min-height: 36px;
+        flex: 0 0 62px;
+      }
+      .modal-form .day-chip {
+        flex-basis: 54px;
+      }
+      .modal-hero-amount {
+        padding: 6px 10px;
+        margin-bottom: 8px;
+        border-radius: 10px;
+      }
+      .hero-amount-label {
+        font-size: 9px;
+        margin-bottom: 0;
+      }
+      .hero-amount-input {
+        font-size: 18px !important;
+        width: 120px;
+        line-height: 1.25;
+      }
+      .hero-amount-input-wrap .currency {
+        font-size: 16px;
+      }
+      .live-monthly-pill {
+        margin-top: 3px;
+        padding: 2px 8px;
+        font-size: 10px;
+      }
+      .modal-header > div:first-child {
+        min-width: 0;
+      }
+      .modal-header > div:first-child > div:last-child {
+        min-width: 0;
+      }
+      .modal-header > div:first-child > div:last-child > span {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .modal-close-btn {
+        min-width: 34px;
+        min-height: 34px;
+      }
+      .modern-form-group {
+        margin-bottom: 8px;
+        border-radius: 10px;
+      }
+      .modern-field-row {
+        padding: 8px 10px;
+        gap: 8px;
+      }
+      .category-chips-scroll {
+        gap: 5px;
+        margin-bottom: 8px;
+      }
+      .category-chip {
+        min-height: 34px;
+        padding: 5px 10px;
+      }
+      /* Sabit gider: kısa ve hızlı giriş akışı */
+      #modal-expense .modal-form {
+        padding-top: 6px !important;
+      }
+      #modal-expense .modal-hero-amount {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        column-gap: 8px;
+        text-align: left;
+        padding: 7px 10px;
+      }
+      #modal-expense .hero-amount-label {
+        grid-column: 1;
+      }
+      #modal-expense .hero-amount-input-wrap {
+        grid-column: 1;
+        justify-content: flex-start;
+      }
+      #modal-expense .live-monthly-pill {
+        grid-column: 2;
+        grid-row: 1 / span 2;
+        margin: 0;
+        white-space: nowrap;
+      }
+      #modal-expense .category-chips-scroll {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        overflow-x: auto;
+        padding: 2px 1px 5px;
+      }
+      #modal-expense .category-chip {
+        justify-content: center;
+        min-width: 0;
+        padding-right: 7px;
+        padding-left: 7px;
+      }
+      #modal-expense .modern-form-group {
+        margin-bottom: 7px;
+      }
+      #modal-expense .modern-field-row {
+        padding: 6px 9px;
+      }
+      #modal-expense .day-chips-row {
+        display: none;
+      }
+      #modal-expense #expense-due-day {
+        min-height: 36px;
+        margin-top: 2px !important;
+      }
+      #modal-expense .installment-chips-row {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 3px;
+        margin-bottom: 4px;
+        overflow: visible;
+      }
+      #modal-expense .inst-chip {
+        min-width: 0;
+        min-height: 30px;
+        padding: 3px 1px;
+        font-size: 9.5px;
+      }
+      #modal-expense .chips-label-row {
+        margin-bottom: 3px !important;
+      }
+      #modal-expense .chips-label-row .modern-field-label {
+        font-size: 9px;
+      }
+      #modal-expense .modal-form > div[style*="margin-bottom:10px"] {
+        margin-bottom: 6px !important;
+      }
+      #modal-expense .modal-form > div[style*="grid-template-columns:1fr 1fr"] {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 6px !important;
+        margin-top: 4px !important;
+      }
+      #modal-expense .modal-form > div[style*="grid-template-columns:1fr 1fr"] .modern-field-row {
+        padding: 4px 8px !important;
+      }
+      #modal-expense .modal-form > div[style*="grid-template-columns:1fr 1fr"] .modern-form-group {
+        margin-bottom: 0;
+      }
+      #modal-expense .modal-form > .modern-form-group:last-of-type {
+        margin-bottom: 6px;
+      }
+      #modal-expense .modal-form > .modern-form-group:last-of-type .modern-field-row {
+        padding-top: 5px;
+        padding-bottom: 5px;
+      }
+      /* Vade günü ve başlangıç tarihini yan yana alarak bir satır kazan. */
+      #modal-expense .modal-form > .modern-form-group:last-of-type {
+        display: grid;
+        grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+        align-items: stretch;
+      }
+      #modal-expense .modal-form > .modern-form-group:last-of-type > .modern-field-divider {
+        display: none;
+      }
+      #modal-expense .modal-form > .modern-form-group:last-of-type > .modern-field-row {
+        min-width: 0;
+        align-items: flex-start;
+        padding: 7px 6px;
+      }
+      #modal-expense .modal-form > .modern-form-group:last-of-type > .modern-field-row + .modern-field-row {
+        border-left: 1px solid #f1f5f9;
+      }
+      #modal-expense .modal-form > .modern-form-group:last-of-type .modern-field-icon {
+        width: 24px;
+        height: 24px;
+      }
+      #modal-expense .modal-form > .modern-form-group:last-of-type .modern-field-content {
+        min-width: 0;
+      }
+      #modal-expense .modal-form > .modern-form-group:last-of-type .modern-field-content > div:first-child {
+        align-items: flex-start !important;
+        gap: 4px;
+      }
+      #modal-expense .modal-form > .modern-form-group:last-of-type #expense-due-day-label {
+        white-space: nowrap;
+      }
+      #modal-expense #expense-start-date {
+        min-width: 0;
+        font-size: 14px !important;
+      }
+      #modal-expense #expense-due-day {
+        min-height: 32px;
+        padding: 4px 8px !important;
+      }
+      #modal-expense .modal-actions-modern {
+        margin-top: 4px;
+        padding-top: 5px !important;
       }
       #saving-live-hero-box {
         align-items: stretch !important;
@@ -3238,6 +3436,167 @@
       #page-title {
         max-width: 130px;
       }
+    }
+
+    /* iOS inspired visual system shared by every page */
+    :root {
+      --ios-bg: #f2f2f7;
+      --ios-surface: #ffffff;
+      --ios-border: rgba(60, 60, 67, 0.12);
+      --ios-muted: #8e8e93;
+      --ios-blue: #007aff;
+      --ios-green: #34c759;
+      --ios-radius: 16px;
+    }
+    html, body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+      background: var(--ios-bg);
+      color: #1c1c1e;
+    }
+    #content { background: var(--ios-bg); }
+    #topbar {
+      background: rgba(255,255,255,0.92);
+      border-bottom: 1px solid var(--ios-border);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+      backdrop-filter: saturate(180%) blur(18px);
+      -webkit-backdrop-filter: saturate(180%) blur(18px);
+    }
+    .page-main-title, #page-title { color: #1c1c1e; letter-spacing: -0.45px; }
+    .page-header-row { margin-bottom: 18px; }
+    .card, .summary-card, .dash-box, .debt-stat-card, .settings-container > .card {
+      background: var(--ios-surface);
+      border: 1px solid var(--ios-border);
+      border-radius: var(--ios-radius);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.045);
+    }
+    .card:hover, .summary-card:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.07); }
+    .btn-add-primary, .btn-modern-save, .btn-submit, .btn-login {
+      background: var(--ios-blue) !important;
+      border: 0;
+      border-radius: 12px;
+      box-shadow: none;
+      font-weight: 650;
+      transition: background-color .16s ease, transform .16s ease;
+    }
+    .btn-add-primary:hover, .btn-modern-save:hover, .btn-submit:hover, .btn-login:hover {
+      background: #0066d6 !important;
+      box-shadow: none;
+      transform: translateY(-1px);
+    }
+    .btn-modern-cancel, .btn-secondary {
+      border-radius: 12px;
+      background: #e5e5ea;
+      color: #1c1c1e;
+    }
+    .form-control, .filter-select, .modern-field-input, .field-input {
+      font-family: inherit;
+    }
+    .form-control {
+      border: 1px solid var(--ios-border);
+      border-radius: 11px;
+      background: #f9f9fb;
+      box-shadow: none;
+    }
+    .form-control:focus {
+      border-color: rgba(0,122,255,.55);
+      box-shadow: 0 0 0 3px rgba(0,122,255,.12);
+    }
+    .modern-form-group { border-color: var(--ios-border); border-radius: 12px; }
+    .modern-field-row { background: #fff; }
+    .category-chip, .inst-chip, .day-chip, .tab-btn, .savings-filter-tab {
+      border-radius: 10px;
+    }
+    .category-chip.active, .tab-btn.active, .savings-filter-tab.active {
+      background: var(--ios-blue);
+      border-color: var(--ios-blue);
+      box-shadow: none;
+      color: #fff;
+    }
+    .modal-overlay {
+      background: rgba(0,0,0,.36);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    .modal {
+      border: 1px solid rgba(255,255,255,.55);
+      box-shadow: 0 12px 40px rgba(0,0,0,.18);
+    }
+    .modal-header { border-color: var(--ios-border); }
+    .modal-actions, .modal-actions-modern { border-color: var(--ios-border); }
+    .toast { border-radius: 14px; }
+    .user-profile-badge { border-color: var(--ios-border); }
+    @media (max-width: 600px) {
+      #content { background: var(--ios-bg); }
+      .card, .summary-card, .dash-box, .debt-stat-card { border-radius: 14px; }
+      .modal-overlay:not(#modal-confirm) .modal {
+        border-radius: 22px 22px 0 0 !important;
+      }
+      .modal-header { background: rgba(255,255,255,.96); }
+      .modal-actions, .modal-actions-modern { background: rgba(255,255,255,.97); }
+      .btn-add-primary { border-radius: 11px; }
+    }
+
+    /* iPhone style bottom tab bar */
+    #mobile-tab-bar { display: none; }
+    @media (max-width: 768px) {
+      #mobile-tab-bar {
+        position: fixed;
+        z-index: 1200;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 2px;
+        padding: 7px 8px max(7px, env(safe-area-inset-bottom));
+        min-height: 62px;
+        background: rgba(249,249,251,.94);
+        border-top: 1px solid rgba(60,60,67,.16);
+        backdrop-filter: saturate(180%) blur(20px);
+        -webkit-backdrop-filter: saturate(180%) blur(20px);
+      }
+      .mobile-tab {
+        display: flex;
+        min-width: 0;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        padding: 3px 2px;
+        border: 0;
+        border-radius: 12px;
+        background: transparent;
+        color: #8e8e93;
+        font: 500 10px/1.1 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .mobile-tab i { font-size: 19px; line-height: 1; }
+      .mobile-tab.active { color: #007aff; font-weight: 650; }
+      .btn-action-icon[title="Düzenle"] {
+        display: inline-flex;
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        min-height: 40px;
+        align-items: center;
+        justify-content: center;
+        padding: 0 !important;
+        border-radius: 12px;
+        background: #eaf3ff;
+        color: #007aff;
+        font-size: 16px !important;
+        touch-action: manipulation;
+      }
+      .btn-action-icon[title="Düzenle"]:active {
+        background: #d6e8ff;
+        transform: scale(.96);
+      }
+      #content {
+        padding-bottom: calc(84px + env(safe-area-inset-bottom)) !important;
+      }
+      #topbar { left: 0; }
+      #sidebar { z-index: 1300; }
     }
   </style>
 </head>
@@ -3848,6 +4207,21 @@
       </section>
 
     </main>
+
+    <nav id="mobile-tab-bar" aria-label="Ana menü">
+      <button type="button" class="mobile-tab active" data-tab-page="dashboard" onclick="navigate('dashboard')" aria-label="Özet">
+        <i class="fas fa-chart-pie"></i><span>Özet</span>
+      </button>
+      <button type="button" class="mobile-tab" data-tab-page="savings" onclick="navigate('savings')" aria-label="Kasa">
+        <i class="fas fa-wallet"></i><span>Kasa</span>
+      </button>
+      <button type="button" class="mobile-tab" data-tab-page="expenses" onclick="navigate('expenses')" aria-label="Giderler">
+        <i class="fas fa-arrow-down"></i><span>Giderler</span>
+      </button>
+      <button type="button" class="mobile-tab" data-tab-page="cards" onclick="navigate('cards')" aria-label="Kartlarım">
+        <i class="fas fa-credit-card"></i><span>Kartlarım</span>
+      </button>
+    </nav>
   </div>
 
   <!-- ==========================================================================
@@ -3878,7 +4252,7 @@
           <div class="hero-amount-label">Toplam Tutar</div>
           <div class="hero-amount-input-wrap">
             <span class="currency">₺</span>
-            <input type="number" step="0.01" id="expense-total-amount" class="hero-amount-input" placeholder="0,00" required oninput="recalcExpenseMonthly()">
+            <input type="text" inputmode="decimal" id="expense-total-amount" class="hero-amount-input money-input" placeholder="0,00" required oninput="formatMoneyInput(this); recalcExpenseMonthly()" onblur="normalizeMoneyInput(this)">
           </div>
           <div class="live-monthly-pill" id="expense-live-monthly">
             <i class="fas fa-calculator"></i> Aylık Taksit: <strong id="expense-monthly-badge" style="margin-left:3px;font-weight:700;">₺0,00</strong> / ay
@@ -4024,7 +4398,7 @@
           <div class="hero-amount-label" style="color:#0369a1;">Toplam Borç Tutarı</div>
           <div class="hero-amount-input-wrap">
             <span class="currency" style="color:#0284c7;">₺</span>
-            <input type="number" step="0.01" id="card-debt" class="hero-amount-input" style="color:#0c4a6e;" placeholder="0,00" required oninput="onCardDebtInput()">
+            <input type="text" inputmode="decimal" id="card-debt" class="hero-amount-input money-input" style="color:#0c4a6e;" placeholder="0,00" required oninput="formatMoneyInput(this); onCardDebtInput()" onblur="normalizeMoneyInput(this)">
           </div>
           <div class="live-monthly-pill" id="card-min-pill" style="border-color:#bae6fd;color:#0284c7;">
             <i class="fas fa-percent"></i> Asgari: <strong id="card-min-badge" style="margin-left:3px;font-weight:700;">₺0,00</strong> (%20)
@@ -4086,7 +4460,7 @@
             <div class="modern-field-icon"><i class="fas fa-coins"></i></div>
             <div class="modern-field-content">
               <label class="modern-field-label">ASGARİ ÖDEME (₺)</label>
-              <input type="number" step="0.01" id="card-min-payment" class="modern-field-input" placeholder="Otomatik veya özel tutar">
+              <input type="text" inputmode="decimal" id="card-min-payment" class="modern-field-input money-input" placeholder="Otomatik veya özel tutar" oninput="formatMoneyInput(this)" onblur="normalizeMoneyInput(this)">
             </div>
           </div>
           <div class="modern-field-divider"></div>
@@ -4175,7 +4549,7 @@
           <div class="hero-amount-label" style="color:#15803d;">Gelir Tutarı</div>
           <div class="hero-amount-input-wrap">
             <span class="currency" style="color:#16a34a;">₺</span>
-            <input type="number" step="0.01" id="income-amount" class="hero-amount-input" style="color:#14532d;" placeholder="0,00" required>
+            <input type="text" inputmode="decimal" id="income-amount" class="hero-amount-input money-input" style="color:#14532d;" placeholder="0,00" required oninput="formatMoneyInput(this)" onblur="normalizeMoneyInput(this)">
           </div>
         </div>
 
@@ -4285,9 +4659,9 @@
           <div class="hero-amount-input-wrap">
             <span class="currency" id="debt-currency-symbol" style="color:#059669;">₺</span>
             <!-- Normal tutar input -->
-            <input type="number" step="0.01" id="debt-amount" class="hero-amount-input" placeholder="0,00" style="color:#064e3b;">
+            <input type="text" inputmode="decimal" id="debt-amount" class="hero-amount-input money-input" placeholder="0,00" style="color:#064e3b;" oninput="formatMoneyInput(this)" onblur="normalizeMoneyInput(this)">
             <!-- Taksitli tutar input (gizli başlar) -->
-            <input type="number" step="0.01" id="debt-total-amount" class="hero-amount-input" placeholder="0,00" style="display:none;color:#064e3b;" oninput="recalcDebtInstallment()">
+            <input type="text" inputmode="decimal" id="debt-total-amount" class="hero-amount-input money-input" placeholder="0,00" style="display:none;color:#064e3b;" oninput="formatMoneyInput(this); recalcDebtInstallment()" onblur="normalizeMoneyInput(this)">
           </div>
           <div class="live-monthly-pill" id="debt-live-monthly-pill" style="display:none;border-color:#a7f3d0;color:#047857;">
             <i class="fas fa-calculator"></i> Aylık: <strong id="debt-live-monthly-badge" style="margin-left:3px;font-weight:700;">₺0,00</strong> / ay
@@ -4366,7 +4740,7 @@
                 <div class="modern-field-icon"><i class="fas fa-coins"></i></div>
                 <div class="modern-field-content">
                   <label class="modern-field-label">AYLIK TAKSİT TUTARI (₺)</label>
-                  <input type="number" step="0.01" id="debt-installment-amount" class="modern-field-input" placeholder="Otomatik hesaplanır">
+                  <input type="text" inputmode="decimal" id="debt-installment-amount" class="modern-field-input money-input" placeholder="Otomatik hesaplanır" oninput="formatMoneyInput(this)" onblur="normalizeMoneyInput(this)">
                 </div>
               </div>
             </div>
@@ -4439,18 +4813,7 @@
           </div>
         </div>
 
-        <!-- 3. VARLIK ARAMA VE SEÇİMİ -->
-        <div class="saving-asset-search" style="margin-bottom:10px;">
-          <label class="modern-field-label" for="saving-asset-search" style="margin-bottom:4px;">VARLIK ARA VE SEÇ</label>
-          <div style="display:flex;align-items:center;gap:8px;border:1px solid #dbe4ef;border-radius:10px;background:#fff;padding:0 10px;">
-            <i class="fas fa-search" style="color:#64748b;font-size:12px;"></i>
-            <input type="search" id="saving-asset-search" class="modern-field-input" style="padding:10px 0;" placeholder="Örn: gram altın, THYAO, dolar, Bitcoin" autocomplete="off" oninput="filterSavingAssets(this.value)" onfocus="filterSavingAssets(this.value)">
-            <button type="button" aria-label="Aramayı temizle" onclick="clearSavingAssetSearch()" style="border:0;background:transparent;color:#94a3b8;padding:6px;cursor:pointer;"><i class="fas fa-times"></i></button>
-          </div>
-          <div id="saving-asset-results" style="display:none;margin-top:6px;max-height:180px;overflow-y:auto;border:1px solid #e2e8f0;border-radius:10px;background:#fff;"></div>
-        </div>
-
-        <!-- 4. CANLI PİYASA BİLGİ & DOLDURMA KUTUSU -->
+        <!-- 3. CANLI PİYASA BİLGİ & DOLDURMA KUTUSU -->
         <div id="saving-live-hero-box" style="background:linear-gradient(135deg,#f0fdf4 0%,#ecfdf5 100%);border:1.5px dashed #a7f3d0;border-radius:12px;padding:8px 12px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
           <div>
             <div style="font-size:9.5px;font-weight:700;color:#065f46;text-transform:uppercase;">CANLI PİYASA FİYATI</div>
@@ -4480,7 +4843,7 @@
               <div class="modern-field-icon"><i class="fas fa-cubes"></i></div>
               <div class="modern-field-content">
                 <label class="modern-field-label">MİKTAR *</label>
-                <input type="number" step="any" id="saving-amount" class="modern-field-input" placeholder="10" required oninput="onSavingNameOrAmountInput()">
+                <input type="text" inputmode="decimal" id="saving-amount" class="modern-field-input money-input" placeholder="10" required oninput="formatMoneyInput(this); onSavingNameOrAmountInput()" onblur="normalizeMoneyInput(this)">
               </div>
             </div>
             <div class="modern-field-row">
@@ -4499,14 +4862,14 @@
               <div class="modern-field-icon"><i class="fas fa-shopping-cart"></i></div>
               <div class="modern-field-content">
                 <label class="modern-field-label">BİRİM ALIŞ (₺)</label>
-                <input type="number" step="any" id="saving-purchase-price" class="modern-field-input" placeholder="2800" oninput="onSavingNameOrAmountInput()">
+                <input type="text" inputmode="decimal" id="saving-purchase-price" class="modern-field-input money-input" placeholder="2.800,00" oninput="formatMoneyInput(this); onSavingNameOrAmountInput()" onblur="normalizeMoneyInput(this)">
               </div>
             </div>
             <div class="modern-field-row">
               <div class="modern-field-icon" style="background:#eff6ff;color:#2563eb;"><i class="fas fa-coins"></i></div>
               <div class="modern-field-content">
                 <label class="modern-field-label" style="color:#2563eb;">GÜNCEL TOPLAM (₺) *</label>
-                <input type="number" step="any" id="saving-current-value" class="modern-field-input" placeholder="59600" required style="color:#2563eb;font-weight:700;">
+                <input type="text" inputmode="decimal" id="saving-current-value" class="modern-field-input money-input" placeholder="59.600,00" required style="color:#2563eb;font-weight:700;" oninput="formatMoneyInput(this)" onblur="normalizeMoneyInput(this)">
               </div>
             </div>
           </div>
@@ -4529,10 +4892,10 @@
           </div>
         </div>
 
-        <!-- MODAL AKSİYONLARI (Touch-Friendly) -->
-        <div class="modal-actions" style="margin-top:0;padding-bottom:14px;">
-          <button type="button" class="btn-secondary" style="border-radius:10px;padding:9px 16px;font-size:13px;" onclick="closeModal('modal-saving')">Vazgeç</button>
-          <button type="submit" class="btn-submit" style="border-radius:10px;padding:9px 20px;font-size:13px;font-weight:700;"><i class="fas fa-check"></i> Kaydet</button>
+        <!-- Diğer veri giriş pencereleriyle aynı, sabit işlem alanı -->
+        <div class="modal-actions-modern">
+          <button type="button" class="btn-modern-cancel" onclick="closeModal('modal-saving')">İptal</button>
+          <button type="submit" class="btn-modern-save" style="background:linear-gradient(135deg,#047857,#10b981);"><i class="fas fa-check-circle"></i> Birikimi Kaydet</button>
         </div>
       </form>
     </div>
@@ -4727,6 +5090,57 @@
     function formatMoney(amount) {
       const num = Number(amount) || 0;
       return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(num);
+    }
+
+    function parseMoneyInput(value) {
+      let text = String(value ?? '').trim();
+      if (!text) return 0;
+      // Türkçe biçim: 1.234,56. Nokta ondalık olarak yazılmışsa onu da kabul et.
+      if (text.includes(',')) text = text.replace(/\./g, '').replace(',', '.');
+      else {
+        const dots = text.match(/\./g) || [];
+        const lastDot = text.lastIndexOf('.');
+        const digitsAfterDot = lastDot >= 0 ? text.slice(lastDot + 1).replace(/\D/g, '').length : 0;
+        // "1.000" uygulamanın kendi binlik gösterimidir; "1.5" ise ondalık giriş kabul edilir.
+        if (dots.length > 1 || (dots.length === 1 && digitsAfterDot === 3)) text = text.replace(/\./g, '');
+      }
+      const number = Number(text.replace(/[^0-9.-]/g, ''));
+      return Number.isFinite(number) ? number : 0;
+    }
+
+    function moneyInputDisplay(value, alwaysDecimals = false) {
+      const raw = String(value ?? '').trim();
+      if (!raw) return '';
+      const numeric = parseMoneyInput(raw);
+      const commaIndex = Math.max(raw.lastIndexOf(','), raw.lastIndexOf('.'));
+      const hasFraction = commaIndex >= 0 && raw.slice(commaIndex + 1).replace(/\D/g, '').length > 0;
+      const digits = hasFraction ? raw.slice(commaIndex + 1).replace(/\D/g, '').slice(0, 2) : '';
+      const integer = Math.trunc(Math.abs(numeric)).toLocaleString('tr-TR');
+      const sign = numeric < 0 ? '-' : '';
+      if (alwaysDecimals) return sign + integer + ',' + String(Math.round((Math.abs(numeric) % 1) * 100)).padStart(2, '0');
+      return sign + integer + (commaIndex >= 0 ? ',' + digits : '');
+    }
+
+    function formatMoneyInput(input) {
+      const end = input.selectionStart || input.value.length;
+      const digitsBefore = input.value.slice(0, end).replace(/\D/g, '').length;
+      input.value = moneyInputDisplay(input.value, false);
+      let seen = 0;
+      let cursor = input.value.length;
+      for (let i = 0; i < input.value.length; i++) {
+        if (/\d/.test(input.value[i])) seen++;
+        if (seen >= digitsBefore) { cursor = i + 1; break; }
+      }
+      requestAnimationFrame(() => input.setSelectionRange(cursor, cursor));
+    }
+
+    function normalizeMoneyInput(input) {
+      if (input.value.trim()) input.value = moneyInputDisplay(input.value, true);
+    }
+
+    function setMoneyInputValue(id, value) {
+      const input = document.getElementById(id);
+      if (input) input.value = value === null || value === undefined || value === '' ? '' : moneyInputDisplay(value, true);
     }
 
     function formatDate(dateStr) {
@@ -5033,6 +5447,12 @@
       // Update sidebar active classes
       document.querySelectorAll('.sidebar-item').forEach(item => {
         item.classList.toggle('active', item.dataset.page === pageId);
+      });
+
+      document.querySelectorAll('.mobile-tab').forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.tabPage === pageId);
+        if (tab.dataset.tabPage === pageId) tab.setAttribute('aria-current', 'page');
+        else tab.removeAttribute('aria-current');
       });
 
       // Update active page content
@@ -5439,7 +5859,7 @@
     }
 
     function recalcExpenseMonthly() {
-      const total = parseFloat(document.getElementById('expense-total-amount').value) || 0;
+      const total = parseMoneyInput(document.getElementById('expense-total-amount').value);
       const count = parseInt(document.getElementById('expense-total-installments').value) || 1;
       const monthly = count > 0 ? (total / count) : 0;
       document.getElementById('expense-monthly-amount').value = monthly.toFixed(2);
@@ -5458,7 +5878,7 @@
         document.getElementById('expense-id').value = expense.id;
         document.getElementById('expense-title').value = expense.title;
         document.getElementById('expense-desc').value = expense.description || '';
-        document.getElementById('expense-total-amount').value = expense.total_amount;
+        setMoneyInputValue('expense-total-amount', expense.total_amount);
         document.getElementById('expense-total-installments').value = expense.total_installments;
         document.getElementById('expense-monthly-amount').value = expense.installment_amount;
         document.getElementById('expense-paid-installments').value = expense.paid_installments || 0;
@@ -5494,9 +5914,9 @@
       const body = {
         title: document.getElementById('expense-title').value.trim(),
         description: document.getElementById('expense-desc').value.trim(),
-        total_amount: parseFloat(document.getElementById('expense-total-amount').value) || 0,
+        total_amount: parseMoneyInput(document.getElementById('expense-total-amount').value),
         total_installments: parseInt(document.getElementById('expense-total-installments').value) || 1,
-        installment_amount: parseFloat(document.getElementById('expense-monthly-amount').value) || 0,
+        installment_amount: parseMoneyInput(document.getElementById('expense-monthly-amount').value),
         paid_installments: parseInt(document.getElementById('expense-paid-installments').value) || 0,
         start_date: document.getElementById('expense-start-date').value || null,
         due_day: parseInt(document.getElementById('expense-due-day').value) || 1,
@@ -5685,14 +6105,14 @@
     }
 
     function onCardDebtInput() {
-      const debt = parseFloat(document.getElementById('card-debt').value) || 0;
+      const debt = parseMoneyInput(document.getElementById('card-debt').value);
       const minInput = document.getElementById('card-min-payment');
       const badgeEl = document.getElementById('card-min-badge');
       if (debt > 0) {
         const minVal = (debt * 0.20).toFixed(2);
         if (badgeEl) badgeEl.textContent = formatMoney(minVal);
         if (minInput && (!minInput.value || minInput.dataset.autoCalc === '1')) {
-          minInput.value = minVal;
+          setMoneyInputValue('card-min-payment', minVal);
           minInput.dataset.autoCalc = '1';
         }
       } else {
@@ -5710,8 +6130,8 @@
         document.getElementById('card-id').value = card.id;
         document.getElementById('card-name').value = card.card_name;
         document.getElementById('card-bank').value = card.bank_name || '';
-        document.getElementById('card-debt').value = card.debt_amount;
-        document.getElementById('card-min-payment').value = card.minimum_payment || '';
+        setMoneyInputValue('card-debt', card.debt_amount);
+        setMoneyInputValue('card-min-payment', card.minimum_payment);
         document.getElementById('card-due-date').value = card.due_date || '';
         document.getElementById('card-statement-date').value = card.statement_date || '';
         document.getElementById('card-period-month').value = card.period_month || (now.getMonth() + 1);
@@ -5747,8 +6167,8 @@
       const body = {
         card_name: document.getElementById('card-name').value.trim(),
         bank_name: document.getElementById('card-bank').value.trim(),
-        debt_amount: parseFloat(document.getElementById('card-debt').value) || 0,
-        minimum_payment: parseFloat(document.getElementById('card-min-payment').value) || null,
+        debt_amount: parseMoneyInput(document.getElementById('card-debt').value),
+        minimum_payment: parseMoneyInput(document.getElementById('card-min-payment').value) || null,
         due_date: document.getElementById('card-due-date').value || null,
         statement_date: document.getElementById('card-statement-date').value || null,
         period_month: parseInt(document.getElementById('card-period-month').value),
@@ -5950,7 +6370,7 @@
         titleEl.textContent = 'Geliri Düzenle';
         document.getElementById('income-id').value = income.id;
         document.getElementById('income-source').value = income.source;
-        document.getElementById('income-amount').value = income.amount;
+        setMoneyInputValue('income-amount', income.amount);
         document.getElementById('income-is-recurring').checked = !!income.is_recurring;
         document.getElementById('income-recurring-day').value = income.recurring_day || 1;
         document.getElementById('income-desc').value = income.description || '';
@@ -5985,7 +6405,7 @@
       const isRecurring = document.getElementById('income-is-recurring').checked ? 1 : 0;
       const body = {
         source: document.getElementById('income-source').value.trim(),
-        amount: parseFloat(document.getElementById('income-amount').value) || 0,
+        amount: parseMoneyInput(document.getElementById('income-amount').value),
         is_recurring: isRecurring,
         recurring_day: isRecurring ? (parseInt(document.getElementById('income-recurring-day').value) || 1) : null,
         description: document.getElementById('income-desc').value.trim() || null
@@ -6128,11 +6548,10 @@
     }
 
     function recalcDebtInstallment() {
-      const total = parseFloat(document.getElementById('debt-total-amount').value) || 0;
+      const total = parseMoneyInput(document.getElementById('debt-total-amount').value);
       const count = parseInt(document.getElementById('debt-total-installments').value) || 1;
       const monthly = count > 0 ? (total / count).toFixed(2) : '0.00';
-      const instInput = document.getElementById('debt-installment-amount');
-      if (instInput) instInput.value = monthly;
+        setMoneyInputValue('debt-installment-amount', monthly);
       const badge = document.getElementById('debt-live-monthly-badge');
       if (badge) badge.textContent = formatMoney(monthly);
     }
@@ -6193,13 +6612,13 @@
         document.getElementById('debt-is-installment').checked = isInst;
         toggleDebtInstallment();
         if (isInst) {
-          document.getElementById('debt-total-amount').value = debt.amount;
+          setMoneyInputValue('debt-total-amount', debt.amount);
           document.getElementById('debt-total-installments').value = debt.total_installments || 1;
-          document.getElementById('debt-installment-amount').value = debt.installment_amount || '';
+          setMoneyInputValue('debt-installment-amount', debt.installment_amount);
           document.getElementById('debt-paid-installments').value = debt.paid_installments || 0;
           selectDebtInstallment(debt.total_installments || 12);
         } else {
-          document.getElementById('debt-amount').value = debt.amount;
+          setMoneyInputValue('debt-amount', debt.amount);
         }
       } else {
         titleEl.textContent = isReceivable ? 'Yeni Alacak Ekle' : 'Yeni Verecek Ekle';
@@ -6221,9 +6640,9 @@
 
       let body;
       if (isInst) {
-        const totalAmt = parseFloat(document.getElementById('debt-total-amount').value) || 0;
+        const totalAmt = parseMoneyInput(document.getElementById('debt-total-amount').value);
         const totalInst = parseInt(document.getElementById('debt-total-installments').value) || 1;
-        const instAmt = parseFloat(document.getElementById('debt-installment-amount').value) || (totalAmt / totalInst);
+        const instAmt = parseMoneyInput(document.getElementById('debt-installment-amount').value) || (totalAmt / totalInst);
         body = {
           person_name: document.getElementById('debt-person-name').value.trim(),
           amount: totalAmt,
@@ -6237,7 +6656,7 @@
       } else {
         body = {
           person_name: document.getElementById('debt-person-name').value.trim(),
-          amount: parseFloat(document.getElementById('debt-amount').value) || 0,
+          amount: parseMoneyInput(document.getElementById('debt-amount').value),
           due_date: document.getElementById('debt-due-date').value || null,
           description: document.getElementById('debt-desc').value.trim() || null,
           is_installment: 0
@@ -6548,7 +6967,8 @@
       document.getElementById('saving-unit').value = asset.unit;
       const search = document.getElementById('saving-asset-search');
       if (search) search.value = asset.name;
-      document.getElementById('saving-asset-results').style.display = 'none';
+      const assetResults = document.getElementById('saving-asset-results');
+      if (assetResults) assetResults.style.display = 'none';
       selectSavingTypeModal(asset.type);
       refreshSavingQuote(false);
     }
@@ -6562,10 +6982,10 @@
         titleEl.textContent = 'Birikimi Düzenle';
         document.getElementById('saving-id').value = saving.id;
         document.getElementById('saving-name').value = saving.name;
-        document.getElementById('saving-amount').value = saving.amount;
+        setMoneyInputValue('saving-amount', saving.amount);
         document.getElementById('saving-unit').value = saving.unit || '';
-        document.getElementById('saving-purchase-price').value = saving.purchase_price || '';
-        document.getElementById('saving-current-value').value = saving.live_total_value || saving.current_value || '';
+        setMoneyInputValue('saving-purchase-price', saving.purchase_price);
+        setMoneyInputValue('saving-current-value', saving.live_total_value || saving.current_value);
         document.getElementById('saving-notes').value = saving.notes || '';
         selectSavingTypeModal(saving.type || 'altin');
       } else {
@@ -6586,8 +7006,8 @@
       const type = document.getElementById('saving-type').value;
       const name = (document.getElementById('saving-name').value || '').toLowerCase();
       const unit = (document.getElementById('saving-unit').value || '').toUpperCase();
-      const amount = parseFloat(document.getElementById('saving-amount').value) || 0;
-      const buyPrice = parseFloat(document.getElementById('saving-purchase-price').value) || 0;
+      const amount = parseMoneyInput(document.getElementById('saving-amount').value);
+      const buyPrice = parseMoneyInput(document.getElementById('saving-purchase-price').value);
       const liveRateEl = document.getElementById('saving-modal-live-rate');
       const profitBadge = document.getElementById('saving-modal-profit-badge');
 
@@ -6627,14 +7047,14 @@
       if (livePrice > 0 && amount > 0) {
         const estTotal = amount * livePrice;
         if (!curValInput.value || curValInput.dataset.autoFilled === '1') {
-          curValInput.value = Math.round(estTotal * 100) / 100;
+          setMoneyInputValue('saving-current-value', Math.round(estTotal * 100) / 100);
           curValInput.dataset.autoFilled = '1';
         }
       }
 
       // Kâr/Zarar Tahmini Önizleme
       if (profitBadge) {
-        const curVal = parseFloat(curValInput.value) || (amount * livePrice);
+        const curVal = parseMoneyInput(curValInput.value) || (amount * livePrice);
         const totalCost = amount * buyPrice;
         if (buyPrice > 0 && curVal > 0) {
           const diff = curVal - totalCost;
@@ -6693,10 +7113,10 @@
 
     function applyLivePriceToModal() {
       if (window._modalEstimatedLivePrice) {
-        const amount = parseFloat(document.getElementById('saving-amount').value) || 1;
+        const amount = parseMoneyInput(document.getElementById('saving-amount').value) || 1;
         const total = amount * window._modalEstimatedLivePrice;
         const curValInput = document.getElementById('saving-current-value');
-        curValInput.value = Math.round(total * 100) / 100;
+        setMoneyInputValue('saving-current-value', Math.round(total * 100) / 100);
         curValInput.dataset.autoFilled = '1';
         onSavingNameOrAmountInput();
         showToast('Canlı piyasa toplam değeri uygulandı.');
@@ -6709,10 +7129,10 @@
       const body = {
         type: document.getElementById('saving-type').value,
         name: document.getElementById('saving-name').value.trim(),
-        amount: parseFloat(document.getElementById('saving-amount').value) || 0,
+        amount: parseMoneyInput(document.getElementById('saving-amount').value),
         unit: document.getElementById('saving-unit').value.trim() || null,
-        purchase_price: parseFloat(document.getElementById('saving-purchase-price').value) || null,
-        current_value: parseFloat(document.getElementById('saving-current-value').value) || 0,
+        purchase_price: parseMoneyInput(document.getElementById('saving-purchase-price').value) || null,
+        current_value: parseMoneyInput(document.getElementById('saving-current-value').value),
         notes: document.getElementById('saving-notes').value.trim() || null
       };
 
