@@ -1012,6 +1012,14 @@
       letter-spacing: 0.5px;
       margin-bottom: 3px;
     }
+    .hero-amount-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      margin-bottom: 6px;
+      gap: 8px;
+    }
     .hero-amount-toggle-wrap {
       display: inline-flex;
       align-items: center;
@@ -1020,7 +1028,7 @@
       padding: 2px;
       border-radius: 20px;
       gap: 2px;
-      margin-bottom: 4px;
+      margin-left: auto;
     }
     .amount-mode-btn {
       background: transparent;
@@ -1028,16 +1036,23 @@
       font-size: 10.5px;
       font-weight: 700;
       color: #065f46;
-      padding: 3px 10px;
+      padding: 3px 9px;
       border-radius: 16px;
       cursor: pointer;
       transition: all 0.2s ease;
       line-height: 1.2;
+      white-space: nowrap;
     }
     .amount-mode-btn.active {
       background: #047857;
       color: #ffffff;
       box-shadow: 0 1px 4px rgba(4, 120, 87, 0.25);
+    }
+    .expense-installment-split-row {
+      display: grid !important;
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: 8px !important;
+      margin-top: 6px !important;
     }
     .hero-amount-input-wrap {
       display: flex;
@@ -3107,27 +3122,45 @@
         overflow: visible !important;
       }
       #modal-expense .modal-hero-amount {
-        display: grid;
-        grid-template-columns: 1fr auto;
-        align-items: center;
-        column-gap: 8px;
-        text-align: left;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
         padding: 7px 10px;
+        margin-bottom: 6px;
       }
-      #modal-expense .hero-amount-label,
-      #modal-expense .hero-amount-toggle-wrap {
-        grid-column: 1;
-        margin-bottom: 2px;
+      #modal-expense .hero-amount-top-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        margin-bottom: 3px;
       }
       #modal-expense .hero-amount-input-wrap {
-        grid-column: 1;
-        justify-content: flex-start;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+      }
+      #modal-expense .hero-amount-input {
+        font-size: 26px !important;
+        font-weight: 800;
+        text-align: center;
+        width: 100%;
+        max-width: 220px;
+      }
+      #modal-expense .hero-amount-input-wrap .currency {
+        font-size: 24px;
+        font-weight: 800;
       }
       #modal-expense .live-monthly-pill {
-        grid-column: 2;
-        grid-row: 1 / span 2;
         margin: 0;
+        font-size: 10px;
+        padding: 2.5px 7px;
         white-space: nowrap;
+      }
+      #modal-expense .hero-amount-toggle-wrap {
+        margin: 0 0 0 auto;
       }
       #modal-expense .category-chips-scroll {
         display: flex;
@@ -4713,20 +4746,22 @@
 
         <!-- 1. HERO AMOUNT BOX -->
         <div class="modal-hero-amount">
-          <div class="hero-amount-toggle-wrap">
-            <button type="button" class="amount-mode-btn active" id="btn-expense-mode-total" onclick="setExpenseAmountMode('total')">
-              Toplam Tutar
-            </button>
-            <button type="button" class="amount-mode-btn" id="btn-expense-mode-monthly" onclick="setExpenseAmountMode('monthly')">
-              Aylık Taksit
-            </button>
+          <div class="hero-amount-top-row">
+            <div class="live-monthly-pill" id="expense-live-monthly">
+              <i class="fas fa-calculator"></i> <span id="expense-live-monthly-text">Aylık Taksit:</span> <strong id="expense-monthly-badge" style="margin-left:3px;font-weight:700;">₺0,00</strong>
+            </div>
+            <div class="hero-amount-toggle-wrap">
+              <button type="button" class="amount-mode-btn active" id="btn-expense-mode-total" onclick="setExpenseAmountMode('total')">
+                Toplam
+              </button>
+              <button type="button" class="amount-mode-btn" id="btn-expense-mode-monthly" onclick="setExpenseAmountMode('monthly')">
+                Aylık
+              </button>
+            </div>
           </div>
           <div class="hero-amount-input-wrap">
             <span class="currency">₺</span>
             <input type="text" inputmode="decimal" id="expense-total-amount" class="hero-amount-input money-input" placeholder="0,00" required oninput="formatMoneyInput(this); recalcExpenseMonthly()" onblur="normalizeMoneyInput(this)">
-          </div>
-          <div class="live-monthly-pill" id="expense-live-monthly">
-            <i class="fas fa-calculator"></i> <span id="expense-live-monthly-text">Aylık Taksit:</span> <strong id="expense-monthly-badge" style="margin-left:3px;font-weight:700;">₺0,00</strong>
           </div>
           <input type="hidden" id="expense-monthly-amount" value="0">
         </div>
@@ -4775,7 +4810,7 @@
             <button type="button" class="inst-chip active" data-val="12" onclick="selectExpenseInstallment(12)">12 Ay</button>
             <button type="button" class="inst-chip" data-val="24" onclick="selectExpenseInstallment(24)">24 Ay</button>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;">
+          <div class="expense-installment-split-row">
             <div class="modern-form-group" style="margin-bottom:0;">
               <div class="modern-field-row" style="padding:6px 10px;">
                 <div class="modern-field-content">
@@ -5561,80 +5596,109 @@
       return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(num);
     }
 
-    function moneyInputParts(value) {
-      const raw = String(value ?? '').trim();
-      if (!raw) return { raw: '', sign: '', integer: '', fraction: '', separatorIndex: -1 };
-
-      const commaIndex = raw.lastIndexOf(',');
-      const dots = raw.match(/\./g) || [];
-      const lastDot = raw.lastIndexOf('.');
-      const digitsAfterDot = lastDot >= 0 ? raw.slice(lastDot + 1).replace(/\D/g, '').length : 0;
-      // A single dot with one or two following digits can be a decimal separator.
-      // Dots in values such as 1.000 and 10.0000 are thousands separators.
-      const separatorIndex = commaIndex >= 0 ? commaIndex : (dots.length === 1 && digitsAfterDot <= 2 ? lastDot : -1);
-      const integerRaw = separatorIndex >= 0 ? raw.slice(0, separatorIndex) : raw;
-      const fractionRaw = separatorIndex >= 0 ? raw.slice(separatorIndex + 1) : '';
-      const integer = integerRaw.replace(/\D/g, '').replace(/^0+(?=\d)/, '') || '0';
-
-      return {
-        raw,
-        sign: /^\s*-/.test(raw) ? '-' : '',
-        integer,
-        fraction: fractionRaw.replace(/\D/g, '').slice(0, 2),
-        separatorIndex
-      };
-    }
-
     function parseMoneyInput(value) {
-      const parts = moneyInputParts(value);
-      if (!parts.raw) return 0;
-      const number = Number(`${parts.sign}${parts.integer}.${parts.fraction || '0'}`);
-      return Number.isFinite(number) ? number : 0;
-    }
-
-    function moneyInputDisplay(value, alwaysDecimals = false) {
-      const parts = moneyInputParts(value);
-      if (!parts.raw) return '';
-      const integer = parts.integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-      if (alwaysDecimals) return `${parts.sign}${integer},${parts.fraction.padEnd(2, '0')}`;
-      return `${parts.sign}${integer}${parts.separatorIndex >= 0 ? ',' + parts.fraction : ''}`;
+      if (value === null || value === undefined) return 0;
+      const str = String(value).trim();
+      if (!str) return 0;
+      if (str.includes(',')) {
+        const parts = str.split(',');
+        const intPart = parts[0].replace(/\D/g, '') || '0';
+        const decPart = (parts[1] || '').replace(/\D/g, '').slice(0, 2);
+        const num = Number(intPart + '.' + (decPart || '0'));
+        return Number.isFinite(num) ? num : 0;
+      }
+      const num = Number(str.replace(/\D/g, ''));
+      return Number.isFinite(num) ? num : 0;
     }
 
     function formatMoneyInput(input) {
-      const raw = input.value;
-      const caret = input.selectionStart ?? raw.length;
-      const parts = moneyInputParts(raw);
-      const isFractionCaret = parts.separatorIndex >= 0 && caret > parts.separatorIndex;
-      const fractionDigitsBeforeCaret = isFractionCaret
-        ? raw.slice(parts.separatorIndex + 1, caret).replace(/\D/g, '').length
-        : 0;
-      const integerDigitsBeforeCaret = raw.slice(0, isFractionCaret ? parts.separatorIndex : caret).replace(/\D/g, '').length;
+      let raw = input.value;
+      if (!raw) { input.value = ''; return; }
 
-      input.value = moneyInputDisplay(raw, false);
-      let cursor;
-      if (parts.separatorIndex >= 0 && isFractionCaret) {
-        cursor = input.value.indexOf(',') + 1 + fractionDigitsBeforeCaret;
+      const caret = input.selectionStart ?? raw.length;
+      const charBeforeCaret = raw[caret - 1];
+
+      // If user typed dot '.' on keypad and there is no comma yet, convert typed dot to decimal comma ','
+      if (charBeforeCaret === '.' && !raw.includes(',')) {
+        raw = raw.slice(0, caret - 1) + ',' + raw.slice(caret);
+      }
+
+      const digitsBeforeCaret = raw.slice(0, caret).replace(/\D/g, '').length;
+      const hasComma = raw.includes(',');
+      const isCaretAfterComma = hasComma && caret > raw.indexOf(',');
+
+      let intRaw, decRaw;
+      if (hasComma) {
+        const commaIdx = raw.indexOf(',');
+        intRaw = raw.slice(0, commaIdx).replace(/\D/g, '');
+        decRaw = raw.slice(commaIdx + 1).replace(/\D/g, '').slice(0, 2);
+      } else {
+        intRaw = raw.replace(/\D/g, '');
+        decRaw = null;
+      }
+
+      intRaw = intRaw.replace(/^0+(?=\d)/, '');
+
+      if (!intRaw && decRaw === null) {
+        input.value = '';
+        return;
+      }
+
+      const intFormatted = (intRaw || '0').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+      const formatted = hasComma ? (intFormatted + ',' + (decRaw !== null ? decRaw : '')) : intFormatted;
+
+      input.value = formatted;
+
+      let newCaret = 0;
+      if (hasComma && isCaretAfterComma) {
+        const fracDigitsBefore = raw.slice(raw.indexOf(',') + 1, caret).replace(/\D/g, '').length;
+        newCaret = formatted.indexOf(',') + 1 + Math.min(decRaw ? decRaw.length : 0, fracDigitsBefore);
       } else {
         let seen = 0;
-        cursor = 0;
-        for (let i = 0; i < input.value.length; i++) {
-          if (/\d/.test(input.value[i])) seen++;
-          if (seen >= integerDigitsBeforeCaret) {
-            cursor = i + 1;
+        newCaret = formatted.length;
+        for (let i = 0; i < formatted.length; i++) {
+          if (/\d/.test(formatted[i])) seen++;
+          if (seen >= digitsBeforeCaret) {
+            newCaret = i + 1;
             break;
           }
         }
       }
-      requestAnimationFrame(() => input.setSelectionRange(cursor, cursor));
+      requestAnimationFrame(() => {
+        if (input.setSelectionRange) input.setSelectionRange(newCaret, newCaret);
+      });
     }
 
     function normalizeMoneyInput(input) {
-      if (input.value.trim()) input.value = moneyInputDisplay(input.value, true);
+      const val = (input.value || '').trim();
+      if (!val) return;
+      if (val.endsWith(',')) {
+        input.value = val.slice(0, -1);
+        return;
+      }
+      if (val.includes(',')) {
+        const parts = val.split(',');
+        if (parts[1].length === 1) {
+          input.value = parts[0] + ',' + parts[1] + '0';
+        }
+      }
     }
 
     function setMoneyInputValue(id, value) {
       const input = document.getElementById(id);
-      if (input) input.value = value === null || value === undefined || value === '' ? '' : moneyInputDisplay(value, true);
+      if (!input) return;
+      if (value === null || value === undefined || value === '') {
+        input.value = '';
+        return;
+      }
+      const num = Number(value) || 0;
+      if (num % 1 !== 0) {
+        const intPart = Math.floor(Math.abs(num)).toLocaleString('tr-TR');
+        const decPart = String(Math.round((Math.abs(num) % 1) * 100)).padStart(2, '0');
+        input.value = (num < 0 ? '-' : '') + intPart + ',' + decPart;
+      } else {
+        input.value = Math.abs(num).toLocaleString('tr-TR');
+      }
     }
 
     function formatDate(dateStr) {
