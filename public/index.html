@@ -1431,12 +1431,122 @@
     .page-section[data-page="cards"] {
       max-width: 860px;
     }
+    #content.combined-expenses-view .page-section[data-page="cards"].combined-section-hidden,
+    #content.combined-expenses-view .page-section[data-page="expenses"].combined-section-hidden {
+      display: none !important;
+    }
+    #content.combined-expenses-view .page-section[data-page="cards"] .page-header-row {
+      justify-content: flex-end;
+    }
+    #content.combined-expenses-view .page-section[data-page="cards"] .page-header-row .page-main-title {
+      display: none;
+    }
+    .expense-view-switch {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 3px;
+      padding: 4px;
+      margin: 0 0 14px;
+      border: 1px solid rgba(60,60,67,.08);
+      border-radius: 13px;
+      background: #e5e5ea;
+    }
+    .expense-view-tabs {
+      display: grid;
+      flex: 1;
+      min-width: 0;
+      grid-template-columns: 1fr 1fr;
+      gap: 3px;
+    }
+    .expense-view-actions { flex: 0 0 auto; margin-left: 5px; }
+    .expense-view-actions .btn-add-primary {
+      min-height: 38px;
+      padding: 7px 10px;
+      border-radius: 10px;
+      white-space: nowrap;
+      font-size: 11px;
+    }
+    .expense-view-tab {
+      min-height: 40px;
+      border: 0;
+      border-radius: 10px;
+      background: transparent;
+      color: #636366;
+      font: 600 13px/1.2 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      cursor: pointer;
+      transition: background .16s ease, color .16s ease, box-shadow .16s ease;
+    }
+    .expense-view-tab.active {
+      background: #fff;
+      color: #1c1c1e;
+      box-shadow: 0 1px 4px rgba(0,0,0,.12);
+    }
+    .records-toolbar, .filter-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .record-status-tabs {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      min-width: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+    .record-status-tabs::-webkit-scrollbar { display: none; }
+    .record-status-tab {
+      flex: 0 0 auto;
+      min-height: 34px;
+      padding: 6px 12px;
+      border: 1px solid rgba(60,60,67,.12);
+      border-radius: 18px;
+      color: #636366;
+      background: #fff;
+      font: 600 12px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      cursor: pointer;
+    }
+    .record-status-tab.active {
+      color: #fff;
+      background: #007aff;
+      border-color: #007aff;
+    }
+    .record-sort-control, .record-sort-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      flex: 0 0 auto;
+      color: #8e8e93;
+    }
+    .record-sort-control select, .record-sort-group select {
+      max-width: 145px;
+      min-height: 34px;
+      padding: 5px 9px;
+      border: 1px solid rgba(60,60,67,.12);
+      border-radius: 10px;
+      background: #fff;
+      color: #3a3a3c;
+      font: 600 12px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
 
     .cards-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 14px;
+      max-height: 62vh;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 2px 4px 8px 1px;
+      overscroll-behavior-y: contain;
+      scrollbar-width: thin;
+      scrollbar-color: #c7c7cc transparent;
     }
+    .cards-grid::-webkit-scrollbar { width: 5px; }
+    .cards-grid::-webkit-scrollbar-thumb { background: #c7c7cc; border-radius: 8px; }
 
     /* Credit Card Styling */
     .credit-card-visual {
@@ -2956,7 +3066,8 @@
       }
       /* Sabit gider: kısa ve hızlı giriş akışı */
       #modal-expense .modal-form {
-        padding-top: 6px !important;
+        padding: 1px 10px 2px !important;
+        overflow: visible !important;
       }
       #modal-expense .modal-hero-amount {
         display: grid;
@@ -2980,22 +3091,39 @@
         white-space: nowrap;
       }
       #modal-expense .category-chips-scroll {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        display: flex;
+        flex-wrap: nowrap;
         overflow-x: auto;
-        padding: 2px 1px 5px;
+        padding: 1px 1px 4px;
+        margin-bottom: 4px;
       }
       #modal-expense .category-chip {
         justify-content: center;
-        min-width: 0;
+        min-width: max-content;
+        min-height: 29px;
         padding-right: 7px;
         padding-left: 7px;
+        font-size: 10px;
       }
       #modal-expense .modern-form-group {
-        margin-bottom: 7px;
+        margin-bottom: 4px;
       }
       #modal-expense .modern-field-row {
-        padding: 6px 9px;
+        padding: 4px 7px;
+      }
+      /* Remove optional/repeated controls from the quick mobile entry flow. */
+      #modal-expense .modern-form-group:has(#expense-title) .modern-field-divider,
+      #modal-expense .modern-form-group:has(#expense-title) .modern-field-row:has(#expense-desc),
+      #modal-expense .installment-chips-row {
+        display: none !important;
+      }
+      #modal-expense .modern-form-group:has(#expense-title) .modern-field-row:has(#expense-title) {
+        min-height: 44px;
+      }
+      #modal-expense .modern-field-label { margin-bottom: 0; }
+      #modal-expense .modern-field-icon { width: 24px; height: 24px; }
+      #modal-expense .modal-form > div[style*="margin-bottom:10px"] {
+        margin-bottom: 4px !important;
       }
       #modal-expense .day-chips-row {
         display: none;
@@ -3013,9 +3141,9 @@
       }
       #modal-expense .inst-chip {
         min-width: 0;
-        min-height: 30px;
-        padding: 3px 1px;
-        font-size: 9.5px;
+        min-height: 27px;
+        padding: 2px 1px;
+        font-size: 9px;
       }
       #modal-expense .chips-label-row {
         margin-bottom: 3px !important;
@@ -3084,9 +3212,62 @@
         padding: 4px 8px !important;
       }
       #modal-expense .modal-actions-modern {
-        margin-top: 4px;
-        padding-top: 5px !important;
+        margin-top: 1px;
+        padding: 3px 10px max(4px, env(safe-area-inset-bottom)) !important;
+        position: static;
+        box-shadow: none;
       }
+      #modal-expense .btn-modern-cancel,
+      #modal-expense .btn-modern-save {
+        min-height: 38px;
+        padding-top: 7px;
+        padding-bottom: 7px;
+      }
+      #modal-expense .modal-header {
+        padding: 7px 12px 6px !important;
+      }
+      #modal-expense .modal-header > div:first-child > div:first-child {
+        width: 28px !important;
+        height: 28px !important;
+      }
+      #modal-expense .modal-header .modal-title {
+        font-size: 14px !important;
+      }
+      #modal-expense .modal-header > div:first-child > div:last-child > span {
+        font-size: 10px !important;
+      }
+      #modal-expense .modal-hero-amount {
+        padding: 4px 8px;
+        margin-bottom: 5px;
+      }
+      #modal-expense .hero-amount-input {
+        font-size: 17px !important;
+      }
+      #modal-expense .live-monthly-pill {
+        font-size: 9px;
+        padding: 2px 6px;
+      }
+      #modal-expense .modal {
+        max-height: 100dvh !important;
+        overflow: hidden !important;
+        padding-bottom: max(2px, env(safe-area-inset-bottom)) !important;
+      }
+      #modal-expense .modal::before { margin-top: 4px; margin-bottom: 0; }
+    }
+    @media (max-width: 600px) and (max-height: 700px) {
+      #modal-expense .modal-header { padding: 4px 10px 3px !important; }
+      #modal-expense .modal-hero-amount { padding: 2px 7px; margin-bottom: 3px; }
+      #modal-expense .category-chips-scroll { max-height: 28px; }
+      #modal-expense .category-chip { min-height: 25px; padding-top: 2px; padding-bottom: 2px; }
+      #modal-expense .modern-form-group { margin-bottom: 2px; }
+      #modal-expense .modern-field-row { padding-top: 2px; padding-bottom: 2px; }
+      #modal-expense .modal-form > .modern-form-group:last-of-type > .modern-field-row { padding: 3px 4px; }
+      #modal-expense #expense-due-day { min-height: 28px; }
+      #modal-expense .btn-modern-cancel,
+      #modal-expense .btn-modern-save { min-height: 34px; }
+    }
+
+    @media (max-width: 600px) {
       #saving-live-hero-box {
         align-items: stretch !important;
         flex-wrap: wrap;
@@ -3539,6 +3720,14 @@
     /* iPhone style bottom tab bar */
     #mobile-tab-bar { display: none; }
     @media (max-width: 768px) {
+      /* Full mobile app shell */
+      html, body { min-height: 100%; }
+      body { background: #f2f2f7; }
+      #app-container {
+        min-height: 100dvh;
+        height: 100dvh;
+        overflow: hidden;
+      }
       #mobile-tab-bar {
         position: fixed;
         z-index: 1200;
@@ -3549,8 +3738,8 @@
         grid-template-columns: repeat(4, minmax(0, 1fr));
         gap: 2px;
         padding: 7px 8px max(7px, env(safe-area-inset-bottom));
-        min-height: 62px;
-        background: rgba(249,249,251,.94);
+        min-height: 68px;
+        background: rgba(249,249,251,.92);
         border-top: 1px solid rgba(60,60,67,.16);
         backdrop-filter: saturate(180%) blur(20px);
         -webkit-backdrop-filter: saturate(180%) blur(20px);
@@ -3593,10 +3782,116 @@
         transform: scale(.96);
       }
       #content {
-        padding-bottom: calc(84px + env(safe-area-inset-bottom)) !important;
+        position: fixed;
+        top: calc(52px + env(safe-area-inset-top, 0px));
+        left: 0;
+        right: 0;
+        bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+        height: auto;
+        min-height: 0;
+        margin: 0 !important;
+        padding: 12px max(14px, env(safe-area-inset-left, 0px)) 20px !important;
+        overflow-x: hidden;
+        overflow-y: auto;
+        overscroll-behavior-y: contain;
+        -webkit-overflow-scrolling: touch;
       }
-      #topbar { left: 0; }
-      #sidebar { z-index: 1300; }
+      #topbar {
+        left: 0;
+        right: 0;
+        top: 0;
+        height: calc(52px + env(safe-area-inset-top, 0px));
+        padding: env(safe-area-inset-top, 0px) max(12px, env(safe-area-inset-left, 0px)) 0;
+        background: rgba(249,249,251,.92);
+        z-index: 1100;
+      }
+      .topbar-left { gap: 8px; }
+      .btn-hamburger {
+        display: inline-flex;
+        width: 38px;
+        height: 38px;
+        align-items: center;
+        justify-content: center;
+        color: #007aff;
+        background: #e5e5ea;
+        border-radius: 12px;
+      }
+      #page-title { font-size: 17px; font-weight: 700; }
+      .topbar-right { gap: 8px; }
+      .user-profile-badge { padding: 2px; border: 0; background: transparent; }
+      .user-avatar-circle { width: 32px; height: 32px; }
+      #topbar-user-name, .btn-logout-text { display: none !important; }
+      .btn-logout {
+        width: 34px;
+        height: 34px;
+        justify-content: center;
+        padding: 0;
+        border: 0;
+        border-radius: 50%;
+        background: #ffe5e5;
+      }
+      #sidebar {
+        width: min(320px, 84vw);
+        min-height: 100dvh;
+        background: rgba(249,249,251,.98);
+        box-shadow: 12px 0 40px rgba(0,0,0,.16);
+        z-index: 1300;
+      }
+      .sidebar-header {
+        padding: calc(18px + env(safe-area-inset-top, 0px)) 18px 16px;
+        color: #1c1c1e;
+        border-bottom-color: var(--ios-border);
+      }
+      .sidebar-item {
+        margin: 3px 10px;
+        padding: 12px 13px;
+        gap: 12px;
+        border-radius: 12px;
+        color: #3a3a3c;
+      }
+      .sidebar-item:hover { background: #e5e5ea; color: #1c1c1e; }
+      .sidebar-item.active {
+        background: #e5f0ff;
+        color: #007aff;
+        border: 0;
+      }
+      .sidebar-footer {
+        padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
+        color: #8e8e93;
+        border-top-color: var(--ios-border);
+      }
+      .page-section { overflow: visible; }
+      .page-header-row {
+        align-items: center;
+        margin: 0 0 12px;
+        gap: 8px;
+      }
+      .page-main-title { font-size: 18px; line-height: 1.2; }
+      .btn-add-primary {
+        min-height: 40px;
+        padding: 8px 12px;
+        font-size: 12px;
+        border-radius: 12px;
+      }
+      .dashboard-summary-grid,
+      .debts-summary-grid { gap: 8px; }
+      .dashboard-two-col { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+      .cards-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+      .savings-grid, .savings-list, .notes-grid { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+      .card, .summary-card, .dash-box, .debt-stat-card, .saving-item-card, .note-card {
+        min-width: 0;
+        border-radius: 16px;
+        box-shadow: 0 1px 4px rgba(0,0,0,.04);
+      }
+      .filter-bar { flex-wrap: wrap; }
+      .filter-group { min-width: 0; flex: 1 1 140px; }
+      .table-container { max-width: 100%; }
+      .modal-overlay { z-index: 1500; }
+      #toast-container { top: calc(62px + env(safe-area-inset-top, 0px)); left: 12px; right: 12px; }
+      .toast { width: 100%; min-width: 0; max-width: none; }
+    }
+    @media (max-width: 350px) {
+      .cards-grid { grid-template-columns: minmax(0, 1fr); }
     }
   </style>
 </head>
@@ -3680,7 +3975,7 @@
         </li>
         <li class="sidebar-item" data-page="expenses">
           <i class="fas fa-file-invoice-dollar"></i>
-          <span>Sabit Giderler</span>
+          <span>Giderler ve Kartlar</span>
         </li>
         <li class="sidebar-item" data-page="cards">
           <i class="fas fa-credit-card"></i>
@@ -3848,6 +4143,17 @@
       <!-- ======================================================================
            D. SABİT GİDERLER (data-page="expenses")
            ====================================================================== -->
+      <div class="expense-view-switch hidden" id="expense-view-switch" role="tablist" aria-label="Gider görünümü">
+        <div class="expense-view-tabs">
+          <button type="button" class="expense-view-tab active" id="tab-fixed-expenses" role="tab" aria-selected="true" onclick="setCombinedExpenseTab('expenses')">Sabit Giderler</button>
+          <button type="button" class="expense-view-tab" id="tab-card-debts" role="tab" aria-selected="false" onclick="setCombinedExpenseTab('cards')">Kart Borçları</button>
+        </div>
+        <div class="expense-view-actions">
+          <button type="button" class="btn-add-primary" id="btn-add-expense-tab" onclick="openExpenseModal()"><i class="fas fa-plus"></i> Gider Ekle</button>
+          <button type="button" class="btn-add-primary hidden" id="btn-add-card-tab" onclick="openCardModal()"><i class="fas fa-plus"></i> Kart Ekle</button>
+        </div>
+      </div>
+
       <section class="page-section" data-page="expenses">
         <!-- 2 Üst Kart: Aylık Sabit Çıkış + Kalan Taksit Toplamı -->
         <div class="debts-summary-grid">
@@ -3880,11 +4186,22 @@
             </h2>
             <span style="font-size: 11.5px; color: var(--text-muted);">Düzenli aylık ödemeler ve taksitler</span>
           </div>
-          <button class="btn-add-primary" onclick="openExpenseModal()" style="padding: 6px 12px; font-size: 12.5px;">
-            <i class="fas fa-plus"></i> Yeni Gider
-          </button>
         </div>
 
+        <div class="records-toolbar">
+          <div class="record-status-tabs" role="group" aria-label="Sabit gider durumu">
+            <button type="button" class="record-status-tab active" data-expense-status="open" onclick="setExpenseStatus('open')">Bekleyen</button>
+            <button type="button" class="record-status-tab" data-expense-status="paid" onclick="setExpenseStatus('paid')">Ödendi</button>
+            <button type="button" class="record-status-tab" data-expense-status="all" onclick="setExpenseStatus('all')">Tümü</button>
+          </div>
+          <label class="record-sort-control"><i class="fas fa-sort-amount-down"></i>
+            <select id="expense-sort" aria-label="Sabit giderleri sırala" onchange="loadExpenses()">
+              <option value="due">Ödeme günü</option>
+              <option value="name">İsim</option>
+              <option value="amount">Tutar</option>
+            </select>
+          </label>
+        </div>
         <div class="expenses-grid" id="expenses-grid-container">
           <!-- Expense Cards injected via JS -->
         </div>
@@ -3894,18 +4211,21 @@
            E. KART BORÇLARI (data-page="cards")
            ====================================================================== -->
       <section class="page-section" data-page="cards">
-        <div class="page-header-row">
-          <h2 class="page-main-title">
-            <i class="fas fa-credit-card text-blue"></i>
-            Kredi Kartı Borçları
-          </h2>
-          <button class="btn-add-primary" onclick="openCardModal()">
-            <i class="fas fa-plus"></i> Kart Borcu Ekle
-          </button>
-        </div>
-
         <!-- Filtreleme Çubuğu -->
         <div class="filter-bar">
+          <div class="record-status-tabs" role="group" aria-label="Kart borcu durumu">
+            <button type="button" class="record-status-tab active" data-card-status="open" onclick="setCardStatus('open')">Bekleyen</button>
+            <button type="button" class="record-status-tab" data-card-status="paid" onclick="setCardStatus('paid')">Ödendi</button>
+            <button type="button" class="record-status-tab" data-card-status="all" onclick="setCardStatus('all')">Tümü</button>
+          </div>
+          <div class="filter-group record-sort-group">
+            <label for="card-sort"><i class="fas fa-sort-amount-down"></i></label>
+            <select id="card-sort" class="filter-select" aria-label="Kartları sırala" onchange="filterCards()">
+              <option value="due">Vade tarihi</option>
+              <option value="amount">Borç tutarı</option>
+              <option value="name">Kart adı</option>
+            </select>
+          </div>
           <div class="filter-group">
             <label for="card-filter-month"><i class="fas fa-calendar-alt"></i> Dönem Ayı:</label>
             <select id="card-filter-month" class="filter-select" onchange="filterCards()">
@@ -5072,6 +5392,9 @@
     let currentDebtTab = 'receivables'; // 'receivables' or 'payables'
     let selectedNoteColor = '#fff9c4';
     let cachedCards = [];
+    let cachedExpenses = [];
+    let expenseStatus = 'open';
+    let cardStatus = 'open';
     let pendingConfirmAction = null;
 
     const SAVINGS_CONFIG = {
@@ -5122,14 +5445,22 @@
     }
 
     function formatMoneyInput(input) {
-      const end = input.selectionStart || input.value.length;
-      const digitsBefore = input.value.slice(0, end).replace(/\D/g, '').length;
-      input.value = moneyInputDisplay(input.value, false);
+      const raw = input.value;
+      const end = input.selectionStart ?? raw.length;
+      const prefix = raw.slice(0, end);
+      const digitsBefore = prefix.replace(/\D/g, '').length;
+      const separatorBefore = /[,.]/.test(prefix);
+      const hadSeparator = /[,.]/.test(raw);
+      input.value = moneyInputDisplay(raw, false);
       let seen = 0;
-      let cursor = input.value.length;
+      let cursor = digitsBefore === 0 ? 0 : input.value.length;
       for (let i = 0; i < input.value.length; i++) {
         if (/\d/.test(input.value[i])) seen++;
-        if (seen >= digitsBefore) { cursor = i + 1; break; }
+        if (digitsBefore > 0 && seen >= digitsBefore) { cursor = i + 1; break; }
+      }
+      if (separatorBefore && hadSeparator && digitsBefore > 0) {
+        const separatorIndex = input.value.indexOf(',');
+        if (separatorIndex >= 0 && cursor <= separatorIndex) cursor = separatorIndex + 1;
       }
       requestAnimationFrame(() => input.setSelectionRange(cursor, cursor));
     }
@@ -5431,7 +5762,7 @@
        ========================================================================== */
     const PAGE_TITLES = {
       dashboard: 'Özet',
-      expenses: 'Sabit Giderler',
+      expenses: 'Giderler ve Kartlar',
       cards: 'Kart Borçları',
       income: 'Gelirler',
       debts: 'Alacak / Verecek',
@@ -5441,8 +5772,29 @@
       admin: 'Yönetim'
     };
 
+    function setCombinedExpenseTab(section) {
+      const showCards = section === 'cards';
+      const expenseSection = document.querySelector('.page-section[data-page="expenses"]');
+      const cardSection = document.querySelector('.page-section[data-page="cards"]');
+      expenseSection?.classList.toggle('combined-section-hidden', showCards);
+      cardSection?.classList.toggle('combined-section-hidden', !showCards);
+
+      const fixedTab = document.getElementById('tab-fixed-expenses');
+      const cardsTab = document.getElementById('tab-card-debts');
+      fixedTab?.classList.toggle('active', !showCards);
+      cardsTab?.classList.toggle('active', showCards);
+      fixedTab?.setAttribute('aria-selected', String(!showCards));
+      cardsTab?.setAttribute('aria-selected', String(showCards));
+      document.getElementById('btn-add-expense-tab')?.classList.toggle('hidden', showCards);
+      document.getElementById('btn-add-card-tab')?.classList.toggle('hidden', !showCards);
+    }
+
     function navigate(pageId) {
       currentPage = pageId;
+      const isExpenseHub = pageId === 'expenses' || pageId === 'cards';
+      document.getElementById('content').classList.toggle('combined-expenses-view', isExpenseHub);
+      document.getElementById('expense-view-switch')?.classList.toggle('hidden', !isExpenseHub);
+      if (isExpenseHub) setCombinedExpenseTab(pageId === 'cards' ? 'cards' : 'expenses');
 
       // Update sidebar active classes
       document.querySelectorAll('.sidebar-item').forEach(item => {
@@ -5456,8 +5808,9 @@
       });
 
       // Update active page content
+      const visiblePages = isExpenseHub ? ['expenses', 'cards'] : [pageId];
       document.querySelectorAll('.page-section').forEach(sec => {
-        sec.classList.toggle('active', sec.dataset.page === pageId);
+        sec.classList.toggle('active', visiblePages.includes(sec.dataset.page));
       });
 
       // Update topbar title
@@ -5469,8 +5822,8 @@
       // Load data for active page
       switch (pageId) {
         case 'dashboard': loadDashboard(); break;
-        case 'expenses': loadExpenses(); break;
-        case 'cards': loadCards(); break;
+        case 'expenses':
+        case 'cards': loadExpenses(); loadCards(); break;
         case 'income': loadIncome(); break;
         case 'debts': loadDebts(); break;
         case 'savings': loadSavings(); break;
@@ -5806,6 +6159,22 @@
       Diğer: 'badge-diger'
     };
 
+    function setExpenseStatus(status) {
+      expenseStatus = status;
+      document.querySelectorAll('[data-expense-status]').forEach(button => {
+        button.classList.toggle('active', button.dataset.expenseStatus === status);
+      });
+      loadExpenses();
+    }
+
+    function setCardStatus(status) {
+      cardStatus = status;
+      document.querySelectorAll('[data-card-status]').forEach(button => {
+        button.classList.toggle('active', button.dataset.cardStatus === status);
+      });
+      filterCards();
+    }
+
     function selectExpenseCategory(cat) {
       const input = document.getElementById('expense-category');
       if (input) input.value = cat;
@@ -5942,7 +6311,8 @@
       const container = document.getElementById('expenses-grid-container');
       try {
         const expenses = await api('/api/expenses');
-        if (!expenses || expenses.length === 0) {
+        cachedExpenses = expenses || [];
+        if (cachedExpenses.length === 0) {
           container.innerHTML = `
             <div class="empty-state">
               <i class="fas fa-file-invoice-dollar"></i>
@@ -5957,8 +6327,8 @@
         }
 
         // Üst Toplam Kartları Hesaplama
-        const monthlyTotal = expenses.filter(e => e.is_active).reduce((sum, e) => sum + (parseFloat(e.installment_amount) || 0), 0);
-        const remainingTotal = expenses.filter(e => e.is_active).reduce((sum, e) => {
+        const monthlyTotal = cachedExpenses.filter(e => e.is_active).reduce((sum, e) => sum + (parseFloat(e.installment_amount) || 0), 0);
+        const remainingTotal = cachedExpenses.filter(e => e.is_active).reduce((sum, e) => {
           const rem = Math.max(0, (e.total_installments || 1) - (e.paid_installments || 0));
           return sum + (rem * (parseFloat(e.installment_amount) || 0));
         }, 0);
@@ -5967,7 +6337,21 @@
         if (monthlyEl) monthlyEl.textContent = formatMoney(monthlyTotal);
         if (remainingEl) remainingEl.textContent = formatMoney(remainingTotal);
 
-        container.innerHTML = expenses.map(item => {
+        let visibleExpenses = cachedExpenses.filter(item => {
+          const complete = !item.is_active || (item.paid_installments || 0) >= (item.total_installments || 1);
+          return expenseStatus === 'all' || (expenseStatus === 'paid' ? complete : !complete);
+        });
+        const expenseSort = document.getElementById('expense-sort')?.value || 'due';
+        visibleExpenses.sort((a, b) => {
+          if (expenseSort === 'name') return String(a.title || '').localeCompare(String(b.title || ''), 'tr');
+          if (expenseSort === 'amount') return (Number(b.total_amount) || 0) - (Number(a.total_amount) || 0);
+          return (Number(a.due_day) || 1) - (Number(b.due_day) || 1);
+        });
+        if (visibleExpenses.length === 0) {
+          container.innerHTML = `<div class="empty-state"><i class="fas ${expenseStatus === 'paid' ? 'fa-check-circle' : 'fa-hourglass-half'}"></i><h4>${expenseStatus === 'paid' ? 'Ödenmiş gider yok' : 'Bekleyen gider yok'}</h4><p>Bu filtrede gösterilecek kayıt bulunmuyor.</p></div>`;
+          return;
+        }
+        container.innerHTML = visibleExpenses.map(item => {
           const cat = item.category || 'Diğer';
           const badgeClass = categoryBadgeClasses[cat] || 'badge-diger';
           const catIcons = { 'Konut':'🏠','Teknoloji':'💻','Araç':'🚗','Sağlık':'🏥','Eğitim':'📚','Giyim':'👕','Diğer':'📌' };
@@ -6194,7 +6578,7 @@
       try {
         const cards = await api('/api/cards');
         cachedCards = cards || [];
-        renderCards(cachedCards);
+        filterCards();
       } catch (err) {
         showToast('Kart borçları yüklenemedi: ' + err.message, 'error');
       }
@@ -6204,7 +6588,7 @@
       const month = document.getElementById('card-filter-month').value;
       const year = document.getElementById('card-filter-year').value;
 
-      let filtered = cachedCards;
+      let filtered = cachedCards.filter(card => cardStatus === 'all' || (cardStatus === 'paid' ? !!card.is_paid : !card.is_paid));
       if (month) {
         filtered = filtered.filter(c => String(c.period_month) === String(month));
       }
@@ -6212,6 +6596,15 @@
         filtered = filtered.filter(c => String(c.period_year) === String(year));
       }
 
+      const sort = document.getElementById('card-sort')?.value || 'due';
+      filtered.sort((a, b) => {
+        if (sort === 'amount') return (Number(b.debt_amount) || 0) - (Number(a.debt_amount) || 0);
+        if (sort === 'name') return String(a.card_name || '').localeCompare(String(b.card_name || ''), 'tr');
+        return String(a.due_date || '9999-12-31').localeCompare(String(b.due_date || '9999-12-31'));
+      });
+
+      const list = document.getElementById('cards-grid-container');
+      if (list) list.scrollTop = 0;
       renderCards(filtered);
     }
 
@@ -6222,7 +6615,7 @@
           <div class="empty-state">
             <i class="fas fa-credit-card"></i>
             <h4>Kart Borcu Bulunmuyor</h4>
-            <p>Seçilen dönemde kart borcu kaydı yok veya tüm borçlar listelendi.</p>
+            <p>${cardStatus === 'paid' ? 'Ödenmiş kart borcu yok.' : cardStatus === 'open' ? 'Bekleyen kart borcu yok.' : 'Seçilen filtrelerde kart borcu kaydı yok.'}</p>
           </div>`;
         return;
       }
