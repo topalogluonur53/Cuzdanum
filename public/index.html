@@ -6497,7 +6497,7 @@
           const endDate = calcInstallmentEndDate(item.start_date, totalInst, paidInst, item.due_day);
 
           return `
-            <div class="debt-item-card" style="flex-direction:column;align-items:stretch;gap:9px;padding:12px 14px;border-radius:12px;cursor:pointer;" title="Düzenlemek için çift tıklayın" ondblclick="openExpenseModalById(${item.id})">
+            <div class="debt-item-card" style="flex-direction:column;align-items:stretch;gap:9px;padding:12px 14px;border-radius:12px;cursor:pointer;" title="Düzenlemek için tıklayın" onclick="openExpenseModalById(${item.id})">
               <!-- Başlık ve Aylık / Toplam Tutar -->
               <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
                 <div style="min-width:0;flex:1;">
@@ -6536,7 +6536,7 @@
                   <span style="font-size:10.5px;color:var(--text-muted);font-weight:600;">
                     %${pct} tamamlandı
                   </span>
-                  <button class="btn-pay-installment" style="font-size:11px;padding:4px 10px;border-radius:6px;font-weight:600;display:inline-flex;align-items:center;gap:4px;background:${isComplete ? '#cbd5e1' : 'var(--green)'};color:${isComplete ? '#64748b' : '#fff'};cursor:${isComplete ? 'default' : 'pointer'};" ${isComplete ? 'disabled' : ''} onclick="payExpenseInstallment(${item.id})">
+                  <button class="btn-pay-installment" style="font-size:11px;padding:4px 10px;border-radius:6px;font-weight:600;display:inline-flex;align-items:center;gap:4px;background:${isComplete ? '#cbd5e1' : 'var(--green)'};color:${isComplete ? '#64748b' : '#fff'};cursor:${isComplete ? 'default' : 'pointer'};" ${isComplete ? 'disabled' : ''} onclick="event.stopPropagation(); payExpenseInstallment(${item.id})">
                     <i class="fas ${isComplete ? 'fa-check' : 'fa-plus'}"></i>
                     ${isComplete ? 'Tamamlandı' : 'Taksit Öde'}
                   </button>
@@ -6751,7 +6751,7 @@
 
         return `
           <div class="card-item-wrapper" data-card-id="${c.id}">
-            <div class="credit-card-visual ${bankClass} ${isPaid ? 'paid' : ''}">
+            <div class="credit-card-visual ${bankClass} ${isPaid ? 'paid' : ''}" style="cursor:pointer;" title="Düzenlemek için tıklayın" onclick='openCardModal(${JSON.stringify(c)})'>
               <div class="credit-card-top">
                 <div>
                   <div class="card-bank-name">${escapeHtml(c.bank_name || 'Banka')}</div>
@@ -7022,7 +7022,7 @@
 
         container.innerHTML = incomes.map(item => {
           return `
-            <div class="income-item-row">
+            <div class="income-item-row" style="cursor:pointer;" title="Düzenlemek için tıklayın" onclick='openIncomeModal(${JSON.stringify(item)})'>
               <div class="income-left-box">
                 <div class="income-source-icon">
                   <i class="fas fa-money-bill-alt"></i>
@@ -7043,10 +7043,10 @@
               <div style="display: flex; align-items: center; gap: 16px;">
                 <div class="income-amount-right">+${formatMoney(item.amount)}</div>
                 <div class="card-actions-dropdown">
-                  <button class="btn-action-icon" title="Düzenle" onclick='openIncomeModal(${JSON.stringify(item)})'>
+                  <button class="btn-action-icon" title="Düzenle" onclick='event.stopPropagation(); openIncomeModal(${JSON.stringify(item)})'>
                     <i class="fas fa-pen"></i>
                   </button>
-                  <button class="btn-action-icon delete" title="Sil" onclick="deleteIncome(${item.id})">
+                  <button class="btn-action-icon delete" title="Sil" onclick="event.stopPropagation(); deleteIncome(${item.id})">
                     <i class="fas fa-trash-alt"></i>
                   </button>
                 </div>
@@ -7319,7 +7319,7 @@
           const pendingBadge = '<span class="category-badge badge-diger" style="font-size:9.5px;padding:1.5px 6px;">Bekliyor</span>';
 
           return `
-            <div class="debt-item-card" style="flex-direction:column;align-items:stretch;gap:7px;">
+            <div class="debt-item-card" style="flex-direction:column;align-items:stretch;gap:7px;cursor:pointer;" title="Düzenlemek için tıklayın" onclick='openDebtModal(${JSON.stringify(item)})'>
               <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
                 <div style="display:flex;align-items:center;gap:8px;min-width:0;">
                   <div class="debt-person-avatar ${avatarClass}">${initial}</div>
@@ -7345,10 +7345,10 @@
                     }
                   </div>
                   <div class="card-actions-dropdown">
-                    <button class="btn-action-icon" style="padding:2px 4px;font-size:11px;" title="Düzenle" onclick='openDebtModal(${JSON.stringify(item)})'>
+                    <button class="btn-action-icon" style="padding:2px 4px;font-size:11px;" title="Düzenle" onclick='event.stopPropagation(); openDebtModal(${JSON.stringify(item)})'>
                       <i class="fas fa-pen"></i>
                     </button>
-                    <button class="btn-action-icon delete" style="padding:2px 4px;font-size:11px;" title="Sil" onclick="deleteDebt(${item.id}, '${isRecTab ? 'receivable' : 'payable'}')">
+                    <button class="btn-action-icon delete" style="padding:2px 4px;font-size:11px;" title="Sil" onclick="event.stopPropagation(); deleteDebt(${item.id}, '${isRecTab ? 'receivable' : 'payable'}')">
                       <i class="fas fa-trash-alt"></i>
                     </button>
                   </div>
@@ -7364,7 +7364,7 @@
                   <div style="height:4px;background:#e2e8f0;border-radius:2px;overflow:hidden;margin-bottom:6px;">
                     <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,${isRecTab ? '#10b981,#059669' : '#e94560,#ff6b6b'});border-radius:2px;transition:width 0.4s ease;"></div>
                   </div>
-                  <button class="btn-pay-installment" style="font-size:10px;padding:3px 8px;background:${isRecTab ? 'var(--green)' : 'var(--accent)'};" onclick="payDebtInstallment(${item.id},'${isRecTab ? 'receivable' : 'payable'}')">
+                  <button class="btn-pay-installment" style="font-size:10px;padding:3px 8px;background:${isRecTab ? 'var(--green)' : 'var(--accent)'};" onclick="event.stopPropagation(); payDebtInstallment(${item.id},'${isRecTab ? 'receivable' : 'payable'}')">
                     <i class="fas fa-check"></i> ${isRecTab ? 'Taksit Tahsil Et' : 'Taksit Öde'}
                   </button>
                 </div>` : ''}
@@ -7841,7 +7841,7 @@
         const isProfit = pLoss >= 0;
 
         return `
-          <div class="debt-item-card saving-item-card" style="padding:9px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+          <div class="debt-item-card saving-item-card" style="padding:9px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer;" title="Düzenlemek için tıklayın" onclick='openSavingModal(${JSON.stringify(item)})'>
             <!-- Sol Taraf: İkon ve Varlık Bilgileri -->
             <div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1;">
               <div class="debt-person-avatar" style="background:#eff6ff;color:#2563eb;font-size:16px;width:34px;height:34px;border-radius:9px;flex-shrink:0;">
@@ -7878,7 +7878,7 @@
                 <button class="btn-action-icon" style="padding:3px 5px;font-size:11px;" title="Düzenle" onclick='openSavingModal(${JSON.stringify(item)})'>
                   <i class="fas fa-pen"></i>
                 </button>
-                <button class="btn-action-icon delete" style="padding:3px 5px;font-size:11px;" title="Sil" onclick="deleteSaving(${item.id})">
+                <button class="btn-action-icon delete" style="padding:3px 5px;font-size:11px;" title="Sil" onclick="event.stopPropagation(); deleteSaving(${item.id})">
                   <i class="fas fa-trash-alt"></i>
                 </button>
               </div>
@@ -8066,8 +8066,8 @@
           const bg = item.color || '#fff9c4';
 
           return `
-            <div class="note-card" style="background: ${bg};">
-              <button class="note-pin-btn ${isPinned ? 'active' : ''}" title="${isPinned ? 'Sabitlemeyi kaldır' : 'Sabitle'}" onclick="togglePinNote(${item.id})">
+            <div class="note-card" style="background: ${bg}; cursor:pointer;" title="Düzenlemek için tıklayın" onclick='openNoteModal(${JSON.stringify(item)})'>
+              <button class="note-pin-btn ${isPinned ? 'active' : ''}" title="${isPinned ? 'Sabitlemeyi kaldır' : 'Sabitle'}" onclick="event.stopPropagation(); togglePinNote(${item.id})">
                 <i class="fas fa-thumbtack"></i>
               </button>
 
@@ -8079,10 +8079,10 @@
               <div class="note-footer">
                 <span>${formatDate(item.updated_at || item.created_at)}</span>
                 <div class="card-actions-dropdown">
-                  <button class="btn-action-icon" title="Düzenle" onclick='openNoteModal(${JSON.stringify(item)})'>
+                  <button class="btn-action-icon" title="Düzenle" onclick='event.stopPropagation(); openNoteModal(${JSON.stringify(item)})'>
                     <i class="fas fa-pen"></i>
                   </button>
-                  <button class="btn-action-icon delete" title="Sil" onclick="deleteNote(${item.id})">
+                  <button class="btn-action-icon delete" title="Sil" onclick="event.stopPropagation(); deleteNote(${item.id})">
                     <i class="fas fa-trash-alt"></i>
                   </button>
                 </div>
