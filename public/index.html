@@ -4713,7 +4713,7 @@
           <input type="hidden" id="expense-category" value="Teknoloji">
         </div>
 
-        <!-- 3. BAŞLIK VE AÇIKLAMA (Modern Gruplanmış Kart) -->
+        <!-- 3. BAŞLIK (Modern Gruplanmış Kart) -->
         <div class="modern-form-group">
           <div class="modern-field-row">
             <div class="modern-field-icon"><i class="fas fa-tag"></i></div>
@@ -4722,14 +4722,7 @@
               <input type="text" id="expense-title" class="modern-field-input" placeholder="Örn: iPhone 15 Taksiti, Ev Kirası" required>
             </div>
           </div>
-          <div class="modern-field-divider expense-description-divider"></div>
-          <div class="modern-field-row expense-description-row">
-            <div class="modern-field-icon"><i class="fas fa-align-left"></i></div>
-            <div class="modern-field-content">
-              <label class="modern-field-label">AÇIKLAMA (İSTEĞE BAĞLI)</label>
-              <input type="text" id="expense-desc" class="modern-field-input" placeholder="Örn: 128 GB Gece Yarısı Siyah">
-            </div>
-          </div>
+          <input type="hidden" id="expense-desc" value="">
         </div>
 
         <!-- 4. TAKSİT SEÇİCİ (Dokunmatik Hızlı Çipler) -->
@@ -5532,55 +5525,69 @@
       return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(num);
     }
 
+    function moneyInputParts(value) {
+      const raw = String(value ?? '').trim();
+      if (!raw) return { raw: '', sign: '', integer: '', fraction: '', separatorIndex: -1 };
+
+      const commaIndex = raw.lastIndexOf(',');
+      const dots = raw.match(/\./g) || [];
+      const lastDot = raw.lastIndexOf('.');
+      const digitsAfterDot = lastDot >= 0 ? raw.slice(lastDot + 1).replace(/\D/g, '').length : 0;
+      // A single dot with one or two following digits can be a decimal separator.
+      // Dots in values such as 1.000 and 10.0000 are thousands separators.
+      const separatorIndex = commaIndex >= 0 ? commaIndex : (dots.length === 1 && digitsAfterDot <= 2 ? lastDot : -1);
+      const integerRaw = separatorIndex >= 0 ? raw.slice(0, separatorIndex) : raw;
+      const fractionRaw = separatorIndex >= 0 ? raw.slice(separatorIndex + 1) : '';
+      const integer = integerRaw.replace(/\D/g, '').replace(/^0+(?=\d)/, '') || '0';
+
+      return {
+        raw,
+        sign: /^\s*-/.test(raw) ? '-' : '',
+        integer,
+        fraction: fractionRaw.replace(/\D/g, '').slice(0, 2),
+        separatorIndex
+      };
+    }
+
     function parseMoneyInput(value) {
-      let text = String(value ?? '').trim();
-      if (!text) return 0;
-      // Türkçe biçim: 1.234,56. Nokta ondalık olarak yazılmışsa onu da kabul et.
-      if (text.includes(',')) text = text.replace(/\./g, '').replace(',', '.');
-      else {
-        const dots = text.match(/\./g) || [];
-        const lastDot = text.lastIndexOf('.');
-        const digitsAfterDot = lastDot >= 0 ? text.slice(lastDot + 1).replace(/\D/g, '').length : 0;
-        // "1.000" uygulamanın kendi binlik gösterimidir; "1.5" ise ondalık giriş kabul edilir.
-        if (dots.length > 1 || (dots.length === 1 && digitsAfterDot > 2)) text = text.replace(/\./g, '');
-      }
-      const number = Number(text.replace(/[^0-9.-]/g, ''));
+      const parts = moneyInputParts(value);
+      if (!parts.raw) return 0;
+      const number = Number(`${parts.sign}${parts.integer}.${parts.fraction || '0'}`);
       return Number.isFinite(number) ? number : 0;
     }
 
     function moneyInputDisplay(value, alwaysDecimals = false) {
-      const raw = String(value ?? '').trim();
-      if (!raw) return '';
-      const numeric = parseMoneyInput(raw);
-      const commaIndex = Math.max(raw.lastIndexOf(','), raw.lastIndexOf('.'));
-      const fractionLength = commaIndex >= 0 ? raw.slice(commaIndex + 1).replace(/\D/g, '').length : 0;
-      const hasCommaDecimal = raw.includes(',');
-      const hasDotDecimal = !hasCommaDecimal && (raw.match(/\./g) || []).length === 1 && fractionLength <= 2;
-      const hasDecimal = hasCommaDecimal || hasDotDecimal;
-      const digits = hasDecimal ? raw.slice(commaIndex + 1).replace(/\D/g, '').slice(0, 2) : '';
-      const integer = Math.trunc(Math.abs(numeric)).toLocaleString('tr-TR');
-      const sign = numeric < 0 ? '-' : '';
-      if (alwaysDecimals) return sign + integer + ',' + String(Math.round((Math.abs(numeric) % 1) * 100)).padStart(2, '0');
-      return sign + integer + (hasDecimal ? ',' + digits : '');
+      const parts = moneyInputParts(value);
+      if (!parts.raw) return '';
+      const integer = parts.integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+      if (alwaysDecimals) return `${parts.sign}${integer},${parts.fraction.padEnd(2, '0')}`;
+      return `${parts.sign}${integer}${parts.separatorIndex >= 0 ? ',' + parts.fraction : ''}`;
     }
 
     function formatMoneyInput(input) {
       const raw = input.value;
-      const end = input.selectionStart ?? raw.length;
-      const prefix = raw.slice(0, end);
-      const digitsBefore = prefix.replace(/\D/g, '').length;
-      const separatorBefore = /[,.]/.test(prefix);
-      const hadSeparator = /[,.]/.test(raw);
+      const caret = input.selectionStart ?? raw.length;
+      const parts = moneyInputParts(raw);
+      const isFractionCaret = parts.separatorIndex >= 0 && caret > parts.separatorIndex;
+      const fractionDigitsBeforeCaret = isFractionCaret
+        ? raw.slice(parts.separatorIndex + 1, caret).replace(/\D/g, '').length
+        : 0;
+      const integerDigitsBeforeCaret = raw.slice(0, isFractionCaret ? parts.separatorIndex : caret).replace(/\D/g, '').length;
+
       input.value = moneyInputDisplay(raw, false);
-      let seen = 0;
-      let cursor = digitsBefore === 0 ? 0 : input.value.length;
-      for (let i = 0; i < input.value.length; i++) {
-        if (/\d/.test(input.value[i])) seen++;
-        if (digitsBefore > 0 && seen >= digitsBefore) { cursor = i + 1; break; }
-      }
-      if (separatorBefore && hadSeparator && digitsBefore > 0) {
-        const separatorIndex = input.value.indexOf(',');
-        if (separatorIndex >= 0 && cursor <= separatorIndex) cursor = separatorIndex + 1;
+      let cursor;
+      if (parts.separatorIndex >= 0 && isFractionCaret) {
+        cursor = input.value.indexOf(',') + 1 + fractionDigitsBeforeCaret;
+      } else {
+        let seen = 0;
+        cursor = 0;
+        for (let i = 0; i < input.value.length; i++) {
+          if (/\d/.test(input.value[i])) seen++;
+          if (seen >= integerDigitsBeforeCaret) {
+            cursor = i + 1;
+            break;
+          }
+        }
       }
       requestAnimationFrame(() => input.setSelectionRange(cursor, cursor));
     }
