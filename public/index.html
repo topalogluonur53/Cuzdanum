@@ -5730,6 +5730,26 @@
       return baseDate.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' });
     }
 
+    function getInstallmentTargetMonthName(startDateStr, paidInst, dueDay) {
+      const paid = parseInt(paidInst) || 0;
+      let targetDate;
+      if (startDateStr) {
+        const parts = String(startDateStr).split('-');
+        if (parts.length === 3) {
+          targetDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(dueDay) || parseInt(parts[2]) || 1);
+          targetDate.setMonth(targetDate.getMonth() + paid);
+        }
+      }
+      if (!targetDate || isNaN(targetDate.getTime())) {
+        const now = new Date();
+        targetDate = new Date(now.getFullYear(), now.getMonth(), parseInt(dueDay) || now.getDate());
+      }
+      const curYear = new Date().getFullYear();
+      const targetYear = targetDate.getFullYear();
+      const monthName = targetDate.toLocaleDateString('tr-TR', { month: 'long' });
+      return targetYear !== curYear ? `${monthName} ${targetYear}` : monthName;
+    }
+
     function escapeHtml(text) {
       if (!text) return '';
       return String(text)
@@ -6639,6 +6659,14 @@
           const pct = Math.min(100, Math.round((paidInst / totalInst) * 100));
           const remaining = Math.max(0, totalInst - paidInst);
           const endDate = calcInstallmentEndDate(item.start_date, totalInst, paidInst, item.due_day);
+          const instAmt = Number(item.installment_amount) || 0;
+          const totalAmt = Number(item.total_amount) || 0;
+          const remainingAmount = isComplete ? 0 : (
+            totalAmt && totalInst > 1
+              ? Math.max(0, totalAmt - (paidInst * (instAmt || (totalAmt / totalInst))))
+              : (remaining * (instAmt || totalAmt))
+          );
+          const targetMonthName = getInstallmentTargetMonthName(item.start_date, paidInst, item.due_day);
 
           return `
             <div class="debt-item-card" style="flex-direction:column;align-items:stretch;gap:9px;padding:12px 14px;border-radius:12px;cursor:pointer;" title="Düzenlemek için tıklayın" onclick="openExpenseModalById(${item.id})">
@@ -6656,6 +6684,9 @@
                   </div>
                   <div style="font-size:10.5px;color:var(--text-muted);margin-top:2px;font-weight:500;">
                     Toplam: <strong style="color:var(--text-dark);">${formatMoney(item.total_amount)}</strong>
+                  </div>
+                  <div style="font-size:10.5px;color:var(--text-muted);margin-top:1px;font-weight:500;">
+                    Kalan: <strong style="color:${isComplete ? 'var(--green)' : '#dc2626'};">${formatMoney(remainingAmount)}</strong>
                   </div>
                 </div>
               </div>
@@ -6682,7 +6713,7 @@
                   </span>
                   <button class="btn-pay-installment" style="font-size:11px;padding:4px 10px;border-radius:6px;font-weight:600;display:inline-flex;align-items:center;gap:4px;background:${isComplete ? '#cbd5e1' : 'var(--green)'};color:${isComplete ? '#64748b' : '#fff'};cursor:${isComplete ? 'default' : 'pointer'};" ${isComplete ? 'disabled' : ''} onclick="event.stopPropagation(); payExpenseInstallment(${item.id})">
                     <i class="fas ${isComplete ? 'fa-check' : 'fa-plus'}"></i>
-                    ${isComplete ? 'Tamamlandı' : 'Taksit Öde'}
+                    ${isComplete ? 'Tamamlandı' : `${targetMonthName} ${totalInst > 1 ? 'Taksiti' : ''} Öde`}
                   </button>
                 </div>
               </div>
@@ -6892,6 +6923,10 @@
         const isPaid = !!c.is_paid;
         const bankClass = getBankThemeClass(c.bank_name);
         const isOverdue = !isPaid && c.due_date && c.due_date < today;
+        const monthNames = ['', 'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+        const cardMonth = monthNames[c.period_month] || (c.due_date ? new Date(c.due_date).toLocaleDateString('tr-TR', { month: 'long' }) : '');
+        const cardPeriodLabel = cardMonth ? (c.period_year ? `${cardMonth} ${c.period_year}` : cardMonth) : '';
+        const cardRemaining = isPaid ? 0 : (Number(c.debt_amount) || 0);
 
         return `
           <div class="card-item-wrapper" data-card-id="${c.id}">
@@ -6899,7 +6934,7 @@
               <div class="credit-card-top">
                 <div>
                   <div class="card-bank-name">${escapeHtml(c.bank_name || 'Banka')}</div>
-                  <div class="card-title-sub">${escapeHtml(c.card_name)}</div>
+                  <div class="card-title-sub">${escapeHtml(c.card_name)}${cardPeriodLabel ? ` · <span style="font-weight:600;opacity:0.9;">${cardPeriodLabel}</span>` : ''}</div>
                 </div>
                 <div class="card-type-chip">
                   <span class="chip-icon"></span>
@@ -6910,6 +6945,9 @@
               <div class="card-debt-center">
                 <div class="card-debt-label">Toplam Borç</div>
                 <div class="card-debt-value">${formatMoney(c.debt_amount)}</div>
+                <div class="card-remaining-debt" style="font-size:11.5px;font-weight:600;margin-top:4px;opacity:0.95;">
+                  Kalan: <strong>${formatMoney(cardRemaining)}</strong>
+                </div>
               </div>
 
               <div class="card-footer-info">
@@ -6936,7 +6974,7 @@
                   <input type="checkbox" ${isPaid ? 'checked' : ''} onchange="toggleCardPaid(${c.id}, this.checked)">
                   <span class="toggle-slider"></span>
                 </span>
-                <span class="${isPaid ? 'text-green' : 'text-muted'}">${isPaid ? 'Ödendi' : 'Ödenmedi'}</span>
+                <span class="${isPaid ? 'text-green' : 'text-muted'}">${cardMonth ? cardMonth + ' Borcu: ' : ''}${isPaid ? 'Ödendi' : 'Ödenmedi'}</span>
               </label>
 
               <div style="display: flex; gap: 4px;">
@@ -7456,7 +7494,14 @@
           const pct = Math.min(100, Math.round((paidInst / totalInst) * 100));
           const remaining = totalInst - paidInst;
           const instAmt = item.installment_amount || 0;
+          const totalDebtAmt = Number(item.amount) || 0;
+          const remainingDebtAmt = isSettled ? 0 : (
+            isInst
+              ? Math.max(0, totalDebtAmt ? (totalDebtAmt - (paidInst * (instAmt || (totalDebtAmt / totalInst)))) : (remaining * instAmt))
+              : totalDebtAmt
+          );
           const debtEndDate = isInst ? calcInstallmentEndDate(item.due_date, totalInst, paidInst) : null;
+          const debtTargetMonth = isInst ? getInstallmentTargetMonthName(item.due_date, paidInst) : '';
 
           const settledBadge = `<span class="category-badge badge-saglik" style="font-size:9.5px;padding:1.5px 6px;"><i class="fas fa-check"></i> ${isRecTab ? 'Tahsil Edildi' : 'Ödendi'}</span>`;
           const instBadge = `<span class="category-badge badge-teknoloji" style="font-size:9.5px;padding:1.5px 6px;"><i class="fas fa-credit-card"></i> Taksitli</span>`;
@@ -7484,7 +7529,8 @@
                   <div style="font-size:14.5px;font-weight:800;text-align:right;" class="${amountColorClass}">
                     ${isInst
                       ? `<div style="font-size:12.5px;font-weight:800;">${formatMoney(instAmt)}<span style="font-size:9.5px;font-weight:500;color:var(--text-muted)">/ay</span></div>
-                         <div style="font-size:10px;color:var(--text-muted);">Toplam: ${formatMoney(item.amount)}</div>`
+                         <div style="font-size:10px;color:var(--text-muted);">Toplam: ${formatMoney(item.amount)}</div>
+                         <div style="font-size:10px;color:var(--text-muted);margin-top:1px;">Kalan: <strong style="color:${isSettled ? 'var(--green)' : 'inherit'};">${formatMoney(remainingDebtAmt)}</strong></div>`
                       : `${isRecTab ? '+' : '-'}${formatMoney(item.amount)}`
                     }
                   </div>
@@ -7509,7 +7555,7 @@
                     <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,${isRecTab ? '#10b981,#059669' : '#e94560,#ff6b6b'});border-radius:2px;transition:width 0.4s ease;"></div>
                   </div>
                   <button class="btn-pay-installment" style="font-size:10px;padding:3px 8px;background:${isRecTab ? 'var(--green)' : 'var(--accent)'};" onclick="event.stopPropagation(); payDebtInstallment(${item.id},'${isRecTab ? 'receivable' : 'payable'}')">
-                    <i class="fas fa-check"></i> ${isRecTab ? 'Taksit Tahsil Et' : 'Taksit Öde'}
+                    <i class="fas fa-check"></i> ${isRecTab ? `${debtTargetMonth ? debtTargetMonth + ' ' : ''}Taksit Tahsil Et` : `${debtTargetMonth ? debtTargetMonth + ' ' : ''}Taksiti Öde`}
                   </button>
                 </div>` : ''}
 
