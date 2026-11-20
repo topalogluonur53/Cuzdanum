@@ -4384,13 +4384,6 @@
             <button type="button" class="record-status-tab" data-expense-status="paid" onclick="setExpenseStatus('paid')">Ödendi</button>
             <button type="button" class="record-status-tab" data-expense-status="all" onclick="setExpenseStatus('all')">Tümü</button>
           </div>
-          <label class="record-sort-control"><i class="fas fa-sort-amount-down"></i>
-            <select id="expense-sort" aria-label="Sabit giderleri sırala" onchange="loadExpenses()">
-              <option value="due">Ödeme günü</option>
-              <option value="name">İsim</option>
-              <option value="amount">Tutar</option>
-            </select>
-          </label>
         </div>
         <div class="expenses-grid" id="expenses-grid-container">
           <!-- Expense Cards injected via JS -->
@@ -6632,12 +6625,7 @@
           const complete = !item.is_active || (item.paid_installments || 0) >= (item.total_installments || 1);
           return expenseStatus === 'all' || (expenseStatus === 'paid' ? complete : !complete);
         });
-        const expenseSort = document.getElementById('expense-sort')?.value || 'due';
-        visibleExpenses.sort((a, b) => {
-          if (expenseSort === 'name') return String(a.title || '').localeCompare(String(b.title || ''), 'tr');
-          if (expenseSort === 'amount') return (Number(b.total_amount) || 0) - (Number(a.total_amount) || 0);
-          return (Number(a.due_day) || 1) - (Number(b.due_day) || 1);
-        });
+        visibleExpenses.sort((a, b) => (Number(a.due_day) || 1) - (Number(b.due_day) || 1));
         if (visibleExpenses.length === 0) {
           container.innerHTML = `<div class="empty-state"><i class="fas ${expenseStatus === 'paid' ? 'fa-check-circle' : 'fa-hourglass-half'}"></i><h4>${expenseStatus === 'paid' ? 'Ödenmiş gider yok' : 'Bekleyen gider yok'}</h4><p>Bu filtrede gösterilecek kayıt bulunmuyor.</p></div>`;
           return;
