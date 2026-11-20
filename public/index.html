@@ -6353,17 +6353,19 @@
               <p>Tüm taksitleriniz tamamlanmış görünüyor.</p>
             </div>`;
         } else {
+          const dashCatIcons = { 'Konut':'🏠','Teknoloji':'💻','Araç':'🚗','Sağlık':'🏥','Eğitim':'📚','Giyim':'👕','Diğer':'📌' };
           installmentsList.innerHTML = installments.map(item => {
             const total = item.total_installments || 1;
             const paid = item.paid_installments || 0;
             const remaining = item.remaining !== undefined ? item.remaining : (total - paid);
             const pct = Math.min(100, Math.round((paid / total) * 100));
             const dashEndDate = calcInstallmentEndDate(item.start_date, total, paid, item.due_day);
+            const cat = item.category || 'Diğer';
 
             return `
               <li class="installment-item-row">
                 <div class="installment-item-header">
-                  <span class="installment-title">${escapeHtml(item.title)}</span>
+                  <span class="installment-title"><span style="margin-right:5px;font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;">${dashCatIcons[cat] || '📌'}</span>${escapeHtml(item.title)}</span>
                   <span class="installment-amount">${formatMoney(item.installment_amount)}/ay</span>
                 </div>
                 <div class="installment-sub">
@@ -6652,6 +6654,7 @@
         }
         container.innerHTML = visibleExpenses.map(item => {
           const cat = item.category || 'Diğer';
+          const badgeClass = categoryBadgeClasses[cat] || 'badge-diger';
           const catIcons = { 'Konut':'🏠','Teknoloji':'💻','Araç':'🚗','Sağlık':'🏥','Eğitim':'📚','Giyim':'👕','Diğer':'📌' };
           const totalInst = item.total_installments || 1;
           const paidInst = item.paid_installments || 0;
@@ -6670,22 +6673,31 @@
 
           return `
             <div class="debt-item-card" style="flex-direction:column;align-items:stretch;gap:9px;padding:12px 14px;border-radius:12px;cursor:pointer;" title="Düzenlemek için tıklayın" onclick="openExpenseModalById(${item.id})">
-              <!-- Başlık ve Aylık / Toplam Tutar -->
-              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
-                <div style="min-width:0;flex:1;">
-                  <div style="font-size:14.5px;font-weight:700;color:var(--text-dark);line-height:1.35;word-break:break-word;">
-                    ${escapeHtml(item.title)}
+              <!-- Başlık, Kategori İkonu ve Aylık / Toplam Tutar -->
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+                <div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1;">
+                  <div class="expense-cat-avatar ${badgeClass}" style="width:36px;height:36px;min-width:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">
+                    <span style="font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;line-height:1;">${catIcons[cat] || '📌'}</span>
                   </div>
-                  ${item.description ? `<div style="font-size:11px;color:var(--text-muted);margin-top:2px;line-height:1.3;"><span aria-hidden="true">${catIcons[cat] || '📌'}</span> ${escapeHtml(item.description)}</div>` : ''}
+                  <div style="min-width:0;flex:1;">
+                    <div style="font-size:14px;font-weight:700;color:var(--text-dark);line-height:1.3;word-break:break-word;">
+                      ${escapeHtml(item.title)}
+                    </div>
+                    <div style="font-size:11px;color:var(--text-muted);margin-top:2px;display:flex;align-items:center;gap:5px;flex-wrap:wrap;line-height:1.2;">
+                      <span class="category-badge ${badgeClass}" style="font-size:9.5px;padding:1.5px 6px;border-radius:6px;font-weight:600;">${escapeHtml(cat)}</span>
+                      <span style="font-size:10.5px;color:var(--text-muted);"><i class="far fa-calendar-alt" style="color:var(--primary);font-size:9.5px;"></i> Her ayın ${item.due_day || 1}'i</span>
+                      ${item.description ? `<span>· ${escapeHtml(item.description)}</span>` : ''}
+                    </div>
+                  </div>
                 </div>
                 <div style="text-align:right;flex-shrink:0;">
-                  <div style="font-size:16px;font-weight:800;color:#dc2626;letter-spacing:-0.3px;line-height:1.2;">
-                    ${formatMoney(item.installment_amount)}<span style="font-size:11px;font-weight:600;color:var(--text-muted);">/ay</span>
+                  <div style="font-size:15.5px;font-weight:800;color:#dc2626;letter-spacing:-0.3px;line-height:1.2;">
+                    ${formatMoney(item.installment_amount)}<span style="font-size:10.5px;font-weight:600;color:var(--text-muted);">/ay</span>
                   </div>
-                  <div style="font-size:10.5px;color:var(--text-muted);margin-top:2px;font-weight:500;">
+                  <div style="font-size:10px;color:var(--text-muted);margin-top:2px;font-weight:500;">
                     Toplam: <strong style="color:var(--text-dark);">${formatMoney(item.total_amount)}</strong>
                   </div>
-                  <div style="font-size:10.5px;color:var(--text-muted);margin-top:1px;font-weight:500;">
+                  <div style="font-size:10px;color:var(--text-muted);margin-top:1px;font-weight:500;">
                     Kalan: <strong style="color:${isComplete ? 'var(--green)' : '#dc2626'};">${formatMoney(remainingAmount)}</strong>
                   </div>
                 </div>
