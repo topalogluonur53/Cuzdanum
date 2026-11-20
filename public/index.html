@@ -1662,6 +1662,16 @@
       border-top: none;
       margin-top: -6px;
     }
+    .card-reorder-handle {
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+      cursor: grab;
+      color: #64748b;
+    }
+    .card-reorder-handle:active { cursor: grabbing; background: #e8edf5; }
+    .card-item-wrapper { transition: opacity .15s ease, transform .15s ease; }
+    .card-item-wrapper.is-reordering { opacity: .55; transform: scale(.98); }
 
     .paid-toggle-box {
       display: flex;
@@ -3893,6 +3903,124 @@
     @media (max-width: 350px) {
       .cards-grid { grid-template-columns: minmax(0, 1fr); }
     }
+    .card-list-toolbar {
+      display: grid;
+      grid-template-columns: max-content minmax(0, 1fr);
+      align-items: center;
+      gap: 7px;
+      padding: 7px 9px;
+      margin-bottom: 10px;
+      border: 1px solid var(--ios-border);
+      border-radius: 14px;
+      background: #fff;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .card-list-toolbar::-webkit-scrollbar { display: none; }
+    .card-list-toolbar .record-status-tabs { gap: 4px; flex-wrap: nowrap; }
+    .card-list-toolbar .record-status-tab {
+      min-height: 29px;
+      padding: 4px 9px;
+      font-size: 10px;
+    }
+    .card-view-controls {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 5px;
+      min-width: 0;
+    }
+    .card-list-toolbar .filter-select {
+      width: 100%;
+      min-width: 66px;
+      max-width: none;
+      min-height: 29px;
+      padding: 4px 6px;
+      border-radius: 9px;
+      font-size: 10px;
+    }
+    @media (max-width: 768px) {
+      .card-list-toolbar { gap: 6px; padding: 6px 7px; }
+      .card-list-toolbar .record-status-tab { padding-inline: 7px; }
+      .card-view-controls { grid-template-columns: repeat(2, minmax(66px, 1fr)); gap: 4px; }
+      .card-list-toolbar .filter-select { padding-inline: 4px; }
+    }
+    @media (max-width: 350px) {
+      .card-list-toolbar .record-status-tab { padding-inline: 5px; font-size: 9px; }
+      .card-view-controls { grid-template-columns: repeat(2, minmax(60px, 1fr)); }
+      .card-list-toolbar .filter-select { min-width: 60px; font-size: 9px; }
+    }
+    @media (max-width: 800px) and (max-height: 850px) {
+      #modal-expense .modal {
+        display: flex !important;
+        flex-direction: column !important;
+        height: calc(100dvh - 8px) !important;
+        max-height: calc(100dvh - 8px) !important;
+        overflow: hidden !important;
+        overflow-y: clip !important;
+        scrollbar-width: none;
+        box-sizing: border-box !important;
+      }
+      #modal-expense .modal::-webkit-scrollbar { display: none; }
+      #modal-expense .modal-header { flex: 0 0 auto; padding: 6px 12px 5px !important; }
+      #modal-expense .modal-form {
+        display: flex !important;
+        flex: 1 1 auto;
+        flex-direction: column;
+        min-height: 0;
+        overflow: hidden !important;
+        padding: 3px 10px 2px !important;
+      }
+      #modal-expense .modal-hero-amount { padding: 3px 8px; margin-bottom: 4px; }
+      #modal-expense .hero-amount-label { font-size: 9px; line-height: 1.1; }
+      #modal-expense .hero-amount-input { font-size: 17px !important; line-height: 1.15; }
+      #modal-expense .hero-amount-input-wrap .currency { font-size: 17px; }
+      #modal-expense .live-monthly-pill { margin-top: 2px; padding: 2px 6px; font-size: 9px; }
+      #modal-expense .modal-form > div[style*="margin-bottom:10px"] { margin-bottom: 4px !important; }
+      #modal-expense .chips-label-row { margin-bottom: 2px !important; }
+      #modal-expense .category-chips-scroll { max-height: 29px; margin-bottom: 2px; padding: 0 1px 2px; }
+      #modal-expense .category-chip { min-height: 26px; padding: 3px 7px; font-size: 9px; }
+      #modal-expense .modern-form-group { margin-bottom: 4px; }
+      #modal-expense .modern-field-row { padding: 3px 7px; gap: 6px; }
+      #modal-expense .modern-field-icon { width: 23px; height: 23px; }
+      #modal-expense .modern-field-label { margin-bottom: 0; font-size: 9px; line-height: 1.15; }
+      #modal-expense .modern-field-input { font-size: 12px; line-height: 1.2; }
+      #modal-expense .expense-description-row,
+      #modal-expense .expense-description-divider { display: none !important; }
+      #modal-expense .modern-form-group:has(#expense-title) .modern-field-row:has(#expense-title) { min-height: 42px; }
+      #modal-expense .installment-chips-row { gap: 3px; margin: 2px 0 4px; }
+      #modal-expense .inst-chip { min-height: 25px; padding: 2px 1px; font-size: 9px; }
+      #modal-expense .modal-form > div[style*="grid-template-columns:1fr 1fr"] {
+        gap: 5px !important;
+        margin-top: 2px !important;
+      }
+      #modal-expense .modal-form > div[style*="grid-template-columns:1fr 1fr"] .modern-field-row { padding: 3px 6px !important; }
+      #modal-expense .modal-form > div[style*="grid-template-columns:1fr 1fr"] .modern-field-input { font-size: 12px; }
+      #modal-expense .modal-form > .modern-form-group:last-of-type {
+        display: grid;
+        grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr);
+        align-items: stretch;
+        margin-bottom: 3px;
+      }
+      #modal-expense .modal-form > .modern-form-group:last-of-type > .modern-field-divider { display: none; }
+      #modal-expense .modal-form > .modern-form-group:last-of-type > .modern-field-row {
+        min-width: 0;
+        align-items: flex-start;
+        padding: 4px 5px;
+      }
+      #modal-expense .modal-form > .modern-form-group:last-of-type > .modern-field-row + .modern-field-row { border-left: 1px solid #f1f5f9; }
+      #modal-expense .modal-form > .modern-form-group:last-of-type .modern-field-content { min-width: 0; }
+      #modal-expense .modal-form > .modern-form-group:last-of-type #expense-due-day { min-height: 29px; margin-top: 2px !important; padding: 3px 6px !important; font-size: 11px !important; }
+      #modal-expense #expense-start-date { min-width: 0; font-size: 12px !important; }
+      #modal-expense .modal-actions-modern {
+        flex: 0 0 auto;
+        margin-top: auto;
+        padding: 4px 2px max(4px, env(safe-area-inset-bottom)) !important;
+        position: static;
+        box-shadow: none;
+      }
+      #modal-expense .btn-modern-cancel,
+      #modal-expense .btn-modern-save { min-height: 38px; padding: 6px 12px; }
+    }
   </style>
 </head>
 <body>
@@ -4212,24 +4340,15 @@
            ====================================================================== -->
       <section class="page-section" data-page="cards">
         <!-- Filtreleme Çubuğu -->
-        <div class="filter-bar">
+        <div class="filter-bar card-list-toolbar">
           <div class="record-status-tabs" role="group" aria-label="Kart borcu durumu">
             <button type="button" class="record-status-tab active" data-card-status="open" onclick="setCardStatus('open')">Bekleyen</button>
             <button type="button" class="record-status-tab" data-card-status="paid" onclick="setCardStatus('paid')">Ödendi</button>
             <button type="button" class="record-status-tab" data-card-status="all" onclick="setCardStatus('all')">Tümü</button>
           </div>
-          <div class="filter-group record-sort-group">
-            <label for="card-sort"><i class="fas fa-sort-amount-down"></i></label>
-            <select id="card-sort" class="filter-select" aria-label="Kartları sırala" onchange="filterCards()">
-              <option value="due">Vade tarihi</option>
-              <option value="amount">Borç tutarı</option>
-              <option value="name">Kart adı</option>
-            </select>
-          </div>
-          <div class="filter-group">
-            <label for="card-filter-month"><i class="fas fa-calendar-alt"></i> Dönem Ayı:</label>
+          <div class="card-view-controls">
             <select id="card-filter-month" class="filter-select" onchange="filterCards()">
-              <option value="">Tüm Aylar</option>
+              <option value="">Ay: Tümü</option>
               <option value="1">Ocak</option>
               <option value="2">Şubat</option>
               <option value="3">Mart</option>
@@ -4243,12 +4362,8 @@
               <option value="11">Kasım</option>
               <option value="12">Aralık</option>
             </select>
-          </div>
-
-          <div class="filter-group">
-            <label for="card-filter-year">Yıl:</label>
             <select id="card-filter-year" class="filter-select" onchange="filterCards()">
-              <option value="">Tüm Yıllar</option>
+              <option value="">Yıl: Tümü</option>
               <option value="2024">2024</option>
               <option value="2025">2025</option>
               <option value="2026">2026</option>
@@ -4607,8 +4722,8 @@
               <input type="text" id="expense-title" class="modern-field-input" placeholder="Örn: iPhone 15 Taksiti, Ev Kirası" required>
             </div>
           </div>
-          <div class="modern-field-divider"></div>
-          <div class="modern-field-row">
+          <div class="modern-field-divider expense-description-divider"></div>
+          <div class="modern-field-row expense-description-row">
             <div class="modern-field-icon"><i class="fas fa-align-left"></i></div>
             <div class="modern-field-content">
               <label class="modern-field-label">AÇIKLAMA (İSTEĞE BAĞLI)</label>
@@ -5392,6 +5507,7 @@
     let currentDebtTab = 'receivables'; // 'receivables' or 'payables'
     let selectedNoteColor = '#fff9c4';
     let cachedCards = [];
+    let cardReorderState = null;
     let cachedExpenses = [];
     let expenseStatus = 'open';
     let cardStatus = 'open';
@@ -6584,7 +6700,7 @@
       }
     }
 
-    function filterCards() {
+    function filterCards(preserveScroll = false) {
       const month = document.getElementById('card-filter-month').value;
       const year = document.getElementById('card-filter-year').value;
 
@@ -6596,16 +6712,19 @@
         filtered = filtered.filter(c => String(c.period_year) === String(year));
       }
 
-      const sort = document.getElementById('card-sort')?.value || 'due';
+      const savedOrder = getSavedCardOrder();
+      const orderIndex = new Map(savedOrder.map((id, index) => [String(id), index]));
       filtered.sort((a, b) => {
-        if (sort === 'amount') return (Number(b.debt_amount) || 0) - (Number(a.debt_amount) || 0);
-        if (sort === 'name') return String(a.card_name || '').localeCompare(String(b.card_name || ''), 'tr');
-        return String(a.due_date || '9999-12-31').localeCompare(String(b.due_date || '9999-12-31'));
+        const aIndex = orderIndex.has(String(a.id)) ? orderIndex.get(String(a.id)) : Number.MAX_SAFE_INTEGER;
+        const bIndex = orderIndex.has(String(b.id)) ? orderIndex.get(String(b.id)) : Number.MAX_SAFE_INTEGER;
+        return aIndex - bIndex || String(a.due_date || '9999-12-31').localeCompare(String(b.due_date || '9999-12-31'));
       });
 
       const list = document.getElementById('cards-grid-container');
-      if (list) list.scrollTop = 0;
+      const previousScrollTop = list?.scrollTop || 0;
+      if (list && !preserveScroll) list.scrollTop = 0;
       renderCards(filtered);
+      if (list && preserveScroll) list.scrollTop = previousScrollTop;
     }
 
     function renderCards(cards) {
@@ -6628,7 +6747,7 @@
         const isOverdue = !isPaid && c.due_date && c.due_date < today;
 
         return `
-          <div class="card-item-wrapper">
+          <div class="card-item-wrapper" data-card-id="${c.id}">
             <div class="credit-card-visual ${bankClass} ${isPaid ? 'paid' : ''}">
               <div class="credit-card-top">
                 <div>
@@ -6674,6 +6793,10 @@
               </label>
 
               <div style="display: flex; gap: 4px;">
+                <button type="button" class="btn-action-icon card-reorder-handle" title="Sürükleyerek sırala" aria-label="Kartı sürükleyerek sırala"
+                  onpointerdown="startCardReorder(event, ${c.id})" onpointermove="moveCardReorder(event)" onpointerup="finishCardReorder(event)" onpointercancel="finishCardReorder(event)">
+                  <i class="fas fa-grip-lines"></i>
+                </button>
                 <button class="btn-action-icon" title="Düzenle" onclick='openCardModal(${JSON.stringify(c)})'>
                   <i class="fas fa-pen"></i>
                 </button>
@@ -6684,6 +6807,64 @@
             </div>
           </div>`;
       }).join('');
+    }
+
+    function cardOrderStorageKey() {
+      return `cuzdanim_card_order_${currentUser?.id || 'default'}`;
+    }
+
+    function getSavedCardOrder() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(cardOrderStorageKey()) || '[]');
+        return Array.isArray(saved) ? saved.map(String) : [];
+      } catch (_) {
+        return [];
+      }
+    }
+
+    function startCardReorder(event, cardId) {
+      if (event.button !== undefined && event.button !== 0) return;
+      event.preventDefault();
+      event.stopPropagation();
+      const wrapper = event.currentTarget.closest('.card-item-wrapper');
+      if (!wrapper) return;
+      cardReorderState = { cardId: String(cardId), wrapper, pointerId: event.pointerId };
+      wrapper.classList.add('is-reordering');
+      try { event.currentTarget.setPointerCapture(event.pointerId); } catch (_) {}
+    }
+
+    function moveCardReorder(event) {
+      if (!cardReorderState || cardReorderState.pointerId !== event.pointerId) return;
+      event.preventDefault();
+      const list = document.getElementById('cards-grid-container');
+      const listRect = list?.getBoundingClientRect();
+      if (list && listRect) {
+        if (event.clientY < listRect.top + 42) list.scrollTop -= 12;
+        else if (event.clientY > listRect.bottom - 42) list.scrollTop += 12;
+      }
+      const target = document.elementFromPoint(event.clientX, event.clientY)?.closest('.card-item-wrapper');
+      if (!target || target === cardReorderState.wrapper || target.parentElement !== cardReorderState.wrapper.parentElement) return;
+      const rect = target.getBoundingClientRect();
+      const sameRow = event.clientY >= rect.top + rect.height * .3 && event.clientY <= rect.bottom - rect.height * .3;
+      const insertBefore = sameRow ? event.clientX < rect.left + rect.width / 2 : event.clientY < rect.top + rect.height / 2;
+      if (insertBefore) target.parentElement.insertBefore(cardReorderState.wrapper, target);
+      else target.parentElement.insertBefore(cardReorderState.wrapper, target.nextSibling);
+    }
+
+    function finishCardReorder(event) {
+      if (!cardReorderState || (event.pointerId !== undefined && cardReorderState.pointerId !== event.pointerId)) return;
+      const list = document.getElementById('cards-grid-container');
+      cardReorderState.wrapper.classList.remove('is-reordering');
+      const visibleIds = [...list.querySelectorAll('.card-item-wrapper[data-card-id]')].map(el => el.dataset.cardId);
+      const visibleSet = new Set(visibleIds);
+      const existingIds = new Set(cachedCards.map(card => String(card.id)));
+      const fullOrder = getSavedCardOrder().filter(id => existingIds.has(id));
+      cachedCards.forEach(card => { if (!fullOrder.includes(String(card.id))) fullOrder.push(String(card.id)); });
+      let visibleIndex = 0;
+      const nextOrder = fullOrder.map(id => visibleSet.has(id) ? visibleIds[visibleIndex++] : id);
+      try { localStorage.setItem(cardOrderStorageKey(), JSON.stringify(nextOrder)); } catch (_) {}
+      cardReorderState = null;
+      filterCards(true);
     }
 
     async function toggleCardPaid(id, isPaid) {
