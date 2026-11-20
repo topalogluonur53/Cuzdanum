@@ -5750,6 +5750,54 @@
       return targetYear !== curYear ? `${monthName} ${targetYear}` : monthName;
     }
 
+    function isExpensePaidForCurrentMonth(item) {
+      const totalInst = parseInt(item.total_installments) || 1;
+      const paidInst = parseInt(item.paid_installments) || 0;
+
+      // Tamamen bitmiş veya pasif ise ödenmiş kabul edilir
+      if (!item.is_active || paidInst >= totalInst) {
+        return true;
+      }
+
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const currentMonth = now.getMonth();
+
+      // Sıradaki ödenecek taksitin ait olduğu tarihi hesapla
+      let nextDueDate;
+      if (item.start_date) {
+        const parts = String(item.start_date).split('-');
+        if (parts.length === 3) {
+          nextDueDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(item.due_day) || parseInt(parts[2]) || 1);
+          nextDueDate.setMonth(nextDueDate.getMonth() + paidInst);
+        }
+      }
+
+      if (!nextDueDate || isNaN(nextDueDate.getTime())) {
+        return paidInst > 0;
+      }
+
+      const nextDueYear = nextDueDate.getFullYear();
+      const nextDueMonth = nextDueDate.getMonth();
+
+      // Sıradaki taksit bu aydan sonraya denk geliyorsa bu ayın taksiti ÖDENMİŞTİR
+      if (nextDueYear > currentYear || (nextDueYear === currentYear && nextDueMonth > currentMonth)) {
+        return true;
+      }
+
+      return false;
+    }
+
+    function hasExpenseStartedByCurrentMonth(item) {
+      if (!item.start_date) return true;
+      const parts = String(item.start_date).split('-');
+      if (parts.length !== 3) return true;
+      const startDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, 1);
+      const now = new Date();
+      const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      return startDate <= currentMonthStart;
+    }
+
     function escapeHtml(text) {
       if (!text) return '';
       return String(text)
@@ -6644,12 +6692,26 @@
         if (remainingEl) remainingEl.textContent = formatMoney(remainingTotal);
 
         let visibleExpenses = cachedExpenses.filter(item => {
-          const complete = !item.is_active || (item.paid_installments || 0) >= (item.total_installments || 1);
-          return expenseStatus === 'all' || (expenseStatus === 'paid' ? complete : !complete);
+          const isPaidThisMonth = isExpensePaidForCurrentMonth(item);
+          const hasStarted = hasExpenseStartedByCurrentMonth(item);
+
+          if (expenseStatus === 'all') return true;
+          if (expenseStatus === 'paid') {
+            return isPaidThisMonth && hasStarted;
+          }
+          // 'open' (Bekleyen): Bu aya ait olup ödenmemiş olanlar
+          return !isPaidThisMonth && hasStarted;
         });
         visibleExpenses.sort((a, b) => (Number(a.due_day) || 1) - (Number(b.due_day) || 1));
         if (visibleExpenses.length === 0) {
-          container.innerHTML = `<div class="empty-state"><i class="fas ${expenseStatus === 'paid' ? 'fa-check-circle' : 'fa-hourglass-half'}"></i><h4>${expenseStatus === 'paid' ? 'Ödenmiş gider yok' : 'Bekleyen gider yok'}</h4><p>Bu filtrede gösterilecek kayıt bulunmuyor.</p></div>`;
+          const emptyIcon = expenseStatus === 'paid' ? 'fa-wallet' : 'fa-check-circle';
+          const emptyTitle = expenseStatus === 'paid' ? 'Bu Ay Ödenmiş Gider Yok' : expenseStatus === 'open' ? 'Bekleyen Gider Yok' : 'Kayıtlı Gider Yok';
+          const emptyDesc = expenseStatus === 'open'
+            ? '🎉 Harika! Bu aya ait tüm sabit gider ve taksit ödemeleriniz tamamlandı.'
+            : expenseStatus === 'paid'
+              ? 'Bu ay için henüz ödenmiş bir taksit veya gider kaydı bulunmuyor.'
+              : 'Henüz bir sabit gider kaydı eklenmedi.';
+          container.innerHTML = `<div class="empty-state"><i class="fas ${emptyIcon}"></i><h4>${emptyTitle}</h4><p>${emptyDesc}</p></div>`;
           return;
         }
         container.innerHTML = visibleExpenses.map(item => {
@@ -6659,6 +6721,7 @@
           const totalInst = item.total_installments || 1;
           const paidInst = item.paid_installments || 0;
           const isComplete = paidInst >= totalInst;
+          const isThisMonthPaid = isExpensePaidForCurrentMonth(item);
           const pct = Math.min(100, Math.round((paidInst / totalInst) * 100));
           const remaining = Math.max(0, totalInst - paidInst);
           const endDate = calcInstallmentEndDate(item.start_date, totalInst, paidInst, item.due_day);
@@ -6686,6 +6749,7 @@
                     <div style="font-size:11px;color:var(--text-muted);margin-top:2px;display:flex;align-items:center;gap:5px;flex-wrap:wrap;line-height:1.2;">
                       <span class="category-badge ${badgeClass}" style="font-size:9.5px;padding:1.5px 6px;border-radius:6px;font-weight:600;">${escapeHtml(cat)}</span>
                       <span style="font-size:10.5px;color:var(--text-muted);"><i class="far fa-calendar-alt" style="color:var(--primary);font-size:9.5px;"></i> Her ayın ${item.due_day || 1}'i</span>
+                      ${isThisMonthPaid ? `<span class="category-badge badge-saglik" style="font-size:9px;padding:1px 6px;border-radius:6px;font-weight:600;"><i class="fas fa-check"></i> ${isComplete ? 'Tamamlandı' : 'Bu Ay Ödendi'}</span>` : ''}
                       ${item.description ? `<span>· ${escapeHtml(item.description)}</span>` : ''}
                     </div>
                   </div>
