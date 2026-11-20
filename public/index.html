@@ -6783,14 +6783,20 @@
                 <div style="height:5px;background:#e2e8f0;border-radius:3px;overflow:hidden;margin-bottom:7px;">
                   <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#10b981,#059669);border-radius:3px;transition:width 0.4s ease;"></div>
                 </div>
-                <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">
                   <span style="font-size:10.5px;color:var(--text-muted);font-weight:600;">
                     %${pct} tamamlandı
                   </span>
-                  <button class="btn-pay-installment" style="font-size:11px;padding:4px 10px;border-radius:6px;font-weight:600;display:inline-flex;align-items:center;gap:4px;background:${isComplete ? '#cbd5e1' : 'var(--green)'};color:${isComplete ? '#64748b' : '#fff'};cursor:${isComplete ? 'default' : 'pointer'};" ${isComplete ? 'disabled' : ''} onclick="event.stopPropagation(); payExpenseInstallment(${item.id})">
-                    <i class="fas ${isComplete ? 'fa-check' : 'fa-plus'}"></i>
-                    ${isComplete ? 'Tamamlandı' : `${targetMonthName} ${totalInst > 1 ? 'Taksiti' : ''} Öde`}
-                  </button>
+                  <div style="display:flex;align-items:center;gap:6px;">
+                    ${paidInst > 0 ? `
+                      <button type="button" class="btn-unpay-installment" style="font-size:10.5px;padding:4px 8px;border-radius:6px;font-weight:600;display:inline-flex;align-items:center;gap:3px;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;cursor:pointer;" title="Son yapılan taksit ödemesini geri al" onclick="event.stopPropagation(); unpayExpenseInstallment(${item.id})">
+                        <i class="fas fa-undo-alt" style="font-size:9.5px;"></i> Geri Al
+                      </button>` : ''}
+                    <button class="btn-pay-installment" style="font-size:11px;padding:4px 10px;border-radius:6px;font-weight:600;display:inline-flex;align-items:center;gap:4px;background:${isComplete ? '#cbd5e1' : 'var(--green)'};color:${isComplete ? '#64748b' : '#fff'};cursor:${isComplete ? 'default' : 'pointer'};" ${isComplete ? 'disabled' : ''} onclick="event.stopPropagation(); payExpenseInstallment(${item.id})">
+                      <i class="fas ${isComplete ? 'fa-check' : 'fa-plus'}"></i>
+                      ${isComplete ? 'Tamamlandı' : `${targetMonthName} ${totalInst > 1 ? 'Taksiti' : ''} Öde`}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>`;
@@ -6804,6 +6810,16 @@
       try {
         await api('/api/expenses/' + id + '/pay', { method: 'PUT' });
         showToast('Taksit ödemesi kaydedildi!');
+        loadExpenses();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function unpayExpenseInstallment(id) {
+      try {
+        await api('/api/expenses/' + id + '/unpay', { method: 'PUT' });
+        showToast('Son taksit ödemesi geri alındı.');
         loadExpenses();
       } catch (err) {
         showToast(err.message, 'error');
@@ -7630,9 +7646,15 @@
                   <div style="height:4px;background:#e2e8f0;border-radius:2px;overflow:hidden;margin-bottom:6px;">
                     <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,${isRecTab ? '#10b981,#059669' : '#e94560,#ff6b6b'});border-radius:2px;transition:width 0.4s ease;"></div>
                   </div>
-                  <button class="btn-pay-installment" style="font-size:10px;padding:3px 8px;background:${isRecTab ? 'var(--green)' : 'var(--accent)'};" onclick="event.stopPropagation(); payDebtInstallment(${item.id},'${isRecTab ? 'receivable' : 'payable'}')">
-                    <i class="fas fa-check"></i> ${isRecTab ? `${debtTargetMonth ? debtTargetMonth + ' ' : ''}Taksit Tahsil Et` : `${debtTargetMonth ? debtTargetMonth + ' ' : ''}Taksiti Öde`}
-                  </button>
+                  <div style="display:flex;align-items:center;justify-content:flex-end;gap:6px;">
+                    ${paidInst > 0 ? `
+                      <button type="button" class="btn-unpay-installment" style="font-size:9.5px;padding:3px 7px;border-radius:4px;font-weight:600;display:inline-flex;align-items:center;gap:3px;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;cursor:pointer;" title="Son taksit işlemini geri al" onclick="event.stopPropagation(); unpayDebtInstallment(${item.id},'${isRecTab ? 'receivable' : 'payable'}')">
+                        <i class="fas fa-undo-alt" style="font-size:9px;"></i> Geri Al
+                      </button>` : ''}
+                    <button class="btn-pay-installment" style="font-size:10px;padding:3px 8px;background:${isRecTab ? 'var(--green)' : 'var(--accent)'};" onclick="event.stopPropagation(); payDebtInstallment(${item.id},'${isRecTab ? 'receivable' : 'payable'}')">
+                      <i class="fas fa-check"></i> ${isRecTab ? `${debtTargetMonth ? debtTargetMonth + ' ' : ''}Taksit Tahsil Et` : `${debtTargetMonth ? debtTargetMonth + ' ' : ''}Taksiti Öde`}
+                    </button>
+                  </div>
                 </div>` : ''}
 
               ${!isInst && !isSettled ? `
@@ -7653,6 +7675,17 @@
         const endpoint = type === 'receivable' ? '/api/receivables/' : '/api/payables/';
         await api(endpoint + id + '/pay-installment', { method: 'PUT' });
         showToast(type === 'receivable' ? 'Taksit tahsil edildi!' : 'Taksit ödendi!');
+        loadDebts();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function unpayDebtInstallment(id, type) {
+      try {
+        const endpoint = type === 'receivable' ? '/api/receivables/' : '/api/payables/';
+        await api(endpoint + id + '/unpay-installment', { method: 'PUT' });
+        showToast('Son taksit işlemi geri alındı.');
         loadDebts();
       } catch (err) {
         showToast(err.message, 'error');

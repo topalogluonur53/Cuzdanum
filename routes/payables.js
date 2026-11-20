@@ -144,4 +144,34 @@ router.put('/:id/pay-installment', (req, res) => {
   }
 });
 
+// PUT /api/payables/:id/unpay-installment — Taksit ödemesini geri al
+router.put('/:id/unpay-installment', (req, res) => {
+  try {
+    const { id } = req.params;
+    const item = db.prepare('SELECT * FROM payables WHERE id = ? AND user_id = ?').get(id, req.user.id);
+    if (!item) {
+      return res.status(404).json({ error: 'Verecek bulunamadı' });
+    }
+
+    if (!item.is_installment) {
+      return res.status(400).json({ error: 'Bu kayıt taksitli değil' });
+    }
+
+    if (item.paid_installments <= 0) {
+      return res.status(400).json({ error: 'Geri alınacak ödenmiş taksit bulunmuyor' });
+    }
+
+    const newPaid = Math.max(0, item.paid_installments - 1);
+    const isComplete = 0;
+
+    db.prepare('UPDATE payables SET paid_installments = ?, is_paid = ? WHERE id = ? AND user_id = ?')
+      .run(newPaid, isComplete, id, req.user.id);
+
+    const updated = db.prepare('SELECT * FROM payables WHERE id = ?').get(id);
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: 'Sunucu hatası: ' + err.message });
+  }
+});
+
 module.exports = router;

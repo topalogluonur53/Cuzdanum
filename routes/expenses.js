@@ -113,4 +113,30 @@ router.put('/:id/pay', (req, res) => {
   }
 });
 
+// PUT /api/expenses/:id/unpay — Taksit ödemesini geri al
+router.put('/:id/unpay', (req, res) => {
+  try {
+    const { id } = req.params;
+    const expense = db.prepare('SELECT * FROM fixed_expenses WHERE id = ? AND user_id = ?').get(id, req.user.id);
+    if (!expense) {
+      return res.status(404).json({ error: 'Gider bulunamadı' });
+    }
+
+    if (expense.paid_installments <= 0) {
+      return res.status(400).json({ error: 'Geri alınacak ödenmiş taksit bulunmuyor' });
+    }
+
+    const newPaid = Math.max(0, expense.paid_installments - 1);
+    const isActive = 1;
+
+    db.prepare('UPDATE fixed_expenses SET paid_installments = ?, is_active = ? WHERE id = ? AND user_id = ?')
+      .run(newPaid, isActive, id, req.user.id);
+
+    const updated = db.prepare('SELECT * FROM fixed_expenses WHERE id = ?').get(id);
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: 'Sunucu hatası: ' + err.message });
+  }
+});
+
 module.exports = router;
