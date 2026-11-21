@@ -5708,42 +5708,31 @@
       return d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
     }
 
+    function getExpenseInstallmentDate(startDateStr, installmentIndex, dueDay) {
+      const parts = startDateStr ? String(startDateStr).split('-') : [];
+      const validStart = parts.length === 3 && !isNaN(Date.parse(`${parts[0]}-${parts[1]}-${parts[2]}`));
+      const now = new Date();
+      const baseYear = validStart ? parseInt(parts[0]) : now.getFullYear();
+      const baseMonth = validStart ? parseInt(parts[1]) - 1 : now.getMonth();
+      const baseDay = validStart ? (parseInt(dueDay) || parseInt(parts[2]) || 1) : (parseInt(dueDay) || now.getDate());
+      const targetMonth = baseMonth + (parseInt(installmentIndex) || 0);
+      const year = baseYear + Math.floor(targetMonth / 12);
+      const month = ((targetMonth % 12) + 12) % 12;
+      const day = Math.min(Math.max(1, baseDay), new Date(year, month + 1, 0).getDate());
+      return new Date(year, month, day);
+    }
+
     function calcInstallmentEndDate(startDateStr, totalInst, paidInst, dueDay) {
       const total = parseInt(totalInst) || 1;
       const paid = parseInt(paidInst) || 0;
-      const rem = Math.max(0, total - paid);
-      if (rem === 0) return 'Tamamlandı';
+      if (paid >= total) return 'Tamamlandı';
 
-      let baseDate;
-      if (startDateStr) {
-        const parts = String(startDateStr).split('-');
-        if (parts.length === 3) {
-          baseDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(dueDay) || parseInt(parts[2]) || 1);
-          baseDate.setMonth(baseDate.getMonth() + (total - 1));
-        }
-      }
-      if (!baseDate || isNaN(baseDate.getTime())) {
-        const now = new Date();
-        baseDate = new Date(now.getFullYear(), now.getMonth() + (rem - 1), parseInt(dueDay) || now.getDate());
-      }
-
+      const baseDate = getExpenseInstallmentDate(startDateStr, total - 1, dueDay);
       return baseDate.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' });
     }
 
     function getInstallmentTargetMonthName(startDateStr, paidInst, dueDay) {
-      const paid = parseInt(paidInst) || 0;
-      let targetDate;
-      if (startDateStr) {
-        const parts = String(startDateStr).split('-');
-        if (parts.length === 3) {
-          targetDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(dueDay) || parseInt(parts[2]) || 1);
-          targetDate.setMonth(targetDate.getMonth() + paid);
-        }
-      }
-      if (!targetDate || isNaN(targetDate.getTime())) {
-        const now = new Date();
-        targetDate = new Date(now.getFullYear(), now.getMonth(), parseInt(dueDay) || now.getDate());
-      }
+      const targetDate = getExpenseInstallmentDate(startDateStr, paidInst, dueDay);
       const curYear = new Date().getFullYear();
       const targetYear = targetDate.getFullYear();
       const monthName = targetDate.toLocaleDateString('tr-TR', { month: 'long' });
@@ -5754,8 +5743,8 @@
       const totalInst = parseInt(item.total_installments) || 1;
       const paidInst = parseInt(item.paid_installments) || 0;
 
-      // Tamamen bitmiş veya pasif ise ödenmiş kabul edilir
-      if (!item.is_active || paidInst >= totalInst) {
+      // A completed expense is paid for every month.
+      if (paidInst >= totalInst) {
         return true;
       }
 
@@ -5763,24 +5752,13 @@
       const currentYear = now.getFullYear();
       const currentMonth = now.getMonth();
 
-      // Sıradaki ödenecek taksitin ait olduğu tarihi hesapla
-      let nextDueDate;
-      if (item.start_date) {
-        const parts = String(item.start_date).split('-');
-        if (parts.length === 3) {
-          nextDueDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(item.due_day) || parseInt(parts[2]) || 1);
-          nextDueDate.setMonth(nextDueDate.getMonth() + paidInst);
-        }
-      }
-
-      if (!nextDueDate || isNaN(nextDueDate.getTime())) {
-        return paidInst > 0;
-      }
+      // Find the due month of the next unpaid installment.
+      const nextDueDate = getExpenseInstallmentDate(item.start_date, paidInst, item.due_day);
 
       const nextDueYear = nextDueDate.getFullYear();
       const nextDueMonth = nextDueDate.getMonth();
 
-      // Sıradaki taksit bu aydan sonraya denk geliyorsa bu ayın taksiti ÖDENMİŞTİR
+      // If the next installment is in a future month, this month's installment is paid.
       if (nextDueYear > currentYear || (nextDueYear === currentYear && nextDueMonth > currentMonth)) {
         return true;
       }
