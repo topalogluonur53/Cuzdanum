@@ -6786,9 +6786,11 @@
 
     async function payExpenseInstallment(id) {
       try {
-        await api('/api/expenses/' + id + '/pay', { method: 'PUT' });
+        const now = new Date();
+        const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        await api('/api/expenses/' + id + '/pay', { method: 'PUT', body: JSON.stringify({ current_month: currentMonth }) });
         showToast('Taksit ödemesi kaydedildi!');
-        loadExpenses();
+        await loadExpenses();
       } catch (err) {
         showToast(err.message, 'error');
       }
@@ -6798,7 +6800,7 @@
       try {
         await api('/api/expenses/' + id + '/unpay', { method: 'PUT' });
         showToast('Son taksit ödemesi geri alındı.');
-        loadExpenses();
+        await loadExpenses();
       } catch (err) {
         showToast(err.message, 'error');
       }

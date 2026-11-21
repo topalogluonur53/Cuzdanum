@@ -100,7 +100,25 @@ router.put('/:id/pay', (req, res) => {
       return res.status(400).json({ error: 'Tüm taksitler zaten ödenmiş' });
     }
 
-    const newPaid = expense.paid_installments + 1;
+    const paidInstallments = Number(expense.paid_installments) || 0;
+    const totalInstallments = Number(expense.total_installments) || 1;
+    const currentMonthParts = String(req.body && req.body.current_month || '').match(/^(\d{4})-(\d{2})$/);
+    const parsedYear = currentMonthParts ? Number(currentMonthParts[1]) : 0;
+    const parsedMonth = currentMonthParts ? Number(currentMonthParts[2]) : 0;
+    const requestedMonth = currentMonthParts && parsedMonth >= 1 && parsedMonth <= 12
+      ? [parsedYear, parsedMonth]
+      : [new Date().getFullYear(), new Date().getMonth() + 1];
+    const startParts = String(expense.start_date || '').split('-').map(Number);
+    let currentInstallmentIndex = 0;
+    if (startParts.length === 3 && startParts.every(Number.isFinite) && startParts[1] >= 1 && startParts[1] <= 12) {
+      currentInstallmentIndex = Math.max(0,
+        (requestedMonth[0] - startParts[0]) * 12 + (requestedMonth[1] - startParts[1]));
+    }
+
+    // Bring a behind schedule up to the installment for the month being paid.
+    // This makes the next unpaid installment advance to the following month.
+    const newPaid = Math.min(totalInstallments,
+      Math.max(paidInstallments + 1, currentInstallmentIndex + 1));
     const isActive = newPaid < expense.total_installments ? 1 : 0;
 
     db.prepare('UPDATE fixed_expenses SET paid_installments = ?, is_active = ? WHERE id = ? AND user_id = ?')
