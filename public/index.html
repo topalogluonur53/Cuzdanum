@@ -6727,7 +6727,7 @@
                     <div style="font-size:11px;color:var(--text-muted);margin-top:2px;display:flex;align-items:center;gap:5px;flex-wrap:wrap;line-height:1.2;">
                       <span class="category-badge ${badgeClass}" style="font-size:9.5px;padding:1.5px 6px;border-radius:6px;font-weight:600;">${escapeHtml(cat)}</span>
                       <span style="font-size:10.5px;color:var(--text-muted);"><i class="far fa-calendar-alt" style="color:var(--primary);font-size:9.5px;"></i> Her ayın ${item.due_day || 1}'i</span>
-                      ${isThisMonthPaid ? `<span class="category-badge badge-saglik" style="font-size:9px;padding:1px 6px;border-radius:6px;font-weight:600;"><i class="fas fa-check"></i> ${isComplete ? 'Tamamlandı' : 'Bu Ay Ödendi'}</span>` : ''}
+                      ${isThisMonthPaid ? `<span class="category-badge badge-saglik" style="font-size:9px;padding:1px 6px;border-radius:6px;font-weight:600;"><i class="fas fa-check"></i> ${isComplete ? 'Tamamlandı' : `${targetMonthName} taksiti sırada`}</span>` : ''}
                       ${item.description ? `<span>· ${escapeHtml(item.description)}</span>` : ''}
                     </div>
                   </div>
