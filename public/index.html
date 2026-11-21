@@ -4368,16 +4368,6 @@
           </div>
         </div>
 
-        <div class="page-header-row" style="margin-bottom: 12px;">
-          <div>
-            <h2 class="page-main-title" style="margin-bottom: 2px;">
-              <i class="fas fa-file-invoice-dollar text-red"></i>
-              Sabit Giderler & Taksitler
-            </h2>
-            <span style="font-size: 11.5px; color: var(--text-muted);">Düzenli aylık ödemeler ve taksitler</span>
-          </div>
-        </div>
-
         <div class="records-toolbar">
           <div class="record-status-tabs" role="group" aria-label="Sabit gider durumu">
             <button type="button" class="record-status-tab active" data-expense-status="open" onclick="setExpenseStatus('open')">Bekleyen</button>
@@ -4394,6 +4384,16 @@
            E. KART BORÇLARI (data-page="cards")
            ====================================================================== -->
       <section class="page-section" data-page="cards">
+        <div class="debt-stat-card payable" style="margin-bottom:12px;max-width:420px;">
+          <div>
+            <div class="summary-label">Aylık Toplam Borç</div>
+            <div class="summary-value text-red" id="cards-monthly-total">₺0,00</div>
+          </div>
+          <div class="summary-icon-box" style="background:var(--red-light);color:var(--red);">
+            <i class="fas fa-credit-card"></i>
+          </div>
+        </div>
+
         <!-- Filtreleme Çubuğu -->
         <div class="filter-bar card-list-toolbar">
           <div class="record-status-tabs" role="group" aria-label="Kart borcu durumu">
@@ -6953,6 +6953,19 @@
     function filterCards(preserveScroll = false) {
       const month = document.getElementById('card-filter-month').value;
       const year = document.getElementById('card-filter-year').value;
+      const currentDate = new Date();
+      const summaryMonth = Number(month) || currentDate.getMonth() + 1;
+      const summaryYear = Number(year) || currentDate.getFullYear();
+      const monthlyTotal = cachedCards.reduce((total, card) => {
+        const dueParts = String(card.due_date || '').split('-');
+        const cardMonth = Number(card.period_month) || Number(dueParts[1]) || 0;
+        const cardYear = Number(card.period_year) || Number(dueParts[0]) || 0;
+        return cardMonth === summaryMonth && cardYear === summaryYear
+          ? total + (Number(card.debt_amount) || 0)
+          : total;
+      }, 0);
+      const monthlyTotalElement = document.getElementById('cards-monthly-total');
+      if (monthlyTotalElement) monthlyTotalElement.textContent = formatMoney(monthlyTotal);
 
       let filtered = cachedCards.filter(card => cardStatus === 'all' || (cardStatus === 'paid' ? !!card.is_paid : !card.is_paid));
       if (month) {
