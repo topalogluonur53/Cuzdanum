@@ -2267,7 +2267,7 @@
       background: linear-gradient(135deg, #0f2b48 0%, #162447 50%, #1b1a47 100%);
       color: white;
       border-radius: 12px;
-      padding: 30px 14px 10px;
+      padding: 9px 14px;
       margin-bottom: 10px;
       box-shadow: 0 4px 15px rgba(15, 43, 72, 0.18);
       display: flex;
@@ -2284,8 +2284,10 @@
       margin-bottom: 1px;
     }
 
-    .grand-savings-heading { margin-bottom: 1px; }
-    .saving-owner-filter-wrap { position: absolute; top: 7px; right: 10px; display: inline-flex; width: 28px; height: 25px; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,.25); border-radius: 7px; background: rgba(255,255,255,.12); color: rgba(255,255,255,.9); cursor: pointer; }
+    .grand-savings-heading { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 1px; }
+    .grand-savings-left { flex: 1; min-width: 0; }
+    .grand-savings-tools { display: inline-flex; align-items: center; gap: 5px; flex: 0 0 auto; }
+    .saving-owner-filter-wrap { position: relative; flex: 0 0 auto; display: inline-flex; width: 28px; height: 25px; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,.25); border-radius: 7px; background: rgba(255,255,255,.12); color: rgba(255,255,255,.9); cursor: pointer; }
     .saving-owner-filter-wrap i { font-size: 11px; pointer-events: none; }
     .saving-owner-filter-wrap.active::after { content: ''; position: absolute; top: 3px; right: 3px; width: 5px; height: 5px; border-radius: 50%; background: #34d399; box-shadow: 0 0 0 1px #163352; pointer-events: none; }
     .saving-owner-filter {
@@ -3813,7 +3815,7 @@
 
       /* Birikimler */
       .grand-savings-card {
-        padding: 29px 10px 8px;
+        padding: 7px 10px 6px;
         margin-bottom: 8px;
         border-radius: 10px;
       }
@@ -4761,6 +4763,7 @@
             <div>
               <div class="summary-label">Toplam Alacak</div>
               <div class="summary-value text-green" id="debts-total-receivable">₺0,00</div>
+              <div id="debts-monthly-receivable-wrap" style="display:none;margin-top:3px;font-size:10px;color:var(--text-muted);"><span>Aylık Tutar</span> <strong id="debts-monthly-receivable" style="color:var(--green);">₺0,00</strong></div>
             </div>
             <div class="summary-icon-box" style="background: var(--green-light); color: var(--green);">
               <i class="fas fa-hand-holding-usd"></i>
@@ -4771,6 +4774,7 @@
             <div>
               <div class="summary-label">Toplam Verecek</div>
               <div class="summary-value text-red" id="debts-total-payable">₺0,00</div>
+              <div id="debts-monthly-payable-wrap" style="display:none;margin-top:3px;font-size:10px;color:var(--text-muted);"><span>Aylık Tutar</span> <strong id="debts-monthly-payable" style="color:var(--red);">₺0,00</strong></div>
             </div>
             <div class="summary-icon-box" style="background: var(--red-light); color: var(--red);">
               <i class="fas fa-money-bill-wave"></i>
@@ -4816,8 +4820,16 @@
           <div class="grand-savings-left">
             <div class="grand-savings-heading">
               <div class="label"><i class="fas fa-vault" style="margin-right:4px;opacity:0.8;"></i> Portföy Değeri</div>
+              <div class="grand-savings-tools">
+                <label class="saving-owner-filter-wrap" title="Sahibe göre filtrele">
+                  <i class="fas fa-user"></i>
+                  <select class="saving-owner-filter" id="savings-owner-filter" aria-label="Sahibe göre filtrele" onchange="setSavingsOwnerFilter(this.value)">
+                    <option value="">Tüm sahipler</option>
+                  </select>
+                </label>
+              </div>
             </div>
-            <div class="value" id="savings-grand-total">₺0,00</div>
+            <div class="value" id="savings-grand-total" role="button" tabindex="0" aria-pressed="false" aria-label="Portföy tutarlarını gizle" title="Gizlemek veya göstermek için dokunun" style="cursor:pointer;user-select:none;" onclick="togglePortfolioAmountsVisibility()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();togglePortfolioAmountsVisibility();}">₺0,00</div>
             <div class="grand-savings-sub" id="savings-grand-cost">Toplam Alış: ₺0,00</div>
           </div>
           <div class="grand-savings-right" id="savings-grand-profit-box">
@@ -4827,12 +4839,6 @@
               <span class="grand-profit-badge pos" id="savings-grand-profit-badge">--</span>
             </div>
           </div>
-          <label class="saving-owner-filter-wrap" title="Sahibe göre filtrele">
-            <i class="fas fa-user"></i>
-            <select class="saving-owner-filter" id="savings-owner-filter" aria-label="Sahibe göre filtrele" onchange="setSavingsOwnerFilter(this.value)">
-              <option value="">Tüm sahipler</option>
-            </select>
-          </label>
         </div>
 
         <!-- Emtia Türü Filtre Tabları (Kart İçinde Geçiş) -->
@@ -5529,6 +5535,7 @@
         <!-- 5. ACTIONS (Sticky Bottom) -->
         <div class="modal-actions-modern">
           <button type="button" class="btn-modern-cancel" onclick="closeModal('modal-debt')">İptal</button>
+          <button type="button" id="btn-undo-debt-payment" class="btn-unpay-installment" style="display:none;font-size:10px;padding:5px 8px;border-radius:6px;font-weight:600;align-items:center;gap:4px;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;cursor:pointer;" onclick="undoDebtPaymentFromModal()"><i class="fas fa-undo-alt"></i> Geri Al</button>
           <button type="button" class="btn-delete-saving" id="btn-delete-debt" style="display:none;" onclick="deleteDebtFromModal()"><i class="fas fa-trash-alt"></i> Sil</button>
           <button type="submit" class="btn-modern-save" id="btn-save-debt">
             <i class="fas fa-check-circle"></i> Kaydet
@@ -7825,8 +7832,10 @@
       const subtitleEl = document.getElementById('modal-debt-subtitle');
       const saveBtn = document.getElementById('btn-save-debt');
       const deleteBtn = document.getElementById('btn-delete-debt');
+      const undoPaymentBtn = document.getElementById('btn-undo-debt-payment');
       const heroBox = document.getElementById('debt-hero-box');
       const currSymbol = document.getElementById('debt-currency-symbol');
+      if (undoPaymentBtn) undoPaymentBtn.style.display = 'none';
 
       if (isReceivable) {
         if (iconBox) {
@@ -7862,6 +7871,11 @@
 
       if (debt) {
         if (deleteBtn) deleteBtn.style.display = 'inline-flex';
+        const isSettled = isReceivable ? !!debt.is_received : !!debt.is_paid;
+        if (undoPaymentBtn) {
+          undoPaymentBtn.style.display = isSettled ? 'inline-flex' : 'none';
+          undoPaymentBtn.innerHTML = `<i class="fas fa-undo-alt"></i> ${isReceivable ? 'Tahsilatı Geri Al' : 'Ödemeyi Geri Al'}`;
+        }
         titleEl.textContent = isReceivable ? 'Alacağı Düzenle' : 'Vereceği Düzenle';
         document.getElementById('debt-id').value = debt.id;
         document.getElementById('debt-person-name').value = debt.person_name;
@@ -7967,8 +7981,25 @@
             return sum + (Number(p.amount) || 0);
           }, 0);
 
+        const getActiveMonthlyInstallments = items => items
+          .filter(item => {
+            const isSettled = item.is_installment
+              ? (item.is_received !== undefined ? !!item.is_received : !!item.is_paid)
+              : false;
+            const remaining = (Number(item.total_installments) || 1) - (Number(item.paid_installments) || 0);
+            return !!item.is_installment && !isSettled && remaining > 0;
+          });
+        const receivableInstallments = getActiveMonthlyInstallments(receivables || []);
+        const payableInstallments = getActiveMonthlyInstallments(payables || []);
+        const monthlyReceivable = receivableInstallments.reduce((sum, item) => sum + (Number(item.installment_amount) || (Number(item.amount) / (Number(item.total_installments) || 1))), 0);
+        const monthlyPayable = payableInstallments.reduce((sum, item) => sum + (Number(item.installment_amount) || (Number(item.amount) / (Number(item.total_installments) || 1))), 0);
+
         document.getElementById('debts-total-receivable').textContent = formatMoney(totalReceivable);
         document.getElementById('debts-total-payable').textContent = formatMoney(totalPayable);
+        document.getElementById('debts-monthly-receivable').textContent = formatMoney(monthlyReceivable);
+        document.getElementById('debts-monthly-payable').textContent = formatMoney(monthlyPayable);
+        document.getElementById('debts-monthly-receivable-wrap').style.display = receivableInstallments.length ? 'block' : 'none';
+        document.getElementById('debts-monthly-payable-wrap').style.display = payableInstallments.length ? 'block' : 'none';
 
         const isRecTab = currentDebtTab === 'receivables';
         const items = isRecTab ? receivables : payables;
@@ -8099,6 +8130,30 @@
           await api('/api/payables/' + id + '/pay', { method: 'PUT' });
           showToast('Borç ödendi olarak işaretlendi!');
         }
+        loadDebts();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function undoDebtPaymentFromModal() {
+      const id = document.getElementById('debt-id')?.value;
+      if (!id) return;
+      const kind = document.getElementById('debt-kind')?.value;
+      const isReceivable = kind === 'receivables';
+      const endpoint = isReceivable ? '/api/receivables/' : '/api/payables/';
+      const isInstallment = document.getElementById('debt-is-installment')?.checked;
+      try {
+        if (isInstallment) {
+          await api(`${endpoint}${id}/unpay-installment`, { method: 'PUT' });
+        } else {
+          await api(endpoint + id, {
+            method: 'PUT',
+            body: JSON.stringify(isReceivable ? { is_received: 0 } : { is_paid: 0 })
+          });
+        }
+        showToast(isReceivable ? 'Tahsilat geri alındı.' : 'Ödeme geri alındı.');
+        closeModal('modal-debt');
         loadDebts();
       } catch (err) {
         showToast(err.message, 'error');
@@ -8480,6 +8535,7 @@
     let cachedSavingAssetGroups = [];
     let currentSavingLots = [];
     let currentSavingsOwnerFilter = '';
+    let isPortfolioAmountsHidden = localStorage.getItem('cuzdanim_portfolio_amounts_hidden') === '1';
 
     function getSavingStockSymbol(item) {
       return String(item.name || '').trim().split(/[\s,]+/)[0].toUpperCase().replace(/\.IS$/, '');
@@ -8561,15 +8617,29 @@
       const costEl = document.getElementById('savings-grand-cost');
       const profitEl = document.getElementById('savings-grand-profit');
       const badgeEl = document.getElementById('savings-grand-profit-badge');
-      if (totalEl) totalEl.textContent = formatMoney(totalValue);
-      if (costEl) costEl.textContent = `Toplam Alış: ${formatMoney(totalCost)}`;
+      const hiddenAmountText = '••••••';
+      if (totalEl) totalEl.textContent = isPortfolioAmountsHidden ? hiddenAmountText : formatMoney(totalValue);
+      if (costEl) costEl.textContent = `Toplam Alış: ${isPortfolioAmountsHidden ? hiddenAmountText : formatMoney(totalCost)}`;
       if (profitEl && badgeEl) {
         const isPositive = profit >= 0;
-        profitEl.textContent = `${isPositive ? '+' : ''}${formatMoney(profit)}`;
+        profitEl.textContent = isPortfolioAmountsHidden ? hiddenAmountText : `${isPositive ? '+' : ''}${formatMoney(profit)}`;
         profitEl.style.color = isPositive ? '#34d399' : '#f87171';
         badgeEl.className = `grand-profit-badge ${isPositive ? 'pos' : 'neg'}`;
-        badgeEl.innerHTML = `<i class="fas fa-arrow-${isPositive ? 'up' : 'down'}"></i> ${isPositive ? '+' : ''}%${Math.abs(rate).toFixed(1)} ${isPositive ? 'Kâr' : 'Zarar'}`;
+        badgeEl.innerHTML = isPortfolioAmountsHidden
+          ? '<i class="fas fa-eye-slash"></i> Gizli'
+          : `<i class="fas fa-arrow-${isPositive ? 'up' : 'down'}"></i> ${isPositive ? '+' : ''}%${Math.abs(rate).toFixed(1)} ${isPositive ? 'Kâr' : 'Zarar'}`;
       }
+      if (totalEl) {
+        totalEl.setAttribute('aria-pressed', String(isPortfolioAmountsHidden));
+        totalEl.setAttribute('aria-label', `Portföy tutarlarını ${isPortfolioAmountsHidden ? 'göster' : 'gizle'}`);
+        totalEl.title = `${isPortfolioAmountsHidden ? 'Göstermek' : 'Gizlemek'} için dokunun`;
+      }
+    }
+
+    function togglePortfolioAmountsVisibility() {
+      isPortfolioAmountsHidden = !isPortfolioAmountsHidden;
+      localStorage.setItem('cuzdanim_portfolio_amounts_hidden', isPortfolioAmountsHidden ? '1' : '0');
+      updateSavingsPortfolioSummary(getSavingsOwnerFilteredItems());
     }
 
     function setSavingsOwnerFilter(value) {
