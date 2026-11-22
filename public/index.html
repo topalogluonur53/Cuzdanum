@@ -5570,6 +5570,19 @@
     let expenseStatus = 'open';
     let cardStatus = 'open';
     let pendingConfirmAction = null;
+    let observedCalendarMonth = `${new Date().getFullYear()}-${new Date().getMonth()}`;
+
+    setInterval(() => {
+      const now = new Date();
+      const calendarMonth = `${now.getFullYear()}-${now.getMonth()}`;
+      if (calendarMonth === observedCalendarMonth) return;
+      observedCalendarMonth = calendarMonth;
+
+      if (currentPage === 'expenses' || currentPage === 'cards') {
+        loadExpenses();
+        if (currentPage === 'cards') loadCards();
+      }
+    }, 60 * 1000);
 
     const SAVINGS_CONFIG = {
       altin: { label: 'Altın', icon: '🥇' },
