@@ -108,7 +108,9 @@ router.put('/:id/pay', (req, res) => {
     const requestedMonth = currentMonthParts && parsedMonth >= 1 && parsedMonth <= 12
       ? [parsedYear, parsedMonth]
       : [new Date().getFullYear(), new Date().getMonth() + 1];
-    const startParts = String(expense.start_date || '').split('-').map(Number);
+    const monthAnchor = `${requestedMonth[0]}-${String(requestedMonth[1]).padStart(2, '0')}-01`;
+    const expenseStartDate = expense.start_date || monthAnchor;
+    const startParts = String(expenseStartDate).split('-').map(Number);
     let currentInstallmentIndex = 0;
     if (startParts.length === 3 && startParts.every(Number.isFinite) && startParts[1] >= 1 && startParts[1] <= 12) {
       currentInstallmentIndex = Math.max(0,
@@ -121,8 +123,8 @@ router.put('/:id/pay', (req, res) => {
       Math.max(paidInstallments + 1, currentInstallmentIndex + 1));
     const isActive = newPaid < expense.total_installments ? 1 : 0;
 
-    db.prepare('UPDATE fixed_expenses SET paid_installments = ?, is_active = ? WHERE id = ? AND user_id = ?')
-      .run(newPaid, isActive, id, req.user.id);
+    db.prepare('UPDATE fixed_expenses SET paid_installments = ?, is_active = ?, start_date = ? WHERE id = ? AND user_id = ?')
+      .run(newPaid, isActive, expenseStartDate, id, req.user.id);
 
     const updated = db.prepare('SELECT * FROM fixed_expenses WHERE id = ?').get(id);
     res.json(updated);
