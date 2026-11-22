@@ -122,6 +122,8 @@ function initializeDatabase() {
       amount REAL NOT NULL,
       unit TEXT,
       purchase_price REAL,
+      purchase_price_input REAL,
+      purchase_price_currency TEXT DEFAULT 'TRY',
       current_value REAL,
       notes TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -129,6 +131,12 @@ function initializeDatabase() {
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     )
   `);
+
+  // Mevcut veritabanlarına sahip alanını ekle.
+  const savingsColumns = new Set(db.prepare('PRAGMA table_info(savings)').all().map(column => column.name));
+  if (!savingsColumns.has('owner')) db.exec('ALTER TABLE savings ADD COLUMN owner TEXT');
+  if (!savingsColumns.has('purchase_price_input')) db.exec('ALTER TABLE savings ADD COLUMN purchase_price_input REAL');
+  if (!savingsColumns.has('purchase_price_currency')) db.exec("ALTER TABLE savings ADD COLUMN purchase_price_currency TEXT DEFAULT 'TRY'");
 
   // --- Notes (Notlar) ---
   db.exec(`

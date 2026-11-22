@@ -38,6 +38,7 @@ router.get('/quote', async (req, res) => {
       name,
       unit: unit || '',
       live_unit_price: quote.live_unit_price,
+      live_unit_price_usd: quote.live_unit_price_usd,
       is_live: quote.is_live,
       updated_at: rates.updated_at
     });
@@ -146,7 +147,7 @@ router.get('/summary', async (req, res) => {
 // POST /api/savings
 router.post('/', async (req, res) => {
   try {
-    const { type, name, amount, unit, purchase_price, current_value, notes } = req.body;
+    const { type, name, amount, unit, purchase_price, purchase_price_currency, current_value, notes, owner } = req.body;
 
     if (!type || !name || amount === undefined) {
       return res.status(400).json({ error: 'Tür, ad ve miktar gerekli' });
@@ -154,14 +155,17 @@ router.post('/', async (req, res) => {
 
     // Canlı fiyat hesaplama
     const rates = await marketService.getMarketRates();
-    const tempItem = { type, name, amount: parseFloat(amount) || 0, unit, purchase_price: parseFloat(purchase_price) || 0 };
+    const purchaseCurrency = type === 'kripto' && purchase_price_currency === 'USD' ? 'USD' : 'TRY';
+    const purchaseInput = parseFloat(purchase_price) || 0;
+    const purchasePriceTry = purchaseCurrency === 'USD' ? purchaseInput * (Number(rates.currencies.USD) || 1) : purchaseInput;
+    const tempItem = { type, name, amount: parseFloat(amount) || 0, unit, purchase_price: purchasePriceTry };
     const resolved = await marketService.resolveSavingValues(tempItem, rates);
 
     const finalVal = resolved.live_total_value || parseFloat(current_value) || (tempItem.amount * (tempItem.purchase_price || 0));
 
     const result = db.prepare(`
-      INSERT INTO savings (user_id, type, name, amount, unit, purchase_price, current_value, notes)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO savings (user_id, type, name, amount, unit, purchase_price, current_value, notes, owner, purchase_price_input, purchase_price_currency)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       req.user.id,
       type,
@@ -170,7 +174,10 @@ router.post('/', async (req, res) => {
       unit || null,
       tempItem.purchase_price || null,
       finalVal,
-      notes || null
+      notes || null,
+      owner || null,
+      purchaseInput || null,
+      purchaseCurrency
     );
 
     const saving = db.prepare('SELECT * FROM savings WHERE id = ?').get(result.lastInsertRowid);
@@ -190,28 +197,34 @@ router.put('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Birikim bulunamadı' });
     }
 
-    const { type, name, amount, unit, purchase_price, current_value, notes } = req.body;
+    const { type, name, amount, unit, purchase_price, purchase_price_currency, current_value, notes, owner } = req.body;
 
     const newType = type || item.type;
     const newName = name || item.name;
     const newAmount = amount !== undefined ? parseFloat(amount) : item.amount;
     const newUnit = unit !== undefined ? unit : item.unit;
-    const newBuyPrice = purchase_price !== undefined ? parseFloat(purchase_price) : item.purchase_price;
+    const purchaseCurrency = newType === 'kripto' && (purchase_price_currency || item.purchase_price_currency) === 'USD' ? 'USD' : 'TRY';
 
     // Canlı piyasa verisiyle hesapla
     const rates = await marketService.getMarketRates();
+    const purchaseInput = purchase_price !== undefined
+      ? (parseFloat(purchase_price) || 0)
+      : (Number(item.purchase_price_input) || Number(item.purchase_price) || 0);
+    const newBuyPrice = purchaseCurrency === 'USD' ? purchaseInput * (Number(rates.currencies.USD) || 1) : purchaseInput;
     const tempItem = { type: newType, name: newName, amount: newAmount, unit: newUnit, purchase_price: newBuyPrice };
     const resolved = await marketService.resolveSavingValues(tempItem, rates);
 
     const finalVal = resolved.live_total_value || (current_value !== undefined ? parseFloat(current_value) : item.current_value);
 
     db.prepare(`
-      UPDATE savings SET type = ?, name = ?, amount = ?, unit = ?, purchase_price = ?, current_value = ?, notes = ?, updated_at = CURRENT_TIMESTAMP
+      UPDATE savings SET type = ?, name = ?, amount = ?, unit = ?, purchase_price = ?, current_value = ?, notes = ?, owner = ?, purchase_price_input = ?, purchase_price_currency = ?, updated_at = CURRENT_TIMESTAMP
       WHERE id = ? AND user_id = ?
     `).run(
       newType, newName, newAmount,
       newUnit, newBuyPrice,
       finalVal, notes !== undefined ? notes : item.notes,
+      owner !== undefined ? (owner || null) : item.owner,
+      purchaseInput || null, purchaseCurrency,
       id, req.user.id
     );
 

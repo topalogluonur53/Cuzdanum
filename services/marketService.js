@@ -5,6 +5,7 @@ let cachedRates = null;
 let lastFetchTime = 0;
 const CACHE_TTL_MS = 60 * 1000; // 60 saniye önbellek
 let cachedCryptoTryPrices = {};
+let cachedCryptoUsdPrices = {};
 let lastCryptoTryFetch = 0;
 let cryptoTryFetchPromise = null;
 
@@ -26,13 +27,20 @@ async function getCryptoTryPrices(forceRefresh = false) {
 
       const prices = await res.json();
       const nextPrices = {};
+      const nextUsdPrices = {};
       for (const ticker of prices) {
-        if (!ticker.symbol?.endsWith('TRY')) continue;
-        const symbol = ticker.symbol.slice(0, -3);
         const price = parseFloat(ticker.price);
-        if (symbol && Number.isFinite(price) && price > 0) nextPrices[symbol] = price;
+        if (!Number.isFinite(price) || price <= 0) continue;
+        if (ticker.symbol?.endsWith('TRY')) {
+          const symbol = ticker.symbol.slice(0, -3);
+          if (symbol) nextPrices[symbol] = price;
+        } else if (ticker.symbol?.endsWith('USDT')) {
+          const symbol = ticker.symbol.slice(0, -4);
+          if (symbol) nextUsdPrices[symbol] = price;
+        }
       }
       cachedCryptoTryPrices = nextPrices;
+      cachedCryptoUsdPrices = nextUsdPrices;
       lastCryptoTryFetch = Date.now();
       return cachedCryptoTryPrices;
     } catch (err) {
@@ -124,6 +132,15 @@ async function getMarketRates(forceRefresh = false) {
 
   // 2. Binance API (Kripto TRY çiftleri)
   Object.assign(rates.crypto, await getCryptoTryPrices(forceRefresh));
+  rates.crypto_usd = {};
+  const usdTry = Number(rates.currencies.USD) || 1;
+  Object.entries(cachedCryptoUsdPrices).forEach(([symbol, priceUsd]) => {
+    if (!rates.crypto[symbol]) rates.crypto[symbol] = Number(priceUsd) * usdTry;
+  });
+  Object.keys(rates.crypto).forEach(symbol => {
+    rates.crypto_usd[symbol] = Number(rates.crypto[symbol]) / usdTry;
+  });
+  Object.assign(rates.crypto_usd, cachedCryptoUsdPrices);
 
   cachedRates = rates;
   lastFetchTime = now;
@@ -184,6 +201,7 @@ async function resolveSavingValues(item, marketRates) {
   const buyPrice = Number(item.purchase_price) || 0;
 
   let liveUnitPrice = buyPrice || 0;
+  let liveUnitPriceUsd = 0;
   let isLive = false;
 
   if (type === 'altin') {
@@ -218,6 +236,7 @@ async function resolveSavingValues(item, marketRates) {
       : Object.keys(cryptoAliases).find(code => cryptoAliases[code].some(alias => name.includes(alias)));
     if (crypto && marketRates.crypto[crypto]) {
       liveUnitPrice = marketRates.crypto[crypto];
+      liveUnitPriceUsd = Number(marketRates.crypto_usd?.[crypto]) || liveUnitPrice / (Number(marketRates.currencies.USD) || 1);
       isLive = true;
     }
   } else if (type === 'hisse') {
@@ -250,6 +269,7 @@ async function resolveSavingValues(item, marketRates) {
   return {
     ...item,
     live_unit_price: liveUnitPrice,
+    live_unit_price_usd: liveUnitPriceUsd,
     live_total_value: liveTotalValue,
     total_cost: totalCost,
     profit_loss_amount: profitLossAmount,
