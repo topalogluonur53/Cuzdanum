@@ -2303,7 +2303,8 @@
       cursor: pointer;
     }
     .saving-owner-filter option { background: #fff; color: #0f172a; font-size: 12px; }
-    .saving-meta-badge { display: inline-flex; align-items: center; gap: 3px; max-width: 150px; padding: 1px 5px; border-radius: 6px; background: #f1f5f9; color: #526174; font-size: 9px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .saving-meta-badge { display: inline-flex; align-items: center; gap: 3px; padding: 1px 5px; border-radius: 6px; background: #f1f5f9; color: #526174; font-size: 9px; font-weight: 600; white-space: normal; overflow-wrap: anywhere; }
+    .saving-item-card .badge-count { display: inline-flex; align-items: center; padding: 1px 5px; border-radius: 6px; background: #f1f5f9; color: #526174; font-size: 9px; font-weight: 600; white-space: nowrap; }
 
     .grand-savings-left .value {
       font-size: 20px;
@@ -8001,10 +8002,9 @@
                       ${isSettled ? settledBadge : pendingBadge}
                       ${isInst ? instBadge : ''}
                     </div>
+                    ${item.description ? `<div title="${escapeHtml(item.description)}" style="font-size:10.5px;color:var(--text-muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${escapeHtml(item.description)}</div>` : ''}
                     <div style="font-size:10.5px;color:var(--text-muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
                       ${item.due_date ? `<i class="far fa-calendar-alt"></i> ${formatDate(item.due_date)}` : 'Vade belirtilmedi'}
-                      ${isInst ? ` · <i class="far fa-calendar-check text-primary"></i> Bitiş: <strong>${debtEndDate}</strong>` : ''}
-                      ${item.description ? ` · ${escapeHtml(item.description)}` : ''}
                     </div>
                   </div>
                 </div>
@@ -8738,6 +8738,7 @@
         const buyPrice = Number(item.purchase_price) || 0;
         const livePrice = Number(item.live_unit_price) || 0;
         const livePriceUsd = Number(item.live_unit_price_usd) || 0;
+        const unitLivePrice = isGroupedAsset && amount > 0 ? curVal / amount : livePrice;
         const totalCost = Number(item.total_cost !== undefined ? item.total_cost : (buyPrice * amount)) || 0;
 
         const pLoss = Number(item.profit_loss_amount !== undefined ? item.profit_loss_amount : (curVal - totalCost)) || 0;
@@ -8746,9 +8747,14 @@
 
         const cardAction = isGroupedAsset ? `openSavingLotsModal(${assetGroupIndex})` : `openSavingModal(${JSON.stringify(item)})`;
         const cardTitle = isGroupedAsset ? 'İşlem geçmişini görüntülemek için tıklayın' : 'Düzenlemek için tıklayın';
-        const detailLine = isGroupedAsset
-          ? `<strong>${amount.toLocaleString('tr-TR')} ${escapeHtml(item.unit || 'birim')}</strong> · Ağırlıklı ort. maliyet: <strong style="color:var(--text-dark);">${averageCost > 0 ? formatMoney(averageCost) : '—'}</strong>${assetMetrics.unknownAmount > 0 ? ` · ${assetMetrics.unknownAmount.toLocaleString('tr-TR')} ${escapeHtml(item.unit || 'birim')} maliyet eksik` : ''}`
-          : `<strong>${item.amount} ${escapeHtml(item.unit || '')}</strong>${livePrice > 0 ? ` · Canlı: <strong style="color:var(--text-dark);">${formatMoney(livePrice)}</strong>${item.type === 'kripto' && livePriceUsd > 0 ? ` <span style="color:#0f766e;">(${formatMoneyUSD(livePriceUsd)})</span>` : ''}` : ''}${buyPrice > 0 ? ` · Alış: ${formatMoney(buyPrice)}` : ''}`;
+        const unitCostPrice = isGroupedAsset ? averageCost : buyPrice;
+        const costText = !isGroupedAsset && item.type === 'kripto' && item.purchase_price_currency === 'USD'
+          ? formatMoneyUSD(item.purchase_price_input || buyPrice)
+          : (unitCostPrice > 0 ? formatMoney(unitCostPrice) : '—');
+        const livePriceText = unitLivePrice > 0
+          ? `<span style="color:#15803d;">${formatMoney(unitLivePrice)}</span>${item.type === 'kripto' && livePriceUsd > 0 ? ` <span style="color:#0f766e;">(${formatMoneyUSD(livePriceUsd)})</span>` : ''}`
+          : '—';
+        const detailLine = `<strong>${amount.toLocaleString('tr-TR')} ${escapeHtml(item.unit || 'birim')}</strong> · <strong style="color:var(--text-dark);">${costText} / ${livePriceText}</strong>`;
         const metadataLots = isGroupedAsset ? row.lots : [item];
         const owners = getSavingGroupOwners(metadataLots);
         const metadataBadges = [
@@ -8764,13 +8770,10 @@
               </div>
               <div style="min-width:0;flex:1;">
                 <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">
-                  <span style="font-size:13.5px;font-weight:700;color:var(--text-dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(item.name)}</span>
-                  ${isGroupedAsset ? `<span class="badge-count">${row.lots.length} kayıt</span>` : ''}
-                  ${metadataBadges}
-                  ${item.is_live ? '<span class="live-pill"><i class="fas fa-bolt"></i> Canlı</span>' : ''}
-                  ${!isGroupedAsset && item.notes ? `<span style="font-size:10px;color:var(--text-muted);" title="${escapeHtml(item.notes)}"><i class="fas fa-info-circle"></i></span>` : ''}
+                  <span style="font-size:13.5px;font-weight:700;color:var(--text-dark);white-space:normal;overflow-wrap:anywhere;">${escapeHtml(item.name)}</span>
+                  ${isGroupedAsset ? `<span style="display:inline-flex;align-items:center;gap:4px;white-space:nowrap;"><span class="badge-count">${row.lots.length} kayıt</span>${metadataBadges}</span>` : metadataBadges}
                 </div>
-                <div style="font-size:11px;color:var(--text-muted);margin-top:1.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                <div style="font-size:11px;color:var(--text-muted);margin-top:1.5px;white-space:normal;overflow-wrap:anywhere;">
                   ${detailLine}
                 </div>
               </div>
