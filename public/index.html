@@ -1604,6 +1604,10 @@
       gap: 10px;
       margin-bottom: 10px;
     }
+    .saving-owner-filter-wrap.expense-owner-icon-filter { width: 30px; height: 30px; border-color: #0f766e !important; background: #0f766e !important; color: #fff !important; }
+    .saving-owner-filter-wrap.expense-owner-icon-filter > i { color: #fff !important; }
+    .saving-owner-filter-wrap.expense-owner-icon-filter.active { color: #fff !important; border-color: #115e59 !important; background: #115e59 !important; }
+    .expense-owner-icon-filter.active::after { background: #10b981; box-shadow: 0 0 0 1px #fff; }
     .record-status-tabs {
       display: flex;
       align-items: center;
@@ -4668,6 +4672,12 @@
             <button type="button" class="record-status-tab" data-expense-status="paid" onclick="setExpenseStatus('paid')">Ödendi</button>
             <button type="button" class="record-status-tab" data-expense-status="all" onclick="setExpenseStatus('all')">Tümü</button>
           </div>
+          <label class="saving-owner-filter-wrap expense-owner-icon-filter" title="Kime ait filtrele">
+            <i class="fas fa-user"></i>
+            <select id="expense-owner-filter" class="saving-owner-filter" aria-label="Sabit giderleri kime ait bilgisine göre filtrele" onchange="setExpenseOwnerFilter(this.value)">
+              <option value="">Tümü</option>
+            </select>
+          </label>
         </div>
         <div class="expenses-grid" id="expenses-grid-container">
           <!-- Expense Cards injected via JS -->
@@ -5068,6 +5078,13 @@
             </div>
           </div>
           <input type="hidden" id="expense-desc" value="">
+          <div class="modern-field-row">
+            <div class="modern-field-icon"><i class="fas fa-user"></i></div>
+            <div class="modern-field-content">
+              <label class="modern-field-label" for="expense-owner">KİME AİT</label>
+              <input type="text" id="expense-owner" class="modern-field-input" placeholder="Örn: Ayşe">
+            </div>
+          </div>
         </div>
 
         <!-- 4. TAKSİT SEÇİCİ (Dokunmatik Hızlı Çipler) -->
@@ -5895,6 +5912,7 @@
     let cardReorderState = null;
     let cachedExpenses = [];
     let expenseStatus = 'open';
+    let currentExpenseOwnerFilter = '';
     let cardStatus = 'open';
     let pendingConfirmAction = null;
     let observedCalendarMonth = `${new Date().getFullYear()}-${new Date().getMonth()}`;
@@ -6861,6 +6879,31 @@
       loadExpenses();
     }
 
+    function getExpenseOwnerFilteredItems() {
+      if (!currentExpenseOwnerFilter) return cachedExpenses;
+      if (currentExpenseOwnerFilter === 'unassigned') return cachedExpenses.filter(item => !String(item.owner || '').trim());
+      const owner = currentExpenseOwnerFilter.slice(6);
+      return cachedExpenses.filter(item => String(item.owner || '').trim() === owner);
+    }
+
+    function renderExpenseOwnerFilter() {
+      const select = document.getElementById('expense-owner-filter');
+      if (!select) return;
+      const owners = [...new Set(cachedExpenses.map(item => String(item.owner || '').trim()).filter(Boolean))]
+        .sort((a, b) => a.localeCompare(b, 'tr'));
+      const hasUnassigned = cachedExpenses.some(item => !String(item.owner || '').trim());
+      const validFilters = new Set(['', ...(hasUnassigned ? ['unassigned'] : []), ...owners.map(owner => `owner:${owner}`)]);
+      if (!validFilters.has(currentExpenseOwnerFilter)) currentExpenseOwnerFilter = '';
+      select.innerHTML = `<option value="">Tümü</option>${owners.map(owner => `<option value="owner:${escapeHtml(owner)}">${escapeHtml(owner)}</option>`).join('')}${hasUnassigned ? '<option value="unassigned">Belirtilmemiş</option>' : ''}`;
+      select.value = currentExpenseOwnerFilter;
+      select.closest('.saving-owner-filter-wrap')?.classList.toggle('active', Boolean(currentExpenseOwnerFilter));
+    }
+
+    function setExpenseOwnerFilter(ownerFilter) {
+      currentExpenseOwnerFilter = ownerFilter || '';
+      loadExpenses();
+    }
+
     function setCardStatus(status) {
       cardStatus = status;
       document.querySelectorAll('[data-card-status]').forEach(button => {
@@ -6987,6 +7030,7 @@
         document.getElementById('expense-id').value = expense.id;
         document.getElementById('expense-title').value = expense.title;
         document.getElementById('expense-desc').value = expense.description || '';
+        document.getElementById('expense-owner').value = expense.owner || '';
         setMoneyInputValue('expense-total-amount', expense.total_amount);
         document.getElementById('expense-total-installments').value = expense.total_installments;
         document.getElementById('expense-monthly-amount').value = expense.installment_amount;
@@ -7003,6 +7047,7 @@
         titleEl.textContent = 'Yeni Sabit Gider Ekle';
         deleteBtn.style.display = 'none';
         document.getElementById('expense-id').value = '';
+        document.getElementById('expense-owner').value = '';
         document.getElementById('expense-total-amount').value = '';
         document.getElementById('expense-total-installments').value = 12;
         document.getElementById('expense-paid-installments').value = 0;
@@ -7047,7 +7092,8 @@
         paid_installments: parseInt(document.getElementById('expense-paid-installments').value) || 0,
         start_date: document.getElementById('expense-start-date').value || null,
         due_day: parseInt(document.getElementById('expense-due-day').value) || 1,
-        category: document.getElementById('expense-category').value
+        category: document.getElementById('expense-category').value,
+        owner: document.getElementById('expense-owner').value.trim() || null
       };
 
       try {
@@ -7070,6 +7116,7 @@
       try {
         const expenses = await api('/api/expenses');
         cachedExpenses = expenses || [];
+        renderExpenseOwnerFilter();
         if (cachedExpenses.length === 0) {
           container.innerHTML = `
             <div class="empty-state">
@@ -7085,8 +7132,9 @@
         }
 
         // Üst Toplam Kartları Hesaplama
-        const monthlyTotal = cachedExpenses.filter(e => e.is_active).reduce((sum, e) => sum + (parseFloat(e.installment_amount) || 0), 0);
-        const remainingTotal = cachedExpenses.filter(e => e.is_active).reduce((sum, e) => {
+        const ownerFilteredExpenses = getExpenseOwnerFilteredItems();
+        const monthlyTotal = ownerFilteredExpenses.filter(e => e.is_active).reduce((sum, e) => sum + (parseFloat(e.installment_amount) || 0), 0);
+        const remainingTotal = ownerFilteredExpenses.filter(e => e.is_active).reduce((sum, e) => {
           const rem = Math.max(0, (e.total_installments || 1) - (e.paid_installments || 0));
           return sum + (rem * (parseFloat(e.installment_amount) || 0));
         }, 0);
@@ -7095,7 +7143,7 @@
         if (monthlyEl) monthlyEl.textContent = formatMoney(monthlyTotal);
         if (remainingEl) remainingEl.textContent = formatMoney(remainingTotal);
 
-        let visibleExpenses = cachedExpenses.filter(item => {
+        let visibleExpenses = ownerFilteredExpenses.filter(item => {
           const isPaidThisMonth = isExpensePaidForCurrentMonth(item);
           const hasStarted = hasExpenseStartedByCurrentMonth(item);
 
@@ -7152,6 +7200,7 @@
                     </div>
                     <div style="font-size:11px;color:var(--text-muted);margin-top:2px;display:flex;align-items:center;gap:5px;flex-wrap:wrap;line-height:1.2;">
                       <span class="category-badge ${badgeClass}" style="font-size:9.5px;padding:1.5px 6px;border-radius:6px;font-weight:600;">${escapeHtml(cat)}</span>
+                      ${item.owner ? `<span class="saving-meta-badge"><i class="fas fa-user"></i>${escapeHtml(item.owner)}</span>` : ''}
                       <span style="font-size:10.5px;color:var(--text-muted);"><i class="far fa-calendar-alt" style="color:var(--primary);font-size:9.5px;"></i> Her ayın ${item.due_day || 1}'i</span>
                       ${isThisMonthPaid ? `<span class="category-badge badge-saglik" style="font-size:9px;padding:1px 6px;border-radius:6px;font-weight:600;"><i class="fas fa-check"></i> ${isComplete ? 'Tamamlandı' : `${targetMonthName} taksiti sırada`}</span>` : ''}
                       ${item.description ? `<span>· ${escapeHtml(item.description)}</span>` : ''}

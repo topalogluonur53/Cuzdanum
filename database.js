@@ -41,11 +41,15 @@ function initializeDatabase() {
       start_date TEXT,
       due_day INTEGER,
       category TEXT,
+      owner TEXT,
       is_active INTEGER DEFAULT 1,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     )
   `);
+
+  const fixedExpenseColumns = new Set(db.prepare('PRAGMA table_info(fixed_expenses)').all().map(column => column.name));
+  if (!fixedExpenseColumns.has('owner')) db.exec('ALTER TABLE fixed_expenses ADD COLUMN owner TEXT');
 
   // --- Card Debts (Kart Borçları) ---
   db.exec(`

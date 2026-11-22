@@ -18,19 +18,19 @@ router.get('/', (req, res) => {
 // POST /api/expenses
 router.post('/', (req, res) => {
   try {
-    const { title, description, total_amount, installment_amount, total_installments, paid_installments, start_date, due_day, category, is_active } = req.body;
+    const { title, description, total_amount, installment_amount, total_installments, paid_installments, start_date, due_day, category, owner, is_active } = req.body;
 
     if (!title || !total_amount || !installment_amount || !total_installments) {
       return res.status(400).json({ error: 'Başlık, toplam tutar, taksit tutarı ve taksit sayısı gerekli' });
     }
 
     const result = db.prepare(`
-      INSERT INTO fixed_expenses (user_id, title, description, total_amount, installment_amount, total_installments, paid_installments, start_date, due_day, category, is_active)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO fixed_expenses (user_id, title, description, total_amount, installment_amount, total_installments, paid_installments, start_date, due_day, category, owner, is_active)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       req.user.id, title, description || null, total_amount, installment_amount,
       total_installments, paid_installments || 0, start_date || null, due_day || null,
-      category || null, is_active !== undefined ? is_active : 1
+      category || null, owner || null, is_active !== undefined ? is_active : 1
     );
 
     const expense = db.prepare('SELECT * FROM fixed_expenses WHERE id = ?').get(result.lastInsertRowid);
@@ -49,18 +49,19 @@ router.put('/:id', (req, res) => {
       return res.status(404).json({ error: 'Gider bulunamadı' });
     }
 
-    const { title, description, total_amount, installment_amount, total_installments, paid_installments, start_date, due_day, category, is_active } = req.body;
+    const { title, description, total_amount, installment_amount, total_installments, paid_installments, start_date, due_day, category, owner, is_active } = req.body;
 
     db.prepare(`
       UPDATE fixed_expenses SET title = ?, description = ?, total_amount = ?, installment_amount = ?,
-      total_installments = ?, paid_installments = ?, start_date = ?, due_day = ?, category = ?, is_active = ?
+      total_installments = ?, paid_installments = ?, start_date = ?, due_day = ?, category = ?, owner = ?, is_active = ?
       WHERE id = ? AND user_id = ?
     `).run(
       title || expense.title, description !== undefined ? description : expense.description,
       total_amount || expense.total_amount, installment_amount || expense.installment_amount,
       total_installments || expense.total_installments, paid_installments !== undefined ? paid_installments : expense.paid_installments,
       start_date || expense.start_date, due_day || expense.due_day,
-      category !== undefined ? category : expense.category, is_active !== undefined ? is_active : expense.is_active,
+      category !== undefined ? category : expense.category, owner !== undefined ? (owner || null) : expense.owner,
+      is_active !== undefined ? is_active : expense.is_active,
       id, req.user.id
     );
 
