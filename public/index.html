@@ -3390,7 +3390,7 @@
         border-left: 1px solid #f1f5f9;
       }
       #modal-expense .modal-form > .modern-form-group:last-of-type .modern-field-icon {
-        width: 24px;
+        width: calc(100% + 8px);
         height: 24px;
       }
       #modal-expense .modal-form > .modern-form-group:last-of-type .modern-field-content {
@@ -4086,6 +4086,7 @@
       .mobile-tab[data-tab-page="expenses"] i { color: #ff453a; }
       .mobile-tab[data-tab-page="cards"] i { color: #007aff; }
       .mobile-tab[data-tab-page="debts"] i { color: #ff9f0a; }
+      .mobile-tab:not(.active) i { opacity: .58; }
       .mobile-tab-debts { font-size: 8.5px; }
       .mobile-tab-debts span { white-space: nowrap; }
       .mobile-tab.active {
@@ -4096,9 +4097,25 @@
       }
       .mobile-tab.active i {
         color: #0068d9 !important;
+        opacity: 1;
         background: transparent;
         box-shadow: none;
         transform: scale(1.06);
+        position: relative;
+      }
+      .mobile-tab.active span {
+        display: inline-block;
+        position: relative;
+      }
+      .mobile-tab.active span::after {
+        content: "";
+        position: absolute;
+        left: -8px;
+        right: -8px;
+        bottom: -4px;
+        height: 2px;
+        border-radius: 2px;
+        background: #0068d9;
       }
       .mobile-tab:active { transform: scale(.95); }
       .btn-action-icon[title="Düzenle"] {
@@ -8754,7 +8771,7 @@
         const livePriceText = unitLivePrice > 0
           ? `<span style="color:#15803d;">${formatMoney(unitLivePrice)}</span>${item.type === 'kripto' && livePriceUsd > 0 ? ` <span style="color:#0f766e;">(${formatMoneyUSD(livePriceUsd)})</span>` : ''}`
           : '—';
-        const detailLine = `<strong>${amount.toLocaleString('tr-TR')} ${escapeHtml(item.unit || 'birim')}</strong> · <strong style="color:var(--text-dark);">${costText} / ${livePriceText}</strong>`;
+        const detailLine = `<strong>${amount.toLocaleString('tr-TR')} ${escapeHtml(item.unit || 'birim')}</strong>`;
         const metadataLots = isGroupedAsset ? row.lots : [item];
         const owners = getSavingGroupOwners(metadataLots);
         const metadataBadges = [
@@ -8771,10 +8788,14 @@
               <div style="min-width:0;flex:1;">
                 <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">
                   <span style="font-size:13.5px;font-weight:700;color:var(--text-dark);white-space:normal;overflow-wrap:anywhere;">${escapeHtml(item.name)}</span>
-                  ${isGroupedAsset ? `<span style="display:inline-flex;align-items:center;gap:4px;white-space:nowrap;"><span class="badge-count">${row.lots.length} kayıt</span>${metadataBadges}</span>` : metadataBadges}
+                  ${isGroupedAsset ? `<span class="badge-count">${row.lots.length} kayıt</span>` : ''}
                 </div>
-                <div style="font-size:11px;color:var(--text-muted);margin-top:1.5px;white-space:normal;overflow-wrap:anywhere;">
+                <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;font-size:11px;color:var(--text-muted);margin-top:1.5px;white-space:normal;overflow-wrap:anywhere;">
                   ${detailLine}
+                  ${metadataBadges}
+                </div>
+                <div style="font-size:11px;color:var(--text-muted);margin-top:1px;white-space:normal;overflow-wrap:anywhere;">
+                  <strong style="color:var(--text-dark);">${costText} / ${livePriceText}</strong>
                 </div>
               </div>
             </div>
