@@ -4,9 +4,47 @@
 let cachedRates = null;
 let lastFetchTime = 0;
 const CACHE_TTL_MS = 60 * 1000; // 60 saniye önbellek
+let cachedCryptoTryPrices = {};
+let lastCryptoTryFetch = 0;
+let cryptoTryFetchPromise = null;
 
 const stockCache = new Map();
 const STOCK_CACHE_TTL_MS = 3 * 60 * 1000; // 3 dakika hisse önbelleği
+
+async function getCryptoTryPrices(forceRefresh = false) {
+  if (!forceRefresh && lastCryptoTryFetch && Date.now() - lastCryptoTryFetch < CACHE_TTL_MS) {
+    return cachedCryptoTryPrices;
+  }
+  if (cryptoTryFetchPromise) return cryptoTryFetchPromise;
+
+  cryptoTryFetchPromise = (async () => {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+    try {
+      const res = await fetch('https://api.binance.com/api/v3/ticker/price', { signal: controller.signal });
+      if (!res.ok) return cachedCryptoTryPrices;
+
+      const prices = await res.json();
+      const nextPrices = {};
+      for (const ticker of prices) {
+        if (!ticker.symbol?.endsWith('TRY')) continue;
+        const symbol = ticker.symbol.slice(0, -3);
+        const price = parseFloat(ticker.price);
+        if (symbol && Number.isFinite(price) && price > 0) nextPrices[symbol] = price;
+      }
+      cachedCryptoTryPrices = nextPrices;
+      lastCryptoTryFetch = Date.now();
+      return cachedCryptoTryPrices;
+    } catch (err) {
+      console.warn('[MarketService] Binance crypto fetch failed:', err.message);
+      return cachedCryptoTryPrices;
+    } finally {
+      clearTimeout(timeout);
+      cryptoTryFetchPromise = null;
+    }
+  })();
+  return cryptoTryFetchPromise;
+}
 
 /**
  * Genel piyasa kurlarını (Döviz, Altın, Gümüş, Kripto, BIST100) çeker
@@ -85,32 +123,7 @@ async function getMarketRates(forceRefresh = false) {
   }
 
   // 2. Binance API (Kripto TRY çiftleri)
-  try {
-    const cryptoPairs = [
-      { pair: 'BTCTRY', key: 'BTC' },
-      { pair: 'ETHTRY', key: 'ETH' },
-      { pair: 'SOLTRY', key: 'SOL' },
-      { pair: 'USDTTRY', key: 'USDT' },
-      { pair: 'BNBTRY', key: 'BNB' },
-      { pair: 'XRPTRY', key: 'XRP' },
-      { pair: 'ADATRY', key: 'ADA' },
-      { pair: 'DOGETRY', key: 'DOGE' },
-      { pair: 'AVAXTRY', key: 'AVAX' },
-      { pair: 'DOTTRY', key: 'DOT' }
-    ];
-    await Promise.allSettled(cryptoPairs.map(async ({ pair, key }) => {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 3000);
-      const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${pair}`, { signal: controller.signal });
-      clearTimeout(timeout);
-      if (res.ok) {
-        const d = await res.json();
-        if (d && d.price) rates.crypto[key] = parseFloat(d.price);
-      }
-    }));
-  } catch (err) {
-    console.warn('[MarketService] Binance fetch failed:', err.message);
-  }
+  Object.assign(rates.crypto, await getCryptoTryPrices(forceRefresh));
 
   cachedRates = rates;
   lastFetchTime = now;
@@ -199,7 +212,10 @@ async function resolveSavingValues(item, marketRates) {
     }
   } else if (type === 'kripto') {
     const cryptoAliases = { BTC: ['bitcoin', 'btc'], ETH: ['ethereum', 'eth'], SOL: ['solana', 'sol'], USDT: ['tether', 'usdt'], BNB: ['bnb', 'binance'], XRP: ['xrp', 'ripple'], ADA: ['ada', 'cardano'], DOGE: ['doge', 'dogecoin'], AVAX: ['avax', 'avalanche'], DOT: ['dot', 'polkadot'] };
-    const crypto = Object.keys(cryptoAliases).find(code => unit === code || cryptoAliases[code].some(alias => name.includes(alias)));
+    const enteredSymbol = unit || item.name.trim().split(/[\s,]+/)[0].toUpperCase();
+    const crypto = marketRates.crypto[enteredSymbol]
+      ? enteredSymbol
+      : Object.keys(cryptoAliases).find(code => cryptoAliases[code].some(alias => name.includes(alias)));
     if (crypto && marketRates.crypto[crypto]) {
       liveUnitPrice = marketRates.crypto[crypto];
       isLive = true;

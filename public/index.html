@@ -1296,6 +1296,24 @@
     .btn-modern-save:active {
       transform: scale(0.98);
     }
+    .btn-modern-save:disabled {
+      opacity: 0.65;
+      cursor: wait;
+      transform: none;
+    }
+    .btn-delete-saving {
+      min-height: 38px;
+      padding: 8px 12px;
+      border: 1px solid #fecaca;
+      border-radius: 10px;
+      background: #fff;
+      color: #b91c1c;
+      font: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-delete-saving:hover { background: #fef2f2; }
 
     .category-badge {
       padding: 3px 10px;
@@ -2091,8 +2109,17 @@
        H. BİRİKİMLER (data-page="savings")
        ========================================================================== */
     .page-section[data-page="savings"] {
-      max-width: 620px;
+      max-width: 980px;
     }
+
+    .savings-tools { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; }
+    .savings-search-wrap { position: relative; flex: 1; min-width: 160px; }
+    .savings-search-wrap i { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 12px; pointer-events: none; }
+    .savings-search, .savings-sort { height: 36px; border: 1px solid #e2e8f0; border-radius: 9px; background: #fff; color: var(--text-dark); font: inherit; font-size: 12px; outline: none; }
+    .savings-search { width: 100%; padding: 0 12px 0 32px; }
+    .savings-sort { min-width: 170px; padding: 0 10px; cursor: pointer; }
+    .savings-search:focus, .savings-sort:focus { border-color: #60a5fa; box-shadow: 0 0 0 3px rgba(59, 130, 246, .12); }
+    .savings-results-count { margin-left: auto; color: var(--text-muted); font-size: 11px; white-space: nowrap; }
 
     .savings-header-actions {
       display: flex;
@@ -3618,6 +3645,10 @@
         padding: 3px 6.5px;
         font-size: 10px;
       }
+      .savings-tools { flex-wrap: wrap; }
+      .savings-search-wrap { flex-basis: 100%; }
+      .savings-sort { flex: 1; min-width: 0; }
+      .savings-results-count { margin-left: 0; }
       .saving-item-card {
         padding: 8px 10px;
         border-radius: 10px;
@@ -4562,6 +4593,21 @@
           <!-- Injected via JS -->
         </div>
 
+        <div class="savings-tools">
+          <label class="savings-search-wrap">
+            <i class="fas fa-search" aria-hidden="true"></i>
+            <input class="savings-search" id="savings-search" type="search" placeholder="Varlık veya not ara..." aria-label="Birikimlerde ara" oninput="setSavingsSearch(this.value)">
+          </label>
+          <select class="savings-sort" id="savings-sort" aria-label="Birikimleri sırala" onchange="setSavingsSort(this.value)">
+            <option value="value">Değere göre sırala</option>
+            <option value="profit">En çok kazandıran</option>
+            <option value="loss">En çok kaybettiren</option>
+            <option value="name">Ada göre (A–Z)</option>
+            <option value="recent">En son eklenen</option>
+          </select>
+          <span class="savings-results-count" id="savings-results-count" aria-live="polite"></span>
+        </div>
+
         <!-- Seçili Kategori Özeti (İsteğe Bağlı Alt Kart) -->
         <div id="savings-category-banner" style="display:none;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:6px 10px;margin-bottom:8px;font-size:11.5px;color:var(--text-dark);justify-content:space-between;align-items:center;">
           <span id="savings-category-banner-text"></span>
@@ -5295,6 +5341,7 @@
             <button type="button" class="category-chip" data-type="kripto" onclick="selectSavingTypeModal('kripto')">₿ Kripto</button>
             <button type="button" class="category-chip" data-type="gumus" onclick="selectSavingTypeModal('gumus')">🥈 Gümüş</button>
             <button type="button" class="category-chip" data-type="nakit" onclick="selectSavingTypeModal('nakit')">💰 Nakit</button>
+            <button type="button" class="category-chip" data-type="diger" onclick="selectSavingTypeModal('diger')">📦 Diğer</button>
           </div>
         </div>
 
@@ -5315,6 +5362,9 @@
           <button type="button" class="btn-sync-market" style="background:#059669;color:white;border:none;font-size:10.5px;padding:4px 8px;border-radius:6px;cursor:pointer;" onclick="refreshSavingQuote(true)">
             <i class="fas fa-sync-alt"></i> Fiyatı Yenile
           </button>
+          <button type="button" class="btn-sync-market" style="background:#0f766e;color:white;border:none;font-size:10.5px;padding:4px 8px;border-radius:6px;cursor:pointer;" onclick="applyLivePriceToModal()" title="Miktar × canlı birim fiyatını güncel toplam alana aktar">
+            <i class="fas fa-arrow-down"></i> Toplamı Uygula
+          </button>
         </div>
 
         <!-- 4. MODERN INPUT GRUBU: Varlık Adı & Miktar & Birim & Fiyatlar -->
@@ -5326,6 +5376,11 @@
               <label class="modern-field-label">VARLIK ADI *</label>
               <input type="text" id="saving-name" class="modern-field-input" list="saving-assets-datalist" placeholder="Varlık adını yazın veya listeden seçin" required oninput="onSavingNameOrAmountInput()" onchange="selectSavingAssetByName(this.value)">
               <datalist id="saving-assets-datalist"></datalist>
+              <div style="position:relative;margin-top:7px;">
+                <input type="search" id="saving-asset-search" class="modern-field-input" placeholder="Katalogda ara: EUPWR, GESAN, BTC, LINK..." autocomplete="off" onfocus="filterSavingAssets(this.value)" oninput="filterSavingAssets(this.value)" aria-label="Varlık kataloğunda ara">
+                <div id="saving-asset-results" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:20;max-height:180px;overflow:auto;border:1px solid #e2e8f0;border-radius:8px;background:white;box-shadow:0 8px 20px rgba(15,23,42,.12);"></div>
+              </div>
+              <small style="display:block;margin-top:4px;color:var(--text-muted);font-size:10px;">Listeden seçin; listede yoksa sembolü yazın. Desteklenen piyasa çiftlerinde fiyat otomatik alınır.</small>
             </div>
           </div>
           <div class="modern-field-divider"></div>
@@ -5363,6 +5418,7 @@
               <div class="modern-field-content">
                 <label class="modern-field-label" style="color:#2563eb;">GÜNCEL TOPLAM (₺) *</label>
                 <input type="text" inputmode="decimal" id="saving-current-value" class="modern-field-input money-input" placeholder="59.600,00" required style="color:#2563eb;font-weight:700;" oninput="formatMoneyInput(this)" onblur="normalizeMoneyInput(this)">
+                <small style="display:block;margin-top:3px;color:var(--text-muted);font-size:9.5px;">Miktar × canlı birim fiyatı; isterseniz elle değiştirebilirsiniz.</small>
               </div>
             </div>
           </div>
@@ -5388,6 +5444,7 @@
         <!-- Diğer veri giriş pencereleriyle aynı, sabit işlem alanı -->
         <div class="modal-actions-modern">
           <button type="button" class="btn-modern-cancel" onclick="closeModal('modal-saving')">İptal</button>
+          <button type="button" class="btn-delete-saving" id="btn-delete-saving" style="display:none;" onclick="deleteSavingFromModal()"><i class="fas fa-trash-alt"></i> Sil</button>
           <button type="submit" class="btn-modern-save" style="background:linear-gradient(135deg,#047857,#10b981);"><i class="fas fa-check-circle"></i> Birikimi Kaydet</button>
         </div>
       </form>
@@ -7738,9 +7795,21 @@
       ['gumus', 'Gram Gümüş', 'gram'],
       ['doviz', 'Amerikan Doları', 'USD'], ['doviz', 'Euro', 'EUR'], ['doviz', 'İngiliz Sterlini', 'GBP'], ['doviz', 'İsviçre Frangı', 'CHF'], ['doviz', 'Kanada Doları', 'CAD'], ['doviz', 'Avustralya Doları', 'AUD'], ['doviz', 'Japon Yeni', 'JPY'], ['doviz', 'BAE Dirhemi', 'AED'], ['doviz', 'Suudi Arabistan Riyali', 'SAR'], ['doviz', 'Norveç Kronu', 'NOK'], ['doviz', 'İsveç Kronu', 'SEK'], ['doviz', 'Danimarka Kronu', 'DKK'],
       ['kripto', 'Bitcoin', 'BTC'], ['kripto', 'Ethereum', 'ETH'], ['kripto', 'Solana', 'SOL'], ['kripto', 'Tether', 'USDT'], ['kripto', 'BNB', 'BNB'], ['kripto', 'XRP', 'XRP'], ['kripto', 'Cardano', 'ADA'], ['kripto', 'Dogecoin', 'DOGE'], ['kripto', 'Avalanche', 'AVAX'], ['kripto', 'Polkadot', 'DOT'],
-      ['hisse', 'THYAO', 'adet'], ['hisse', 'ASELS', 'adet'], ['hisse', 'TUPRS', 'adet'], ['hisse', 'KCHOL', 'adet'], ['hisse', 'AKBNK', 'adet'], ['hisse', 'GARAN', 'adet'], ['hisse', 'EREGL', 'adet'], ['hisse', 'BIMAS', 'adet'], ['hisse', 'FROTO', 'adet'], ['hisse', 'SISE', 'adet'], ['hisse', 'SAHOL', 'adet'], ['hisse', 'YKBNK', 'adet'], ['hisse', 'ENKAI', 'adet'], ['hisse', 'TCELL', 'adet'], ['hisse', 'TTKOM', 'adet'], ['hisse', 'MGROS', 'adet'], ['hisse', 'PETKM', 'adet'], ['hisse', 'KOZAL', 'adet'], ['hisse', 'AEFES', 'adet'], ['hisse', 'ALARK', 'adet'], ['hisse', 'ARCLK', 'adet'], ['hisse', 'ASTOR', 'adet'], ['hisse', 'BRSAN', 'adet'], ['hisse', 'CANTE', 'adet'], ['hisse', 'CCOLA', 'adet'], ['hisse', 'CIMSA', 'adet'], ['hisse', 'DOAS', 'adet'], ['hisse', 'EKGYO', 'adet'], ['hisse', 'EUPWR', 'adet'], ['hisse', 'GUBRF', 'adet'], ['hisse', 'HEKTS', 'adet'], ['hisse', 'ISCTR', 'adet'], ['hisse', 'KONTR', 'adet'], ['hisse', 'KRDMD', 'adet'], ['hisse', 'ODAS', 'adet'], ['hisse', 'OYAKC', 'adet'], ['hisse', 'PGSUS', 'adet'], ['hisse', 'SASA', 'adet'], ['hisse', 'SOKM', 'adet'], ['hisse', 'TAVHL', 'adet'], ['hisse', 'TOASO', 'adet'], ['hisse', 'TSKB', 'adet'], ['hisse', 'ULKER', 'adet'], ['hisse', 'VAKBN', 'adet'], ['hisse', 'VESTL', 'adet'],
+      ['kripto', 'Litecoin', 'LTC'], ['kripto', 'Chainlink', 'LINK'], ['kripto', 'Bitcoin Cash', 'BCH'], ['kripto', 'TRON', 'TRX'], ['kripto', 'Shiba Inu', 'SHIB'], ['kripto', 'Stellar', 'XLM'], ['kripto', 'Cosmos', 'ATOM'], ['kripto', 'NEAR Protocol', 'NEAR'], ['kripto', 'Uniswap', 'UNI'], ['kripto', 'Aave', 'AAVE'],
+      ['kripto', 'Ethereum Classic', 'ETC'], ['kripto', 'Filecoin', 'FIL'], ['kripto', 'Internet Computer', 'ICP'], ['kripto', 'Render', 'RENDER'], ['kripto', 'Injective', 'INJ'], ['kripto', 'Optimism', 'OP'], ['kripto', 'Arbitrum', 'ARB'], ['kripto', 'Aptos', 'APT'], ['kripto', 'Sui', 'SUI'], ['kripto', 'Sei', 'SEI'],
+      ['kripto', 'Toncoin', 'TON'], ['kripto', 'Pepe', 'PEPE'], ['kripto', 'Bonk', 'BONK'], ['kripto', 'Hedera', 'HBAR'], ['kripto', 'VeChain', 'VET'], ['kripto', 'Algorand', 'ALGO'], ['kripto', 'EOS', 'EOS'], ['kripto', 'Tezos', 'XTZ'], ['kripto', 'The Sandbox', 'SAND'], ['kripto', 'Decentraland', 'MANA'],
+      ['kripto', 'Axie Infinity', 'AXS'], ['kripto', 'Gala', 'GALA'], ['kripto', 'Chiliz', 'CHZ'], ['kripto', 'Curve DAO', 'CRV'], ['kripto', 'Lido DAO', 'LDO'], ['kripto', 'Maker', 'MKR'], ['kripto', 'Compound', 'COMP'], ['kripto', 'Arweave', 'AR'], ['kripto', 'Celestia', 'TIA'], ['kripto', 'Worldcoin', 'WLD'],
+      ['kripto', 'Jupiter', 'JUP'], ['kripto', 'FLOKI', 'FLOKI'], ['kripto', 'PAX Gold', 'PAXG'], ['kripto', 'Zcash', 'ZEC'], ['kripto', 'Monero', 'XMR'], ['kripto', 'Dash', 'DASH'], ['kripto', 'IOTA', 'IOTA'], ['kripto', 'The Graph', 'GRT'], ['kripto', 'Fantom', 'FTM'], ['kripto', 'Flare', 'FLR'],
+      ['hisse', 'EUPWR', 'adet'], ['hisse', 'GESAN', 'adet'], ['hisse', 'THYAO', 'adet'], ['hisse', 'ASELS', 'adet'], ['hisse', 'TUPRS', 'adet'], ['hisse', 'KCHOL', 'adet'], ['hisse', 'AKBNK', 'adet'], ['hisse', 'GARAN', 'adet'], ['hisse', 'EREGL', 'adet'], ['hisse', 'BIMAS', 'adet'], ['hisse', 'FROTO', 'adet'], ['hisse', 'SISE', 'adet'], ['hisse', 'SAHOL', 'adet'], ['hisse', 'YKBNK', 'adet'], ['hisse', 'ENKAI', 'adet'], ['hisse', 'TCELL', 'adet'], ['hisse', 'TTKOM', 'adet'], ['hisse', 'MGROS', 'adet'], ['hisse', 'PETKM', 'adet'], ['hisse', 'KOZAL', 'adet'], ['hisse', 'AEFES', 'adet'], ['hisse', 'ALARK', 'adet'], ['hisse', 'ARCLK', 'adet'], ['hisse', 'ASTOR', 'adet'], ['hisse', 'BRSAN', 'adet'], ['hisse', 'CANTE', 'adet'], ['hisse', 'CCOLA', 'adet'], ['hisse', 'CIMSA', 'adet'], ['hisse', 'DOAS', 'adet'], ['hisse', 'EKGYO', 'adet'], ['hisse', 'GUBRF', 'adet'], ['hisse', 'HEKTS', 'adet'], ['hisse', 'ISCTR', 'adet'], ['hisse', 'KONTR', 'adet'], ['hisse', 'KRDMD', 'adet'], ['hisse', 'ODAS', 'adet'], ['hisse', 'OYAKC', 'adet'], ['hisse', 'PGSUS', 'adet'], ['hisse', 'SASA', 'adet'], ['hisse', 'SOKM', 'adet'], ['hisse', 'TAVHL', 'adet'], ['hisse', 'TOASO', 'adet'], ['hisse', 'TSKB', 'adet'], ['hisse', 'ULKER', 'adet'], ['hisse', 'VAKBN', 'adet'], ['hisse', 'VESTL', 'adet'],
       ['nakit', 'Nakit Türk Lirası', 'TL']
     ].map(([type, name, unit]) => ({ type, name, unit }));
+
+    // Borsa Istanbul market list (effective 1 Oct 2026); search supports BIST Stars and Main shares.
+    const BIST_EXTRA_SYMBOLS = `
+      AAGYO A1CAP A1YEN ACSEL ADEL ADESE ADGYO AFYON AGESA AGHOL AGROT AHGAZ AHSGY AKCNS AKENR AKFGY AKFIS AKFYE AKGRT AKHAN AKMGY AKSA AKSEN AKSGY AKSUE ALBRK ALBTN ALCAR ALCTL ALFAS ALGYO ALKA ALKIM ALKLC ALVES ALTNY ANELE ANGEN ANHYT ANSGR ARASE ARDYZ ARFYE ARMGD ARSAN ARTMS ARZUM ASUZU ATATR ATATP ATAKP AVGYO AVHOL AVPGY AVOD AYDEM AYEN AYGAZ AYCES AZTEK BAGFS BAHKM BALSU BANVT BASGZ BAYRK BEGYO BERA BESLR BESTE BEYAZ BFREN BIGCH BIGEN BIGTK BIENY BINBN BINHO BIZIM BJKAS BLCYT BLUME BMSCH BMSTL BNTAS BOBET BORLS BORSK BOSSA BOSKE BRISA BRKVY BRLSM BRSAN BRYAT BUCIM BULGS BURCE BVSAN BYDNR CANTE CATES CCOLA CELHA CEMAS CEMTS CEMZY CEOEM CGCAM CIMSA CITAS CLEBI CMBTN CONSE CRFSA CUSAN CWENE DAGI DAPGM DARDL DCTTR DENGE DERHL DERIM DESA DESPC DGATE DGNMO DITAS DMRGD DMSAS DNISI DOAS DOCO DOFER DOFRB DOKTA DURDO DURKN DUNYH DZGYO EDATA EFOR EGEEN EGEGY EGEPO EGGUB EGSER EKIM EKOS ELITE EMKEL EMPAE ENDAE ENERY ENSRI EPLAS ERCB ERBOS ESCAR ESCOM ESEN ETILR EUPWR EUREN EYGYO FADE FLAP FMIZP FONET FORMT FORTE FRIGO FRMPL GARFA GEDIK GEDZA GENIL GENKM GENTS GEREL GESAN GIPTA GLCVY GLRYH GOLDA GOLTS GOODY GRSEL GRTHO GSDDE GSDHO GSRAY GUBRF GUNDG GWIND GZNMI HALKB HATSN HDFGS HEDEF HEKTS HKTM HLGYO HOROZ HRKET HTTBT HUNER HURGZ ICBCT ICUGS IEYHO IHAAS IHGZT IHLAS IHLGM IMASM INDES INFO INGRM INTEM ISDMR ISFIN ISGSY ISGYO ISKPL ISMEN ISYAT ISSEN ISVEA IZENR IZFAS IZINV IZMDC JANTS KAPLM KARCL KAREL KARSN KARTN KATMR KAYSE KBORU KCAER KFEIN KGYO KIMMR KLGYO KLKIM KLMSN KLRHO KLSER KLSYN KLYPV KMPUR KNFRT KOCMT KONKA KONTR KONYA KOPOL KORDS KOTON KRDMA KRDMB KRDMD KRONT KRPLS KRSTL KRTEK KRVGD KTSKR KUTPO KUYAS KZBGY KZGYO LIDER LIDFA LILAK LINK LKMNH LOGO LRSHO LUKSK LXGYO LYDHO LYDYE MAGEN MAALT MACKO MAKIM MAKTK MANAS MARBL MARMR MARTI MAVI MCARD MEDTR MEGMT MEKAG MERCN MERIT MERKO METEN METRO MEYSU MHRGY MIATK MNDRS MNDTR MOGAN MOPAS MRGYO MRSHL MSGYO MTRKS NATEN NETAS NETCD NETGL NIBAS NTHOL NUGYO OBASE ODINE OFSYM ONCSM ONRYT ORGE ORZAX OSMEN OSTIM OTTO OYAYO OYYAT OZATD OZGYO OZKGY OZSUB OZYSR PAGYO PAHOL PAMEL PAPIL PARSN PASEU PATEK PCILT PEKGY PENGD PENTA PETUN PINSU PKART PKENT PLTUR PNLSN PNSUT POLHO POLTK PRDGS PRKAB PRKME PRZMA PSDTC PSGYO QUAGR RALYH RAYSG REEDR RGYAS RUBNS RUZYE SAFKR SANFM SANKO SANEL SARAE SARKY SAYAS SDTTR SEGMN SEGYO SEKFK SELEC SELVA SERNT SISE SKBNK SKTAS SKYMD SMART SMRTG SMRVA SNICA SNGYO SOKE SOHOE SRVGY SSAAT SUNTK SURGY SUWEN TABGD TARKM TATEN TATGD TBORG TCKRC TDGYO TEHOL TEKTU TERA TGSAS TKNKA TKNSA TLMAN TMPOL TNZTP TRALT TRENJ TRGYO TRMET TSGYO TSPOR TUREX TURGG TURSG TUCLK TUKAS UCAYM UFUK ULUFA ULUSE ULUUN UNLU USAK USHOL VAKFA VAKFN VANGD VBTYZ VERTU VERUS VESBE VEYAS VKFYO VKING VKGYO VSNMD VRGYO YAPRK YATAS YAYLA YEOTK YESIL YIGIT YKSLN YUNSA ZEDUR ZERGY ZGYO ZRGYO
+    `.trim().split(/\s+/).filter(Boolean);
+    const knownBistSymbols = new Set(SAVING_ASSETS.filter(asset => asset.type === 'hisse').map(asset => asset.name));
+    SAVING_ASSETS.push(...BIST_EXTRA_SYMBOLS.filter(symbol => !knownBistSymbols.has(symbol) && /^[A-Z0-9]{3,6}$/.test(symbol)).map(name => ({ type: 'hisse', name, unit: 'adet' })));
 
     const SAVING_PRESETS = SAVING_ASSETS.reduce((groups, asset) => {
       (groups[asset.type] ||= []).push(asset);
@@ -7844,6 +7913,7 @@
     function selectSavingAsset(index) {
       const asset = SAVING_ASSETS[index];
       if (!asset) return;
+      selectSavingTypeModal(asset.type);
       document.getElementById('saving-type').value = asset.type;
       document.getElementById('saving-name').value = asset.name;
       document.getElementById('saving-unit').value = asset.unit;
@@ -7851,12 +7921,16 @@
       if (search) search.value = asset.name;
       const assetResults = document.getElementById('saving-asset-results');
       if (assetResults) assetResults.style.display = 'none';
-      selectSavingTypeModal(asset.type);
+      const nameInput = document.getElementById('saving-name');
+      if (nameInput) nameInput.focus();
       refreshSavingQuote(false);
     }
 
     function openSavingModal(saving = null) {
       document.getElementById('form-saving').reset();
+      delete document.getElementById('saving-current-value').dataset.autoFilled;
+      const deleteButton = document.getElementById('btn-delete-saving');
+      if (deleteButton) deleteButton.style.display = saving ? 'inline-flex' : 'none';
       renderSavingAssetDatalist();
       const titleEl = document.getElementById('modal-saving-title');
 
@@ -7903,13 +7977,11 @@
       } else if (type === 'gumus') {
         livePrice = currentMarketRates.precious_metals?.GUMUS;
       } else if (type === 'doviz') {
-        if (name.includes('euro') || name.includes('eur')) livePrice = currentMarketRates.currencies?.EUR;
-        else if (name.includes('sterlin') || name.includes('gbp')) livePrice = currentMarketRates.currencies?.GBP;
-        else livePrice = currentMarketRates.currencies?.USD;
+        const currency = unit || (name.includes('euro') ? 'EUR' : name.includes('sterlin') ? 'GBP' : 'USD');
+        livePrice = currentMarketRates.currencies?.[currency];
       } else if (type === 'kripto') {
-        if (name.includes('eth')) livePrice = currentMarketRates.crypto?.ETH;
-        else if (name.includes('sol')) livePrice = currentMarketRates.crypto?.SOL;
-        else livePrice = currentMarketRates.crypto?.BTC;
+        const symbol = unit || name.trim().toUpperCase().split(/[\s,]+/)[0];
+        livePrice = currentMarketRates.crypto?.[symbol];
       } else if (type === 'nakit') {
         livePrice = 1.0;
       }
@@ -8008,13 +8080,27 @@
     async function handleSaveSaving(e) {
       e.preventDefault();
       const id = document.getElementById('saving-id').value;
+      const amount = parseMoneyInput(document.getElementById('saving-amount').value);
+      const currentValue = parseMoneyInput(document.getElementById('saving-current-value').value);
+      if (!(amount > 0)) {
+        showToast('Miktar sıfırdan büyük olmalı.', 'error');
+        document.getElementById('saving-amount').focus();
+        return;
+      }
+      if (!(currentValue >= 0)) {
+        showToast('Güncel toplam değeri kontrol edin.', 'error');
+        document.getElementById('saving-current-value').focus();
+        return;
+      }
+      const saveButton = document.querySelector('#form-saving button[type="submit"]');
+      if (saveButton) { saveButton.disabled = true; saveButton.classList.add('loading'); }
       const body = {
         type: document.getElementById('saving-type').value,
         name: document.getElementById('saving-name').value.trim(),
-        amount: parseMoneyInput(document.getElementById('saving-amount').value),
+        amount,
         unit: document.getElementById('saving-unit').value.trim() || null,
         purchase_price: parseMoneyInput(document.getElementById('saving-purchase-price').value) || null,
-        current_value: parseMoneyInput(document.getElementById('saving-current-value').value),
+        current_value: currentValue,
         notes: document.getElementById('saving-notes').value.trim() || null
       };
 
@@ -8030,6 +8116,8 @@
         loadSavings();
       } catch (err) {
         showToast(err.message, 'error');
+      } finally {
+        if (saveButton) { saveButton.disabled = false; saveButton.classList.remove('loading'); }
       }
     }
 
@@ -8050,6 +8138,18 @@
     let currentSavingsFilter = 'all';
     let cachedSavingsList = [];
     let cachedSavingsSummary = null;
+    let currentSavingsSearch = '';
+    let currentSavingsSort = 'value';
+
+    function setSavingsSearch(value) {
+      currentSavingsSearch = String(value || '').trim().toLocaleLowerCase('tr-TR');
+      renderSavingsList();
+    }
+
+    function setSavingsSort(value) {
+      currentSavingsSort = value || 'value';
+      renderSavingsList();
+    }
 
     function setSavingsFilter(type) {
       currentSavingsFilter = type;
@@ -8067,7 +8167,8 @@
         counts[t] = (counts[t] || 0) + 1;
       });
 
-      const typesToShow = ['all', 'altin', 'doviz', 'hisse', 'kripto', 'gumus', 'nakit'];
+      const configuredTypes = ['altin', 'doviz', 'hisse', 'kripto', 'gumus', 'nakit', 'diger'];
+      const typesToShow = ['all', ...configuredTypes.filter(type => counts[type] || type === currentSavingsFilter)];
 
       tabsContainer.innerHTML = typesToShow.map(typeKey => {
         if (typeKey === 'all') {
@@ -8119,9 +8220,27 @@
       const gridContainer = document.getElementById('savings-grid-container');
       if (!gridContainer) return;
 
-      const filtered = currentSavingsFilter === 'all'
+      let filtered = currentSavingsFilter === 'all'
         ? cachedSavingsList
         : cachedSavingsList.filter(s => s.type === currentSavingsFilter);
+
+      if (currentSavingsSearch) {
+        filtered = filtered.filter(item => [item.name, item.type, item.unit, item.notes]
+          .some(value => String(value || '').toLocaleLowerCase('tr-TR').includes(currentSavingsSearch)));
+      }
+
+      const getValue = item => Number(item.live_total_value !== undefined ? item.live_total_value : item.current_value) || 0;
+      const getProfit = item => Number(item.profit_loss_amount !== undefined ? item.profit_loss_amount : (getValue(item) - (Number(item.total_cost !== undefined ? item.total_cost : item.purchase_price * item.amount) || 0)));
+      const sorters = {
+        value: (a, b) => getValue(b) - getValue(a),
+        profit: (a, b) => getProfit(b) - getProfit(a),
+        loss: (a, b) => getProfit(a) - getProfit(b),
+        name: (a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'tr'),
+        recent: (a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0)
+      };
+      filtered = [...filtered].sort(sorters[currentSavingsSort] || sorters.value);
+      const countEl = document.getElementById('savings-results-count');
+      if (countEl) countEl.textContent = `${filtered.length} / ${cachedSavingsList.length} varlık`;
 
       if (!filtered || filtered.length === 0) {
         gridContainer.innerHTML = `
@@ -8178,14 +8297,6 @@
                     ${isProfit ? '+' : ''}${formatMoney(pLoss)} (%${Math.abs(pRate).toFixed(1)})
                   </span>
                 </div>
-              </div>
-              <div class="card-actions-dropdown" style="display:flex;align-items:center;gap:2px;">
-                <button class="btn-action-icon" style="padding:3px 5px;font-size:11px;" title="Düzenle" onclick='openSavingModal(${JSON.stringify(item)})'>
-                  <i class="fas fa-pen"></i>
-                </button>
-                <button class="btn-action-icon delete" style="padding:3px 5px;font-size:11px;" title="Sil" onclick="event.stopPropagation(); deleteSaving(${item.id})">
-                  <i class="fas fa-trash-alt"></i>
-                </button>
               </div>
             </div>
           </div>`;
@@ -8267,11 +8378,17 @@
         try {
           await api('/api/savings/' + id, { method: 'DELETE' });
           showToast('Birikim kaydı silindi.');
+          closeModal('modal-saving');
           loadSavings();
         } catch (err) {
           showToast(err.message, 'error');
         }
       });
+    }
+
+    function deleteSavingFromModal() {
+      const id = document.getElementById('saving-id')?.value;
+      if (id) deleteSaving(id);
     }
 
     /* ==========================================================================
